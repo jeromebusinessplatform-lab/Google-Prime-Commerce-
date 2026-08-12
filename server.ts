@@ -132,6 +132,24 @@ async function startServer() {
     }
   });
 
+  app.get("/v1/orders/:id", async (req, res, next) => {
+    try {
+      const { getOrderHandler } = await import("./apps/core-service/orders.js");
+      await getOrderHandler(req, res);
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  app.patch("/v1/orders/:id", async (req, res, next) => {
+    try {
+      const { updateOrderHandler } = await import("./apps/core-service/orders.js");
+      await updateOrderHandler(req, res);
+    } catch (e) {
+      next(e);
+    }
+  });
+
   app.post("/v1/orders", async (req, res, next) => {
     try {
       const { createOrderHandler } = await import("./apps/core-service/orders.js");

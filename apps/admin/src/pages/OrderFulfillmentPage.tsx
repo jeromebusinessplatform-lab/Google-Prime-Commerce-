@@ -32,16 +32,33 @@ export function OrderFulfillmentPage() {
   }, [id]);
 
   const updateStatus = async (newStatus: string) => {
-    setOrder((prev: any) => ({ ...prev, status: newStatus }));
-    // Optimistic UI, real implementation would PATCH /v1/orders/:id
+    try {
+      await fetch(`/v1/orders/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus })
+      });
+      setOrder((prev: any) => ({ ...prev, status: newStatus }));
+    } catch (e) {
+      console.error("Failed to update status", e);
+    }
   };
 
-  const approvePayment = () => {
-    setOrder((prev: any) => ({ 
-      ...prev, 
-      status: 'PROCESSING',
-      payment: { ...prev.payment, status: 'VERIFIED' } 
-    }));
+  const approvePayment = async () => {
+    try {
+      await fetch(`/v1/orders/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'PROCESSING', payment: { ...order.payment, status: 'VERIFIED' } })
+      });
+      setOrder((prev: any) => ({ 
+        ...prev, 
+        status: 'PROCESSING',
+        payment: { ...prev.payment, status: 'VERIFIED' } 
+      }));
+    } catch (e) {
+      console.error("Failed to approve payment", e);
+    }
   };
 
   if (!order) return <div className="p-4 text-center mt-10">Loading...</div>;

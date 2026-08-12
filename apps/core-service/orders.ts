@@ -13,6 +13,28 @@ export const getOrdersHandler = async (req: Request, res: Response) => {
   res.json({ data: docs });
 };
 
+export const getOrderHandler = async (req: Request, res: Response) => {
+  const tenantId = "default";
+  const { id } = req.params;
+  const doc = await db.collection(`tenants/${tenantId}/orders`).doc(id).get();
+  
+  if (!doc.exists) {
+    return res.status(404).json({ error: "Order not found" });
+  }
+  
+  res.json({ data: { id: doc.id, ...doc.data() } });
+};
+
+export const updateOrderHandler = async (req: Request, res: Response) => {
+  const tenantId = "default";
+  const { id } = req.params;
+  const updateData = req.body;
+  
+  await db.collection(`tenants/${tenantId}/orders`).doc(id).update(updateData);
+  
+  res.json({ success: true });
+};
+
 export const createOrderHandler = async (req: Request, res: Response) => {
   const tenantId = "default";
   const customerId = req.headers["x-customer-id"] || "preview-user-id";
