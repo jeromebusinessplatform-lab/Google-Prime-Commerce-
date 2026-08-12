@@ -65,7 +65,7 @@ export function ShopPage() {
           {toast}
         </div>
       )}
-      <div className="sticky top-[calc(90px+env(safe-area-inset-top,0px))] bg-white z-30 pb-2 pt-2 border-b border-gray-100 flex flex-col gap-2">
+      <div className="sticky top-[calc(90px+env(safe-area-inset-top,0px))] bg-white dark:bg-gray-950 z-30 pb-2 pt-2 border-b border-gray-100 dark:border-gray-800 flex flex-col gap-2 transition-colors">
         <div className="flex gap-2 relative" ref={searchRef}>
           <div className="relative flex-1">
             <Search className="absolute left-2 top-1.5 text-gray-400" size={16} />
@@ -78,10 +78,10 @@ export function ShopPage() {
                 setShowAutocomplete(true);
               }} 
               placeholder="Search products..." 
-              className="w-full bg-gray-100 border-none rounded-md pl-8 pr-3 py-1.5 text-sm outline-none focus:ring-1 focus:ring-black" 
+              className="w-full bg-gray-100 dark:bg-gray-800 border-none rounded-md pl-8 pr-3 py-1.5 text-sm outline-none focus:ring-1 focus:ring-black dark:focus:ring-white transition-colors" 
             />
             {showAutocomplete && search.length > 0 && filteredProducts.length > 0 && (
-              <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 mt-1 rounded-md shadow-lg z-50 max-h-64 overflow-y-auto">
+              <div className="absolute top-full left-0 right-0 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 mt-1 rounded-md shadow-lg z-50 max-h-64 overflow-y-auto">
                 {filteredProducts.slice(0, 5).map(p => (
                   <div 
                     key={p.id}
@@ -89,12 +89,12 @@ export function ShopPage() {
                       setSearch(p.name);
                       setShowAutocomplete(false);
                     }}
-                    className="flex items-center gap-3 p-2 border-b border-gray-100 last:border-0 hover:bg-gray-50 cursor-pointer"
+                    className="flex items-center gap-3 p-2 border-b border-gray-100 dark:border-gray-800 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors"
                   >
-                    <img src={p.image} alt={p.name} className="w-10 h-10 object-cover rounded bg-gray-100" />
+                    <img src={p.image} alt={p.name} className="w-10 h-10 object-cover rounded bg-gray-100 dark:bg-gray-800" />
                     <div className="flex-1">
-                      <div className="text-sm font-bold text-gray-900 line-clamp-1">{p.name}</div>
-                      <div className="text-xs text-gray-500">₱{p.price.toLocaleString()}</div>
+                      <div className="text-sm font-bold text-gray-900 dark:text-gray-100 line-clamp-1">{p.name}</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">₱{p.price.toLocaleString()}</div>
                     </div>
                   </div>
                 ))}
@@ -108,7 +108,7 @@ export function ShopPage() {
               key={cat}
               onClick={() => setSelectedCategory(cat)}
               className={`px-3 py-1 text-xs font-semibold rounded-full whitespace-nowrap transition-colors ${
-                selectedCategory === cat ? 'bg-black text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                selectedCategory === cat ? 'bg-black dark:bg-white text-white dark:text-black' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
               }`}
             >
               {cat}
@@ -119,8 +119,8 @@ export function ShopPage() {
 
       <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2 mt-3">
         {filteredProducts.map((p) => (
-          <div key={p.id} className="flex flex-col border border-gray-200 rounded-md overflow-hidden bg-white cursor-pointer relative shadow-sm group">
-            <div className="w-full aspect-[4/5] bg-gray-100 relative overflow-hidden">
+          <div key={p.id} className="flex flex-col border border-gray-200 dark:border-gray-800 rounded-md overflow-hidden bg-white dark:bg-gray-900 cursor-pointer relative shadow-sm group transition-colors">
+            <div className="w-full aspect-[4/5] bg-gray-100 dark:bg-gray-800 relative overflow-hidden">
               <img src={p.image} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
               {p.availability !== "in_stock" && (
                 <div className="absolute top-1 left-1 bg-gray-800 text-white text-[9px] font-bold px-1.5 py-0.5 rounded">
@@ -129,14 +129,14 @@ export function ShopPage() {
               )}
             </div>
             <div className="p-1.5 flex flex-col flex-1">
-              <div className="text-[11px] font-semibold leading-tight line-clamp-2 text-gray-900">{p.name}</div>
+              <div className="text-[11px] font-semibold leading-tight line-clamp-2 text-gray-900 dark:text-gray-100">{p.name}</div>
               <div className="mt-auto pt-1 flex items-end justify-between">
                 <div>
                   <div className="text-[12px] font-bold">₱{p.price.toLocaleString()}</div>
-                  {p.compareAtPrice && <div className="text-[10px] text-gray-400 line-through">₱{p.compareAtPrice.toLocaleString()}</div>}
+                  {p.compareAtPrice && <div className="text-[10px] text-gray-400 dark:text-gray-500 line-through">₱{p.compareAtPrice.toLocaleString()}</div>}
                 </div>
                 <button 
-                  className="w-6 h-6 bg-gray-100 flex items-center justify-center rounded text-lg font-bold text-gray-600 hover:bg-black hover:text-white transition-colors"
+                  className="w-6 h-6 bg-gray-100 dark:bg-gray-800 flex items-center justify-center rounded text-lg font-bold text-gray-600 dark:text-gray-300 hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-colors"
                   onClick={(e) => {
                     e.stopPropagation();
                     handleAddToCart(p);

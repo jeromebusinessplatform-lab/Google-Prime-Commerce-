@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate, NavLink } from 'react-router-do
 import { GlobalHeader } from '../../../packages/ui/components/GlobalHeader';
 import { QueueMonitor } from '../../../packages/ui/components/QueueMonitor';
 import { GlobalFooter } from '../../../packages/ui/components/GlobalFooter';
+import { ThemeProvider } from '../../../packages/ui/components/ThemeProvider';
 import { CatalogPage } from './pages/CatalogPage';
 import { OrdersPage } from './pages/OrdersPage';
 import { OrderFulfillmentPage } from './pages/OrderFulfillmentPage';
@@ -67,12 +68,12 @@ function AdminNav() {
     { name: "POS", path: "/pos" },
   ];
   return (
-    <div className="bg-white border-b border-gray-200 sticky top-[calc(55px+35px+env(safe-area-inset-top,0px))] z-30 flex overflow-x-auto shadow-sm">
+    <div className="bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800 sticky top-[calc(55px+35px+env(safe-area-inset-top,0px))] z-30 flex overflow-x-auto shadow-sm transition-colors">
       {tabs.map(t => (
         <NavLink 
           key={t.name}
           to={t.path} 
-          className={({isActive}) => `px-4 py-3 text-xs font-bold whitespace-nowrap border-b-2 transition-colors ${isActive ? 'border-black text-black' : 'border-transparent text-gray-500 hover:text-black hover:border-gray-300'}`}
+          className={({isActive}) => `px-4 py-3 text-xs font-bold whitespace-nowrap border-b-2 transition-colors ${isActive ? 'border-black dark:border-white text-black dark:text-white' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-700'}`}
         >
           {t.name}
         </NavLink>
@@ -99,39 +100,42 @@ export default function App() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 max-w-sm w-full">
-          <div className="flex justify-center mb-4">
-            <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center text-gray-800">
-              <Lock size={24} />
+      <ThemeProvider>
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 dark:text-gray-100 flex flex-col items-center justify-center p-4 transition-colors">
+          <div className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 max-w-sm w-full">
+            <div className="flex justify-center mb-4">
+              <div className="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center text-gray-800 dark:text-gray-200">
+                <Lock size={24} />
+              </div>
             </div>
+            <h1 className="text-xl font-bold text-center mb-6">Admin Access</h1>
+            <form onSubmit={handleLogin} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-gray-700 dark:text-gray-400 mb-1">ACCESS CODE (Hint: 1234)</label>
+                <input 
+                  type="password" 
+                  value={accessCode}
+                  onChange={(e) => setAccessCode(e.target.value)}
+                  className="w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-800 rounded px-3 py-2 focus:border-black dark:focus:border-white focus:outline-none"
+                  placeholder="Enter 4-digit PIN"
+                  autoFocus
+                />
+              </div>
+              {error && <div className="text-red-500 text-xs font-bold">{error}</div>}
+              <button type="submit" className="w-full bg-black dark:bg-white dark:text-black text-white font-bold py-2 rounded hover:bg-gray-800 dark:hover:bg-gray-200">
+                LOGIN
+              </button>
+            </form>
           </div>
-          <h1 className="text-xl font-bold text-center mb-6">Admin Access</h1>
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div>
-              <label className="block text-xs font-bold text-gray-700 mb-1">ACCESS CODE (Hint: 1234)</label>
-              <input 
-                type="password" 
-                value={accessCode}
-                onChange={(e) => setAccessCode(e.target.value)}
-                className="w-full border border-gray-300 rounded px-3 py-2 focus:border-black focus:outline-none"
-                placeholder="Enter 4-digit PIN"
-                autoFocus
-              />
-            </div>
-            {error && <div className="text-red-500 text-xs font-bold">{error}</div>}
-            <button type="submit" className="w-full bg-black text-white font-bold py-2 rounded hover:bg-gray-800">
-              LOGIN
-            </button>
-          </form>
         </div>
-      </div>
+      </ThemeProvider>
     );
   }
 
   return (
-    <BrowserRouter basename="/admin">
-      <div className="min-h-screen bg-gray-50 flex flex-col">
+    <ThemeProvider>
+      <BrowserRouter basename="/admin">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 dark:text-gray-100 flex flex-col transition-colors">
         <GlobalHeader title="Admin" />
         <QueueMonitor />
         <div className="pt-[calc(55px+35px+env(safe-area-inset-top,0px))] pb-[calc(18px+env(safe-area-inset-bottom,0px))] flex-1 flex flex-col">
@@ -154,7 +158,8 @@ export default function App() {
         </div>
         <GlobalFooter hasBottomNav={false} />
         <OrderNotifier />
-      </div>
-    </BrowserRouter>
+        </div>
+      </BrowserRouter>
+    </ThemeProvider>
   );
 }

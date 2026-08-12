@@ -65,18 +65,18 @@ export function DashboardPage() {
         {stats.map((s, i) => {
           const Icon = s.icon;
           return (
-            <div key={i} className="bg-white p-3 rounded-md border border-gray-200 shadow-xs flex flex-col items-center justify-center text-center py-4">
-              <Icon size={20} className="text-gray-400 mb-1" />
+            <div key={i} className="bg-white dark:bg-gray-900 p-3 rounded-md border border-gray-200 dark:border-gray-800 shadow-xs flex flex-col items-center justify-center text-center py-4 transition-colors">
+              <Icon size={20} className="text-gray-400 dark:text-gray-500 mb-1" />
               <div className="text-lg font-bold tracking-tight">{s.value}</div>
-              <div className="text-[11px] text-gray-500 uppercase font-semibold mt-0.5">{s.label}</div>
+              <div className="text-[11px] text-gray-500 dark:text-gray-400 uppercase font-semibold mt-0.5">{s.label}</div>
             </div>
           );
         })}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="bg-white p-4 rounded-md border border-gray-200 shadow-xs min-h-[260px] flex flex-col">
-          <h3 className="font-bold text-xs uppercase tracking-wider mb-3 text-gray-600">SALES TREND</h3>
+        <div className="bg-white dark:bg-gray-900 p-4 rounded-md border border-gray-200 dark:border-gray-800 shadow-xs min-h-[260px] flex flex-col transition-colors">
+          <h3 className="font-bold text-xs uppercase tracking-wider mb-3 text-gray-600 dark:text-gray-400">SALES TREND</h3>
           <div className="flex-1 w-full h-[200px]">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
@@ -98,21 +98,21 @@ export function DashboardPage() {
             </ResponsiveContainer>
           </div>
         </div>
-        <div className="bg-white p-4 rounded-md border border-gray-200 shadow-xs min-h-[260px]">
-          <h3 className="font-bold text-xs uppercase tracking-wider mb-3 text-gray-600">RECENT ACTIVITY</h3>
+        <div className="bg-white dark:bg-gray-900 p-4 rounded-md border border-gray-200 dark:border-gray-800 shadow-xs min-h-[260px] transition-colors">
+          <h3 className="font-bold text-xs uppercase tracking-wider mb-3 text-gray-600 dark:text-gray-400">RECENT ACTIVITY</h3>
           <div className="space-y-3">
             {orders.slice(0, 5).map((o, i) => (
-              <div key={o.id} className="flex gap-3 items-start border-b border-gray-100 pb-2.5 last:border-0">
-                <div className="w-7 h-7 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0 text-blue-600 font-bold text-xs">
+              <div key={o.id} className="flex gap-3 items-start border-b border-gray-100 dark:border-gray-800 pb-2.5 last:border-0">
+                <div className="w-7 h-7 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0 text-blue-600 dark:text-blue-400 font-bold text-xs">
                   {i + 1}
                 </div>
                 <div>
                   <div className="text-xs font-semibold">New order {o.id} received</div>
-                  <div className="text-[10px] text-gray-500">{new Date(o.date).toLocaleString()}</div>
+                  <div className="text-[10px] text-gray-500 dark:text-gray-400">{new Date(o.date).toLocaleString()}</div>
                 </div>
               </div>
             ))}
-            {orders.length === 0 && <div className="text-xs text-gray-500">No recent activity</div>}
+            {orders.length === 0 && <div className="text-xs text-gray-500 dark:text-gray-400">No recent activity</div>}
           </div>
         </div>
       </div>

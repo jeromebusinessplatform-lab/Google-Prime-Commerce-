@@ -1,131 +1,113 @@
 import { env } from "../config/env.js";
-import crypto from "crypto";
+import fs from "fs";
+import path from "path";
+import { initializeApp } from "firebase/app";
+import { 
+  getFirestore, collection, doc, setDoc, getDoc, updateDoc, deleteDoc, 
+  getDocs, query, where, limit as fLimit, addDoc, writeBatch
+} from "firebase/firestore";
 
-// Simple in-memory mock for Preview Mode to avoid requiring Firebase credentials
-class MockQuery {
-  constructor(public docs: any[]) {}
-  where(field: string, op: string, val: any) {
-    return new MockQuery(
-      this.docs.filter((d) => {
-        if (op === "==") return d.data[field] === val;
-        return true;
-      })
-    );
+let databaseId = undefined;
+let firebaseConfig = {};
+try {
+  const configPath = path.join(process.cwd(), 'firebase-applet-config.json');
+  if (fs.existsSync(configPath)) {
+    firebaseConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+    databaseId = (firebaseConfig as any).firestoreDatabaseId;
   }
+} catch (e) {
+  console.error("Failed to read firebase config", e);
+}
+
+const app = initializeApp(firebaseConfig);
+const firestoreDb = getFirestore(app, databaseId);
+
+class ClientSDKQuery {
+  constructor(private q: any) {}
+  
+  where(field: string, op: any, val: any) {
+    return new ClientSDKQuery(query(this.q, where(field, op, val)));
+  }
+  
   limit(n: number) {
-    return new MockQuery(this.docs.slice(0, n));
+    return new ClientSDKQuery(query(this.q, fLimit(n)));
   }
+  
   async get() {
+    const snapshot = await getDocs(this.q);
     return {
-      empty: this.docs.length === 0,
-      docs: this.docs.map(d => ({
+      empty: snapshot.empty,
+      docs: snapshot.docs.map(d => ({
         id: d.id,
-        exists: true,
-        data: () => d.data,
+        exists: d.exists(),
+        data: () => d.data()
       }))
     };
   }
 }
 
-class MockCollection {
-  public records = new Map<string, any>();
-  constructor(public path: string) {}
+class ClientSDKCollection {
+  constructor(private collPath: string) {}
 
   doc(id?: string) {
-    const docId = id || crypto.randomBytes(10).toString('hex');
+    const ref = id ? doc(firestoreDb, this.collPath, id) : doc(collection(firestoreDb, this.collPath));
+    const docId = ref.id;
     return {
       id: docId,
-      set: async (data: any, options?: any) => { 
-        if (options?.merge && this.records.has(docId)) {
-          this.records.set(docId, { ...this.records.get(docId), ...data });
-        } else {
-          this.records.set(docId, data);
-        }
+      set: async (data: any, options?: any) => {
+        await setDoc(ref, data, options || {});
       },
       get: async () => {
-        const exists = this.records.has(docId);
+        const snap = await getDoc(ref);
         return {
-          id: docId,
-          exists,
-          data: () => this.records.get(docId)
+          id: snap.id,
+          exists: snap.exists(),
+          data: () => snap.data()
         };
       },
       update: async (data: any) => {
-        if (!this.records.has(docId)) throw new Error("Document not found");
-        this.records.set(docId, { ...this.records.get(docId), ...data });
+        await updateDoc(ref, data);
       },
       delete: async () => {
-        this.records.delete(docId);
-      }
+        await deleteDoc(ref);
+      },
+      ref 
     };
   }
 
   async add(data: any) {
-    const ref = this.doc();
-    await ref.set(data);
-    return ref;
+    const ref = await addDoc(collection(firestoreDb, this.collPath), data);
+    return this.doc(ref.id);
   }
 
-  where(field: string, op: string, val: any) {
-    const allDocs = Array.from(this.records.entries()).map(([id, data]) => ({ id, data }));
-    return new MockQuery(allDocs).where(field, op, val);
+  where(field: string, op: any, val: any) {
+    return new ClientSDKQuery(collection(firestoreDb, this.collPath)).where(field, op, val);
   }
   
   limit(n: number) {
-    const allDocs = Array.from(this.records.entries()).map(([id, data]) => ({ id, data }));
-    return new MockQuery(allDocs).limit(n);
+    return new ClientSDKQuery(collection(firestoreDb, this.collPath)).limit(n);
   }
 
   async get() {
-    const allDocs = Array.from(this.records.entries()).map(([id, data]) => ({ id, data }));
-    return new MockQuery(allDocs).get();
+    return new ClientSDKQuery(collection(firestoreDb, this.collPath)).get();
   }
 }
 
-class MockFirestore {
-  private collections = new Map<string, MockCollection>();
+class ClientSDKFirestore {
   collection(path: string) {
-    if (!this.collections.has(path)) {
-      this.collections.set(path, new MockCollection(path));
-    }
-    return this.collections.get(path)!;
+    return new ClientSDKCollection(path);
   }
+
   batch() {
+    const b = writeBatch(firestoreDb);
     return {
-      set: (ref: any, data: any, options?: any) => ref.set(data, options),
-      update: (ref: any, data: any) => ref.update(data),
-      commit: async () => {}
+      set: (wrapper: any, data: any, options?: any) => b.set(wrapper.ref, data, options || {}),
+      update: (wrapper: any, data: any) => b.update(wrapper.ref, data),
+      commit: async () => b.commit()
     };
   }
 }
 
-let firestoreDb: any;
-let cloudStorage: any;
+export const db = new ClientSDKFirestore();
+export const storage = null;
 
-if (env.IS_PREVIEW) {
-  firestoreDb = new MockFirestore();
-  cloudStorage = {
-    bucket: () => ({
-      file: () => ({
-        getSignedUrl: async () => ["https://mock-storage.url/file"],
-        save: async () => {}
-      })
-    })
-  };
-} else {
-  // Production initialization
-  const { initializeApp, getApps, applicationDefault } = require('firebase-admin/app');
-  const { getFirestore } = require('firebase-admin/firestore');
-  const { getStorage } = require('firebase-admin/storage');
-  
-  if (!getApps().length) {
-    initializeApp({
-      credential: applicationDefault(),
-    });
-  }
-  firestoreDb = getFirestore();
-  cloudStorage = getStorage();
-}
-
-export const db = firestoreDb;
-export const storage = cloudStorage;

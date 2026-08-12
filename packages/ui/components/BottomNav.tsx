@@ -31,7 +31,7 @@ export function BottomNav() {
 
   return (
     <div 
-      className="fixed bottom-[calc(18px+env(safe-area-inset-bottom,0px))] left-0 right-0 h-[44px] bg-white border-t border-gray-200 z-40 flex items-center"
+      className="fixed bottom-[calc(18px+env(safe-area-inset-bottom,0px))] left-0 right-0 h-[44px] bg-white dark:bg-gray-950 border-t border-gray-200 dark:border-gray-800 z-40 flex items-center transition-colors"
     >
       {tabs.map((tab) => {
         const Icon = tab.icon;
@@ -40,7 +40,7 @@ export function BottomNav() {
             key={tab.name}
             to={tab.path}
             className={({ isActive }) => 
-              `flex-1 h-full flex items-center justify-center relative ${isActive ? 'text-black' : 'text-gray-500 hover:text-gray-900'}`
+              `flex-1 h-full flex items-center justify-center relative ${isActive ? 'text-black dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'}`
             }
             aria-label={tab.name}
           >

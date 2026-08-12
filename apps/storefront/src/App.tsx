@@ -4,6 +4,7 @@ import { GlobalHeader } from '../../../packages/ui/components/GlobalHeader';
 import { QueueMonitor } from '../../../packages/ui/components/QueueMonitor';
 import { GlobalFooter } from '../../../packages/ui/components/GlobalFooter';
 import { BottomNav } from '../../../packages/ui/components/BottomNav';
+import { ThemeProvider } from '../../../packages/ui/components/ThemeProvider';
 import { ShopPage } from './pages/ShopPage';
 import { CartPage } from './pages/CartPage';
 import { CheckoutPage } from './pages/CheckoutPage';
@@ -15,7 +16,7 @@ function AppLayout() {
   const isCheckout = location.pathname === '/checkout';
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white dark:bg-gray-950 dark:text-gray-100 transition-colors">
       {!isCheckout && (
         <>
           <GlobalHeader />
@@ -49,8 +50,10 @@ function AppLayout() {
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <AppLayout />
-    </BrowserRouter>
+    <ThemeProvider>
+      <BrowserRouter>
+        <AppLayout />
+      </BrowserRouter>
+    </ThemeProvider>
   );
 }
