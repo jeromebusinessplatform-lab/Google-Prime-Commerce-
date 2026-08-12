@@ -87,6 +87,69 @@ async function startServer() {
     }
   });
 
+  app.post("/v1/catalog/products/:id/duplicate", async (req, res, next) => {
+    try {
+      const { duplicateProductHandler } = await import("./apps/core-service/catalog.js");
+      await duplicateProductHandler(req, res);
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  app.get("/v1/catalog/categories", async (req, res, next) => {
+    try {
+      const { getCategoriesHandler } = await import("./apps/core-service/catalog.js");
+      await getCategoriesHandler(req, res);
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  app.post("/v1/catalog/categories", async (req, res, next) => {
+    try {
+      const { upsertCategoryHandler } = await import("./apps/core-service/catalog.js");
+      await upsertCategoryHandler(req, res);
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  app.patch("/v1/catalog/categories/:id", async (req, res, next) => {
+    try {
+      const { upsertCategoryHandler } = await import("./apps/core-service/catalog.js");
+      await upsertCategoryHandler(req, res);
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  app.post("/v1/catalog/bulk-update", async (req, res, next) => {
+    try {
+      const { bulkUpdateHandler } = await import("./apps/core-service/bulk-operations.js");
+      await bulkUpdateHandler(req, res);
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  app.post("/v1/catalog/import", async (req, res, next) => {
+    try {
+      const { importCSVHandler } = await import("./apps/core-service/bulk-operations.js");
+      await importCSVHandler(req, res);
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  app.get("/v1/catalog/export", async (req, res, next) => {
+    try {
+      const { exportCSVHandler } = await import("./apps/core-service/bulk-operations.js");
+      await exportCSVHandler(req, res);
+    } catch (e) {
+      next(e);
+    }
+  });
+
   app.get("/v1/order-queue/summary", async (req, res, next) => {
     try {
       const { getOrderQueueSummaryHandler } = await import("./apps/core-service/order-queue.js");

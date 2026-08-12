@@ -4,7 +4,7 @@ import path from "path";
 import { initializeApp } from "firebase/app";
 import { 
   getFirestore, collection, doc, setDoc, getDoc, updateDoc, deleteDoc, 
-  getDocs, query, where, limit as fLimit, addDoc, writeBatch
+  getDocs, query, where, limit as fLimit, addDoc, writeBatch, orderBy
 } from "firebase/firestore";
 
 let databaseId = undefined;
@@ -27,6 +27,10 @@ class ClientSDKQuery {
   
   where(field: string, op: any, val: any) {
     return new ClientSDKQuery(query(this.q, where(field, op, val)));
+  }
+  
+  orderBy(field: string, direction: 'asc' | 'desc' = 'asc') {
+    return new ClientSDKQuery(query(this.q, orderBy(field, direction)));
   }
   
   limit(n: number) {
@@ -82,6 +86,10 @@ class ClientSDKCollection {
 
   where(field: string, op: any, val: any) {
     return new ClientSDKQuery(collection(firestoreDb, this.collPath)).where(field, op, val);
+  }
+
+  orderBy(field: string, direction: 'asc' | 'desc' = 'asc') {
+    return new ClientSDKQuery(collection(firestoreDb, this.collPath)).orderBy(field, direction);
   }
   
   limit(n: number) {
