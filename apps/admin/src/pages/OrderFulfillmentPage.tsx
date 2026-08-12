@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { ChevronLeft, PackageCheck, Truck, CheckCircle2, Receipt, AlertCircle, Printer, X } from 'lucide-react';
 
 interface PackingSlipModalProps {
@@ -127,8 +127,15 @@ function PackingSlipModal({ order, onClose }: PackingSlipModalProps) {
 export function OrderFulfillmentPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [order, setOrder] = useState<any>(null);
   const [showPrintModal, setShowPrintModal] = useState(false);
+
+  useEffect(() => {
+    if (location.search.includes('print=true')) {
+      setShowPrintModal(true);
+    }
+  }, [location.search]);
 
   useEffect(() => {
     fetch('/v1/orders')

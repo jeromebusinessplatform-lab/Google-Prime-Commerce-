@@ -14,6 +14,7 @@ export function CatalogPage() {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [isBulkStockModalOpen, setIsBulkStockModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Partial<Product> | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
@@ -65,10 +66,11 @@ export function CatalogPage() {
     }
   };
 
-  const handleProductSubmit = async (data: any) => {
+  const handleProductSubmit = async (data: any, explicitId?: string) => {
     try {
-      const url = editingProduct?.id ? `/v1/catalog/products/${editingProduct.id}` : '/v1/catalog/products';
-      const method = editingProduct?.id ? 'PATCH' : 'POST';
+      const id = explicitId || editingProduct?.id;
+      const url = id ? `/v1/catalog/products/${id}` : '/v1/catalog/products';
+      const method = id ? 'PATCH' : 'POST';
       
       await fetch(url, {
         method,
@@ -164,8 +166,8 @@ export function CatalogPage() {
           {selectedIds.length > 0 && (
             <div className="flex items-center gap-2 pl-4 border-l border-gray-200 animate-in fade-in slide-in-from-right-4">
               <span className="text-[10px] font-black text-gray-400 uppercase">{selectedIds.length} Selected</span>
-              <button className="text-[10px] font-bold text-red-500 uppercase hover:underline">Bulk Archive</button>
-              <button className="text-[10px] font-bold text-black uppercase hover:underline">Change Price</button>
+              <button onClick={() => setIsBulkStockModalOpen(true)} className="text-[10px] font-bold text-black uppercase hover:underline">Adjust Stock</button>
+              <button onClick={() => setSelectedIds([])} className="text-[10px] font-bold text-gray-400 uppercase hover:underline">Clear</button>
             </div>
           )}
         </div>
@@ -281,6 +283,52 @@ export function CatalogPage() {
             onClose={() => setIsCategoryModalOpen(false)}
             onUpsert={handleCategoryUpsert}
           />
+        </div>
+      )}
+
+      {isBulkStockModalOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 animate-in zoom-in-95 duration-200">
+            <div className="flex justify-between items-center mb-6">
+               <h3 className="font-black text-xs uppercase tracking-widest">Bulk Stock Adjustment</h3>
+               <button onClick={() => setIsBulkStockModalOpen(false)} className="p-2 hover:bg-gray-100 rounded-full"><X size={20}/></button>
+            </div>
+            <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
+               {products.filter(p => selectedIds.includes(p.id)).map(p => (
+                 <div key={p.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100">
+                    <div className="flex items-center gap-3">
+                       <img src={p.media?.[0]?.url || 'https://placehold.co/100x100'} className="w-8 h-10 object-cover rounded border" />
+                       <div>
+                          <div className="text-[10px] font-black uppercase tracking-tighter">{p.name}</div>
+                          <div className="text-[8px] font-bold text-gray-400">CURRENT: {p.stockQuantity}</div>
+                       </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                       <button 
+                         onClick={() => {
+                            const newQty = Math.max(0, p.stockQuantity - 1);
+                            handleProductSubmit({ stockQuantity: newQty }, p.id);
+                         }}
+                         className="w-6 h-6 flex items-center justify-center bg-white border border-gray-200 rounded font-black text-xs hover:bg-gray-50">-</button>
+                       <input 
+                         type="number" 
+                         value={p.stockQuantity}
+                         onChange={(e) => handleProductSubmit({ stockQuantity: parseInt(e.target.value) || 0 }, p.id)}
+                         className="w-12 text-center text-xs font-black bg-white border border-gray-200 rounded py-1" />
+                       <button 
+                         onClick={() => {
+                            const newQty = p.stockQuantity + 1;
+                            handleProductSubmit({ stockQuantity: newQty }, p.id);
+                         }}
+                         className="w-6 h-6 flex items-center justify-center bg-white border border-gray-200 rounded font-black text-xs hover:bg-gray-50">+</button>
+                    </div>
+                 </div>
+               ))}
+            </div>
+            <div className="mt-8 flex justify-end">
+               <button onClick={() => setIsBulkStockModalOpen(false)} className="px-8 py-3 bg-black text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-gray-800 shadow-xl shadow-black/20">Done</button>
+            </div>
+          </div>
         </div>
       )}
     </div>

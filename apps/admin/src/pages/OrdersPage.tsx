@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, MoreHorizontal } from 'lucide-react';
+import { FileText, MoreHorizontal, Printer } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export function OrdersPage() {
@@ -52,7 +52,8 @@ export function OrdersPage() {
                     </span>
                   </td>
                   <td className="p-2.5 text-right">
-                    <button onClick={() => navigate(`/orders/${o.id}`)} className="p-1 text-gray-400 hover:text-black rounded" title="View details"><FileText size={15} /></button>
+                    <button onClick={() => navigate(`/orders/${o.id}`)} className="p-1 text-gray-400 hover:text-black rounded" title="Manage Fulfillment"><FileText size={15} /></button>
+                    <button onClick={() => navigate(`/orders/${o.id}?print=true`)} className="p-1 text-gray-400 hover:text-black rounded ml-1" title="Print Packing Slip"><Printer size={15} /></button>
                     <button className="p-1 text-gray-400 hover:text-black rounded ml-1" title="More options"><MoreHorizontal size={15} /></button>
                   </td>
                 </tr>
