@@ -116,7 +116,43 @@ export function CheckoutPage() {
   const subtotal = items.reduce((acc: number, i: any) => acc + (i.price * i.quantity), 0);
   const tax = subtotal * 0.12; // 12% VAT
   const deliveryFee = 50; // Mock delivery fee
-  const total = subtotal + tax + deliveryFee;
+  
+  const [appliedPromo, setAppliedPromo] = useState<any>(null);
+  const [promoError, setPromoError] = useState('');
+  
+  const handleApplyPromo = async () => {
+    if (!promoCode) return;
+    setPromoError('');
+    try {
+      const res = await fetch('/v1/promotions/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: promoCode })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setAppliedPromo(data.data);
+      } else {
+        setPromoError(data.error || 'Invalid promo code');
+        setAppliedPromo(null);
+      }
+    } catch (e) {
+      setPromoError('Failed to validate promo code');
+    }
+  };
+
+  let discount = 0;
+  if (appliedPromo) {
+    if (appliedPromo.type === 'percentage') {
+      discount = subtotal * (appliedPromo.value / 100);
+    } else if (appliedPromo.type === 'fixed') {
+      discount = appliedPromo.value;
+    } else if (appliedPromo.type === 'freeship') {
+      discount = deliveryFee;
+    }
+  }
+
+  const total = Math.max(0, subtotal + tax + deliveryFee - discount);
 
   const handlePlaceOrder = async () => {
     if (!items.length) return;
@@ -316,15 +352,36 @@ export function CheckoutPage() {
         <div className="py-2">
           <h2 className="text-sm font-bold mb-3">Promotions</h2>
           <div className="flex flex-col sm:flex-row gap-3">
-            <div className="flex-1 relative">
-              <Tag size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-              <input 
-                type="text" 
-                placeholder="Promo Code" 
-                value={promoCode}
-                onChange={e => setPromoCode(e.target.value)}
-                className="w-full border border-gray-300 rounded-md py-2 pl-12 pr-4 text-sm uppercase outline-none focus:border-black focus:ring-1 focus:ring-black transition-shadow"
-              />
+            <div className="flex-1">
+              <div className="relative flex">
+                <Tag size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                <input 
+                  type="text" 
+                  placeholder="Promo Code" 
+                  value={promoCode}
+                  onChange={e => setPromoCode(e.target.value)}
+                  disabled={!!appliedPromo}
+                  className="w-full border border-gray-300 rounded-l-md py-2 pl-12 pr-4 text-sm uppercase outline-none focus:border-black focus:ring-1 focus:ring-black transition-shadow disabled:bg-gray-100"
+                />
+                {!appliedPromo ? (
+                  <button 
+                    onClick={handleApplyPromo}
+                    disabled={!promoCode}
+                    className="bg-black text-white px-4 text-sm font-bold rounded-r-md hover:bg-gray-800 disabled:opacity-50"
+                  >
+                    APPLY
+                  </button>
+                ) : (
+                  <button 
+                    onClick={() => { setAppliedPromo(null); setPromoCode(''); }}
+                    className="bg-red-50 text-red-600 border border-red-200 px-4 text-sm font-bold rounded-r-md hover:bg-red-100"
+                  >
+                    REMOVE
+                  </button>
+                )}
+              </div>
+              {promoError && <div className="text-red-500 text-xs mt-1 font-semibold">{promoError}</div>}
+              {appliedPromo && <div className="text-green-600 text-xs mt-1 font-semibold">Promo applied successfully!</div>}
             </div>
             <div className="flex-1 relative">
               <Tag size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -338,7 +395,6 @@ export function CheckoutPage() {
             </div>
           </div>
         </div>
-
         <hr className="border-gray-200" />
 
         {/* Payment Method */}
@@ -361,7 +417,6 @@ export function CheckoutPage() {
             </button>
           </div>
         </div>
-
         <hr className="border-gray-200" />
 
         {/* Order Summary */}
@@ -380,10 +435,12 @@ export function CheckoutPage() {
               <span className="text-gray-600">Delivery Fee</span>
               <span className="font-semibold text-gray-500">₱{deliveryFee.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
             </div>
-            <div className="flex justify-between items-center text-green-700">
-              <span>Discounts</span>
-              <span className="font-semibold">-₱0.00</span>
-            </div>
+            {discount > 0 && (
+              <div className="flex justify-between items-center text-green-700 font-bold">
+                <span>Discount ({appliedPromo?.code})</span>
+                <span>-₱{discount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+              </div>
+            )}
             <div className="pt-4 mt-2 border-t border-gray-900 flex justify-between items-center font-bold text-sm">
               <span>Total to Pay</span>
               <span>₱{total.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>

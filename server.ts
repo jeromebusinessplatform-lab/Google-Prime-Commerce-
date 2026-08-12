@@ -159,6 +159,33 @@ async function startServer() {
     }
   });
 
+  app.get("/v1/promotions", async (req, res, next) => {
+    try {
+      const { getPromotionsHandler } = await import("./apps/core-service/promotions.js");
+      await getPromotionsHandler(req, res);
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  app.post("/v1/promotions", async (req, res, next) => {
+    try {
+      const { createPromotionHandler } = await import("./apps/core-service/promotions.js");
+      await createPromotionHandler(req, res);
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  app.post("/v1/promotions/validate", async (req, res, next) => {
+    try {
+      const { validatePromotionHandler } = await import("./apps/core-service/promotions.js");
+      await validatePromotionHandler(req, res);
+    } catch (e) {
+      next(e);
+    }
+  });
+
   app.get("/v1/location/autocomplete", async (req, res, next) => {
     try {
       const { autocompleteHandler } = await import("./apps/core-service/location.js");

@@ -1,13 +1,44 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, Tag } from 'lucide-react';
 
 export function PromotionsPage() {
-  const [promotions, setPromotions] = useState([
-    { id: 1, code: 'WELCOME10', type: 'percentage', value: 10, status: 'active', usageLimit: 100, used: 25 },
-    { id: 2, code: 'FREESHIP', type: 'fixed', value: 50, status: 'active', usageLimit: null, used: 142 },
-    { id: 3, code: 'FLASH20', type: 'percentage', value: 20, status: 'expired', usageLimit: 50, used: 50 }
-  ]);
+  const [promotions, setPromotions] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    code: '',
+    type: 'percentage',
+    value: '',
+    usageLimit: ''
+  });
+
+  const fetchPromotions = () => {
+    fetch('/v1/promotions')
+      .then(r => r.json())
+      .then(d => setPromotions(d.data || []));
+  };
+
+  useEffect(() => {
+    fetchPromotions();
+  }, []);
+
+  const handleSave = async () => {
+    try {
+      await fetch('/v1/promotions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...formData,
+          value: Number(formData.value),
+          usageLimit: formData.usageLimit ? Number(formData.usageLimit) : null
+        })
+      });
+      setIsModalOpen(false);
+      setFormData({ code: '', type: 'percentage', value: '', usageLimit: '' });
+      fetchPromotions();
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   return (
     <div className="p-4 max-w-6xl mx-auto w-full">
@@ -17,7 +48,6 @@ export function PromotionsPage() {
           <Plus size={16} /> ADD PROMO CODE
         </button>
       </div>
-
       <div className="bg-white border border-gray-200 rounded-md shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
@@ -45,7 +75,7 @@ export function PromotionsPage() {
                     {p.type === 'percentage' ? `${p.value}%` : `₱${p.value}`}
                   </td>
                   <td className="p-3 text-sm text-gray-600">
-                    {p.used} {p.usageLimit ? `/ ${p.usageLimit}` : 'uses'}
+                    {p.used || 0} {p.usageLimit ? `/ ${p.usageLimit}` : 'uses'}
                   </td>
                   <td className="p-3">
                     <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
@@ -60,11 +90,15 @@ export function PromotionsPage() {
                   </td>
                 </tr>
               ))}
+              {promotions.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="p-8 text-center text-gray-500 text-sm">No promotions found.</td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
       </div>
-
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-md flex flex-col max-h-[90vh]">
@@ -74,30 +108,30 @@ export function PromotionsPage() {
             <div className="p-4 space-y-4">
               <div>
                 <label className="block text-xs font-bold text-gray-700 mb-1">PROMO CODE</label>
-                <input type="text" className="w-full border border-gray-300 rounded px-3 py-2 text-sm uppercase focus:border-black outline-none" placeholder="e.g. SUMMER20" />
+                <input type="text" value={formData.code} onChange={e => setFormData({...formData, code: e.target.value})} className="w-full border border-gray-300 rounded px-3 py-2 text-sm uppercase focus:border-black outline-none" placeholder="e.g. SUMMER20" />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-gray-700 mb-1">DISCOUNT TYPE</label>
-                  <select className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:border-black outline-none">
-                    <option>Percentage (%)</option>
-                    <option>Fixed Amount (₱)</option>
-                    <option>Free Shipping</option>
+                  <select value={formData.type} onChange={e => setFormData({...formData, type: e.target.value})} className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:border-black outline-none">
+                    <option value="percentage">Percentage (%)</option>
+                    <option value="fixed">Fixed Amount (₱)</option>
+                    <option value="freeship">Free Shipping</option>
                   </select>
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-gray-700 mb-1">DISCOUNT VALUE</label>
-                  <input type="number" className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:border-black outline-none" />
+                  <input type="number" value={formData.value} onChange={e => setFormData({...formData, value: e.target.value})} className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:border-black outline-none" />
                 </div>
               </div>
               <div>
                 <label className="block text-xs font-bold text-gray-700 mb-1">USAGE LIMIT (Optional)</label>
-                <input type="number" className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:border-black outline-none" placeholder="Leave empty for unlimited" />
+                <input type="number" value={formData.usageLimit} onChange={e => setFormData({...formData, usageLimit: e.target.value})} className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:border-black outline-none" placeholder="Leave empty for unlimited" />
               </div>
             </div>
             <div className="p-4 border-t border-gray-200 flex justify-end gap-2">
               <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 border border-gray-300 rounded font-bold text-sm hover:bg-gray-50">CANCEL</button>
-              <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 bg-black text-white rounded font-bold text-sm hover:bg-gray-800">SAVE PROMO</button>
+              <button onClick={handleSave} className="px-4 py-2 bg-black text-white rounded font-bold text-sm hover:bg-gray-800">SAVE PROMO</button>
             </div>
           </div>
         </div>
