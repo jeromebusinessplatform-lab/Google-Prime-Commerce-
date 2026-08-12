@@ -29,7 +29,7 @@ function PackingSlipModal({ order, onClose, onUpdateStatus }: PackingSlipModalPr
         <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
           <div className="flex items-center gap-2">
             <Printer size={18} className="text-gray-400" />
-            <h3 className="font-black text-[10px] uppercase tracking-widest text-gray-500">Packing Slip Preview</h3>
+            <h3 className=" text-[10px] uppercase tracking-widest text-gray-500">Packing Slip Preview</h3>
           </div>
           <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
             <X size={20} />
@@ -149,7 +149,7 @@ function PackingSlipModal({ order, onClose, onUpdateStatus }: PackingSlipModalPr
             </div>
 
             <div className="pt-8 border-t border-dashed border-gray-300">
-              <div className="text-[10px] font-black uppercase tracking-widest text-center text-gray-400">
+              <div className="text-[10px]  uppercase tracking-widest text-center text-gray-400">
                 Thank you for your business. For support, contact logistics@example.com
               </div>
             </div>
@@ -157,10 +157,10 @@ function PackingSlipModal({ order, onClose, onUpdateStatus }: PackingSlipModalPr
         </div>
 
         <div className="p-6 border-t border-gray-100 bg-gray-50 flex justify-end gap-3">
-          <button onClick={onClose} className="px-6 py-2.5 bg-white border-2 border-gray-200 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-gray-50 transition-all">
+          <button onClick={onClose} className="px-6 py-2.5 bg-white border-2 border-gray-200 rounded-xl text-[10px]  uppercase tracking-widest hover:bg-gray-50 transition-all">
             Cancel
           </button>
-          <button onClick={handlePrint} className="px-8 py-2.5 bg-black text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-gray-800 transition-all shadow-xl shadow-black/20 flex items-center gap-2">
+          <button onClick={handlePrint} className="px-8 py-2.5 bg-black text-white rounded-xl text-[10px]  uppercase tracking-widest hover:bg-gray-800 transition-all shadow-xl shadow-black/20 flex items-center gap-2">
             <Printer size={14} /> Send to Printer
           </button>
         </div>
@@ -263,18 +263,18 @@ export function OrderFulfillmentPage() {
             <ChevronLeft size={24} />
           </button>
           <div>
-            <h2 className="text-lg font-bold">Order {order.id}</h2>
+            <h2 className="text-lg ">Order {order.id}</h2>
             <div className="text-xs text-gray-500">{new Date(order.date).toLocaleString()}</div>
           </div>
         </div>
         <div className="flex items-center gap-2">
           <button 
             onClick={() => setShowPrintModal(true)}
-            className="flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 rounded text-xs font-bold hover:bg-gray-50 transition-colors"
+            className="flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 rounded text-xs  hover:bg-gray-50 transition-colors"
           >
             <Printer size={16} /> PRINT SLIP
           </button>
-          <span className={`inline-flex items-center px-3 py-1 rounded text-xs font-bold uppercase ${
+          <span className={`inline-flex items-center px-3 py-1 rounded text-xs  uppercase ${
             order.status === 'QUEUED' ? 'bg-yellow-100 text-yellow-800' :
             order.status === 'PROCESSING' ? 'bg-blue-100 text-blue-800' :
             order.status === 'DISPATCHED' ? 'bg-purple-100 text-purple-800' :
@@ -301,28 +301,28 @@ export function OrderFulfillmentPage() {
             <button 
               disabled={order.status !== 'QUEUED'}
               onClick={() => updateStatus('PROCESSING')}
-              className="flex-1 py-2 px-3 bg-blue-50 text-blue-700 font-bold text-sm rounded border border-blue-200 hover:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="flex-1 py-2 px-3 bg-blue-50 text-blue-700  text-sm rounded border border-blue-200 hover:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               <PackageCheck size={18} /> PREPARE ORDER
             </button>
             <button 
               disabled={order.status !== 'PROCESSING'}
               onClick={() => updateStatus('DISPATCHED')}
-              className="flex-1 py-2 px-3 bg-purple-50 text-purple-700 font-bold text-sm rounded border border-purple-200 hover:bg-purple-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="flex-1 py-2 px-3 bg-purple-50 text-purple-700  text-sm rounded border border-purple-200 hover:bg-purple-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               <Truck size={18} /> DISPATCH
             </button>
             <button 
               disabled={order.status !== 'DISPATCHED'}
               onClick={() => updateStatus('DELIVERED')}
-              className="flex-1 py-2 px-3 bg-green-50 text-green-700 font-bold text-sm rounded border border-green-200 hover:bg-green-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="flex-1 py-2 px-3 bg-green-50 text-green-700  text-sm rounded border border-green-200 hover:bg-green-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               <CheckCircle2 size={18} /> DELIVERED
             </button>
           </div>
 
           <div className="bg-white p-4 rounded-md border border-gray-200 shadow-sm">
-            <h3 className="font-bold text-sm mb-3">ORDER ITEMS</h3>
+            <h3 className=" text-sm mb-3">ORDER ITEMS</h3>
             <div className="overflow-x-auto">
               <table className="w-full text-left">
                 <thead>
@@ -335,9 +335,9 @@ export function OrderFulfillmentPage() {
                 <tbody>
                   {order.items.map(item => (
                     <tr key={item.id} className="border-b border-gray-100 last:border-0">
-                      <td className="py-2 text-sm font-semibold">{item.name}</td>
+                      <td className="py-2 text-sm ">{item.name}</td>
                       <td className="py-2 text-sm">{item.qty}</td>
-                      <td className="py-2 text-sm text-right font-bold">₱{(item.price * item.qty).toLocaleString()}</td>
+                      <td className="py-2 text-sm text-right ">₱{(item.price * item.qty).toLocaleString()}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -348,36 +348,36 @@ export function OrderFulfillmentPage() {
 
         <div className="space-y-4">
           <div className="bg-white p-4 rounded-md border border-gray-200 shadow-sm">
-            <h3 className="font-bold text-sm mb-3 flex items-center gap-2"><Receipt size={16} /> PAYMENT PROOF</h3>
+            <h3 className=" text-sm mb-3 flex items-center gap-2"><Receipt size={16} /> PAYMENT PROOF</h3>
             {order.payment.status === 'VERIFICATION_PENDING' ? (
               <div className="bg-yellow-50 p-3 rounded mb-3 border border-yellow-200">
-                <div className="flex gap-2 text-yellow-800 text-sm font-bold mb-2">
+                <div className="flex gap-2 text-yellow-800 text-sm  mb-2">
                   <AlertCircle size={18} /> NEEDS VERIFICATION
                 </div>
                 <img src={order.payment.proofUrl} alt="Proof" className="w-full h-auto rounded border border-gray-200 mb-2 cursor-pointer hover:opacity-90" />
                 <button 
                   onClick={approvePayment}
-                  className="w-full bg-green-600 text-white font-bold py-2 rounded hover:bg-green-700"
+                  className="w-full bg-green-600 text-white  py-2 rounded hover:bg-green-700"
                 >
                   APPROVE PAYMENT
                 </button>
               </div>
             ) : (
-              <div className="bg-green-50 p-3 rounded mb-3 border border-green-200 text-green-800 text-sm font-bold flex items-center gap-2">
+              <div className="bg-green-50 p-3 rounded mb-3 border border-green-200 text-green-800 text-sm  flex items-center gap-2">
                 <CheckCircle2 size={18} /> PAYMENT VERIFIED
               </div>
             )}
             <div className="text-sm">
-              <span className="text-gray-500">Method:</span> <span className="font-semibold">{order.payment.method}</span>
+              <span className="text-gray-500">Method:</span> <span className="">{order.payment.method}</span>
             </div>
             <div className="text-sm mt-1">
-              <span className="text-gray-500">Amount:</span> <span className="font-bold text-lg">₱{order.total.toLocaleString()}</span>
+              <span className="text-gray-500">Amount:</span> <span className=" text-lg">₱{order.total.toLocaleString()}</span>
             </div>
           </div>
 
           <div className="bg-white p-4 rounded-md border border-gray-200 shadow-sm">
-            <h3 className="font-bold text-sm mb-3 text-gray-500">CUSTOMER DETAILS</h3>
-            <div className="text-sm font-bold">{order.customer.name}</div>
+            <h3 className=" text-sm mb-3 text-gray-500">CUSTOMER DETAILS</h3>
+            <div className="text-sm ">{order.customer.name}</div>
             <div className="text-sm text-gray-600 mt-1">{order.customer.phone}</div>
             <div className="text-sm text-gray-600 mt-2 p-2 bg-gray-50 rounded border border-gray-100">
               {order.customer.address}

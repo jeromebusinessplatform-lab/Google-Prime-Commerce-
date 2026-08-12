@@ -32,9 +32,9 @@ function AppLayout() {
           <Route path="/checkout" element={<CheckoutPage />} />
           <Route path="/orders" element={<OrdersPage />} />
           <Route path="/orders/:id" element={<OrderDetailsPage />} />
-          <Route path="/notifications" element={<div className="p-4 font-bold">Notifications</div>} />
-          <Route path="/account" element={<div className="p-4 font-bold">Account</div>} />
-          <Route path="/support" element={<div className="p-4 font-bold">Support</div>} />
+          <Route path="/notifications" element={<div className="p-4 ">Notifications</div>} />
+          <Route path="/account" element={<div className="p-4 ">Account</div>} />
+          <Route path="/support" element={<div className="p-4 ">Support</div>} />
         </Routes>
       </div>
       

@@ -66,7 +66,7 @@ export function ShopPage() {
   return (
     <div className="p-2 md:p-3 max-w-7xl mx-auto">
       {toast && (
-        <div className="fixed top-[100px] left-1/2 -translate-x-1/2 bg-black text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg z-50 flex items-center gap-2 animate-in fade-in slide-in-from-top-4">
+        <div className="fixed top-[100px] left-1/2 -translate-x-1/2 bg-black text-white px-4 py-2 rounded-full text-sm  shadow-lg z-50 flex items-center gap-2 animate-in fade-in slide-in-from-top-4">
           <CheckCircle2 size={16} />
           {toast}
         </div>
@@ -99,7 +99,7 @@ export function ShopPage() {
                   >
                     <img src={p.media?.[0]?.url || p.image || 'https://placehold.co/400x500'} alt={p.name} className="w-10 h-10 object-cover rounded bg-gray-100 dark:bg-gray-800" />
                     <div className="flex-1">
-                      <div className="text-sm font-bold text-gray-900 dark:text-gray-100 line-clamp-1">{p.name}</div>
+                      <div className="text-sm  text-gray-900 dark:text-gray-100 line-clamp-1">{p.name}</div>
                       <div className="text-xs text-gray-500 dark:text-gray-400">₱{p.price.toLocaleString()}</div>
                     </div>
                   </div>
@@ -113,7 +113,7 @@ export function ShopPage() {
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className={`px-3 py-1 text-xs font-semibold rounded-full whitespace-nowrap transition-colors ${
+              className={`px-3 py-1 text-xs  rounded-full whitespace-nowrap transition-colors ${
                 selectedCategory === cat ? 'bg-black dark:bg-white text-white dark:text-black' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
               }`}
             >
@@ -143,24 +143,24 @@ export function ShopPage() {
             <div className="w-full aspect-[4/5] bg-gray-100 dark:bg-gray-800 relative overflow-hidden">
               <img src={p.media?.[0]?.url || p.image || 'https://placehold.co/400x500'} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
               {p.availability !== "in_stock" && (
-                <div className="absolute top-1 left-1 bg-gray-800 text-white text-[9px] font-bold px-1.5 py-0.5 rounded">
+                <div className="absolute top-1 left-1 bg-gray-800 text-white text-[9px]  px-1.5 py-0.5 rounded">
                   {p.availability === "out_of_stock" ? "OUT OF STOCK" : "LOW STOCK"}
                 </div>
               )}
             </div>
             <div className="p-1.5 flex flex-col flex-1">
-              <div className="text-[11px] font-semibold leading-tight line-clamp-1 text-gray-900 dark:text-gray-100 uppercase tracking-tighter">{p.name}</div>
-              {p.subname && <div className="text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase line-clamp-1">{p.subname}</div>}
+              <div className="text-[11px]  leading-tight line-clamp-1 text-gray-900 dark:text-gray-100 uppercase tracking-tighter">{p.name}</div>
+              {p.subname && <div className="text-[9px]  text-gray-400 dark:text-gray-500 uppercase line-clamp-1">{p.subname}</div>}
               
               <div className="mt-1 flex items-center justify-between border-t border-gray-50 dark:border-gray-800 pt-1.5">
                 <div className="flex flex-col">
-                  <div className="text-[12px] font-black tracking-tighter">₱{p.price.toLocaleString()}</div>
-                  <div className={`text-[8px] font-black uppercase tracking-widest ${p.stockQuantity <= 5 ? 'text-red-500' : 'text-gray-400'}`}>
+                  <div className="text-[12px]  tracking-tighter">₱{p.price.toLocaleString()}</div>
+                  <div className={`text-[8px]  uppercase tracking-widest ${p.stockQuantity <= 5 ? 'text-red-500' : 'text-gray-400'}`}>
                     STOCKS: {p.stockQuantity || 0}
                   </div>
                 </div>
                 <button 
-                  className="w-6 h-6 bg-gray-100 dark:bg-gray-800 flex items-center justify-center rounded text-lg font-bold text-gray-600 dark:text-gray-300 hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-colors"
+                  className="w-6 h-6 bg-gray-100 dark:bg-gray-800 flex items-center justify-center rounded text-lg  text-gray-600 dark:text-gray-300 hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-colors"
                   onClick={(e) => {
                     e.stopPropagation();
                     handleAddToCart(p);

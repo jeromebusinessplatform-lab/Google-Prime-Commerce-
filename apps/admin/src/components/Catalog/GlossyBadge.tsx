@@ -16,7 +16,7 @@ const badgeColors: Record<BadgeType, string> = {
 export function GlossyBadge({ type, label }: { type: BadgeType, label?: string, key?: any }) {
   return (
     <span className={`
-      inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider
+      inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px]  uppercase tracking-wider
       ${badgeColors[type] || 'bg-gray-100 text-gray-800'}
       shadow-lg border border-white/20 backdrop-blur-sm
       transition-all duration-300 hover:scale-105 active:scale-95

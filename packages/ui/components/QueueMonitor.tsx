@@ -41,8 +41,8 @@ export function QueueMonitor() {
           key={idx} 
           className="flex-1 flex flex-col justify-center items-center border-r border-gray-200 dark:border-gray-800 last:border-r-0 px-1 overflow-hidden"
         >
-          <div className="text-[8.3px] leading-tight text-gray-500 dark:text-gray-400 font-bold whitespace-nowrap text-center w-full truncate">{block.label}</div>
-          <div className={`text-[11px] leading-tight font-bold whitespace-nowrap text-center w-full truncate ${isStale ? 'text-gray-400 dark:text-gray-500' : 'text-gray-900 dark:text-gray-100'}`}>{block.value}</div>
+          <div className="text-[8.3px] leading-tight text-gray-500 dark:text-gray-400  whitespace-nowrap text-center w-full truncate">{block.label}</div>
+          <div className={`text-[11px] leading-tight  whitespace-nowrap text-center w-full truncate ${isStale ? 'text-gray-400 dark:text-gray-500' : 'text-gray-900 dark:text-gray-100'}`}>{block.value}</div>
         </div>
       ))}
     </div>

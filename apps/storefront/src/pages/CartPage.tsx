@@ -58,11 +58,11 @@ export function CartPage() {
   return (
     <div className="p-2 md:p-3 max-w-3xl mx-auto flex flex-col h-[calc(100vh-55px-35px-44px-18px)]">
       <div className="flex justify-between items-center pb-2 border-b border-gray-200">
-        <h2 className="text-base font-bold">My Cart</h2>
+        <h2 className="text-base ">My Cart</h2>
         {cart.items.length > 0 && (
           <button 
             onClick={() => selectAll(!allSelected)}
-            className="text-xs font-semibold text-gray-600 hover:text-black uppercase"
+            className="text-xs  text-gray-600 hover:text-black uppercase"
           >
             {allSelected ? "CLEAR SELECTION" : "SELECT ALL"}
           </button>
@@ -86,15 +86,15 @@ export function CartPage() {
               <img src={item.image} alt={item.name} className="w-16 h-16 object-cover bg-gray-100 rounded" />
               <div className="flex-1 flex flex-col justify-between">
                 <div>
-                  <div className="font-black text-[12px] uppercase leading-tight text-gray-900 tracking-tighter">{item.name}</div>
-                  <div className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">{item.subname || 'Standard Edition'}</div>
-                  <div className="text-[14px] font-black mt-1 tracking-tight">₱{item.price.toLocaleString()}</div>
+                  <div className=" text-[12px] uppercase leading-tight text-gray-900 tracking-tighter">{item.name}</div>
+                  <div className="text-[9px]  text-gray-400 uppercase tracking-widest">{item.subname || 'Standard Edition'}</div>
+                  <div className="text-[14px]  mt-1 tracking-tight">₱{item.price.toLocaleString()}</div>
                 </div>
                 <div className="flex items-center justify-between mt-2">
                   <div className="flex items-center border border-gray-300 rounded overflow-hidden h-7">
-                    <button onClick={() => updateQuantity(item, item.quantity - 1)} className="px-2 bg-gray-50 hover:bg-gray-100 text-gray-600 font-bold">-</button>
-                    <span className="px-2 text-[12px] font-semibold min-w-[24px] text-center">{item.quantity}</span>
-                    <button onClick={() => updateQuantity(item, item.quantity + 1)} className="px-2 bg-gray-50 hover:bg-gray-100 text-gray-600 font-bold">+</button>
+                    <button onClick={() => updateQuantity(item, item.quantity - 1)} className="px-2 bg-gray-50 hover:bg-gray-100 text-gray-600 ">-</button>
+                    <span className="px-2 text-[12px]  min-w-[24px] text-center">{item.quantity}</span>
+                    <button onClick={() => updateQuantity(item, item.quantity + 1)} className="px-2 bg-gray-50 hover:bg-gray-100 text-gray-600 ">+</button>
                   </div>
                   <button onClick={() => updateQuantity(item, 0)} className="text-gray-400 hover:text-red-600 p-1">
                     <Trash2 size={16} />
@@ -108,18 +108,18 @@ export function CartPage() {
 
       <div className="pt-3 border-t border-gray-200 mt-auto bg-white sticky bottom-0">
         <div className="flex justify-between items-end mb-3">
-          <div className="text-gray-600 text-[12px] uppercase font-semibold">
+          <div className="text-gray-600 text-[12px] uppercase ">
             Selected ({selectedCount})
           </div>
           <div className="text-right">
             <div className="text-xs text-gray-500">Subtotal</div>
-            <div className="text-base font-bold leading-none">₱{selectedTotal.toLocaleString()}</div>
+            <div className="text-base  leading-none">₱{selectedTotal.toLocaleString()}</div>
           </div>
         </div>
         <button 
           disabled={selectedCount === 0}
           onClick={() => navigate('/checkout')}
-          className="w-full bg-black text-white font-bold py-3 rounded-md hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed"
+          className="w-full bg-black text-white  py-3 rounded-md hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed"
         >
           CHECKOUT {selectedCount > 0 ? `(${selectedCount})` : ''}
         </button>

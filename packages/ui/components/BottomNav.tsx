@@ -47,7 +47,7 @@ export function BottomNav() {
             <div className="relative flex items-center justify-center w-[44px] h-[44px]">
               <Icon size={20} strokeWidth={2} />
               {tab.badge && (
-                <span className="absolute top-[8px] right-[8px] bg-red-500 text-white text-[9px] font-bold px-1 rounded-full min-w-[14px] h-[14px] flex items-center justify-center pointer-events-none">
+                <span className="absolute top-[8px] right-[8px] bg-red-500 text-white text-[9px]  px-1 rounded-full min-w-[14px] h-[14px] flex items-center justify-center pointer-events-none">
                   {tab.badge > 99 ? '99+' : tab.badge}
                 </span>
               )}

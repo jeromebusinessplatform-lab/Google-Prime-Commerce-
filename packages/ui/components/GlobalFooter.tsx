@@ -9,7 +9,7 @@ export function GlobalFooter({ hasBottomNav = false }: { hasBottomNav?: boolean 
       style={{ boxSizing: 'content-box' }}
     >
       <div 
-        className="text-[#1a1a1a] font-semibold whitespace-nowrap text-center w-full"
+        className="text-[#1a1a1a]  whitespace-nowrap text-center w-full"
         style={{ fontSize: '9.5px', fontFamily: '"Open Sauce SF", "Roboto Condensed", sans-serif' }}
         aria-label="System usage is proprietary. Do not distribute or copy."
       >

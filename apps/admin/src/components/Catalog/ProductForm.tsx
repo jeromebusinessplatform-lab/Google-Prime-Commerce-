@@ -74,7 +74,7 @@ export function ProductForm({ initialData, categories, allProducts, onSubmit, on
   return (
     <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl flex flex-col max-h-[90vh]">
       <div className="flex justify-between items-center p-4 border-b border-gray-200">
-        <h3 className="font-bold text-lg">{initialData?.id ? 'Edit Product' : 'Add New Product'}</h3>
+        <h3 className=" text-lg">{initialData?.id ? 'Edit Product' : 'Add New Product'}</h3>
         <button onClick={onClose} className="text-gray-400 hover:text-black"><X size={20} /></button>
       </div>
 
@@ -85,7 +85,7 @@ export function ProductForm({ initialData, categories, allProducts, onSubmit, on
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm font-bold transition-colors ${
+              className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm  transition-colors ${
                 activeTab === tab.id ? 'bg-black text-white' : 'text-gray-600 hover:bg-gray-200'
               }`}
             >
@@ -102,21 +102,21 @@ export function ProductForm({ initialData, categories, allProducts, onSubmit, on
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="col-span-2">
-                    <label className="block text-xs font-bold text-gray-700 mb-1">PRODUCT NAME</label>
+                    <label className="block text-xs  text-gray-700 mb-1">PRODUCT NAME</label>
                     <input required type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:border-black outline-none" placeholder="e.g. Premium Espresso Roast" />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-1">SUBNAME / EDITION</label>
+                    <label className="block text-xs  text-gray-700 mb-1">SUBNAME / EDITION</label>
                     <input type="text" value={formData.subname} onChange={e => setFormData({...formData, subname: e.target.value})} className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:border-black outline-none" placeholder="e.g. Winter Limited 2024" />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-1">SLUG</label>
+                    <label className="block text-xs  text-gray-700 mb-1">SLUG</label>
                     <input type="text" value={formData.slug} onChange={e => setFormData({...formData, slug: e.target.value})} className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:border-black outline-none bg-gray-50" placeholder="auto-generated" />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-1">CATEGORIES</label>
+                  <label className="block text-xs  text-gray-700 mb-1">CATEGORIES</label>
                   <select 
                     multiple 
                     value={formData.categories} 
@@ -136,7 +136,7 @@ export function ProductForm({ initialData, categories, allProducts, onSubmit, on
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-1">VISIBILITY STATUS</label>
+                    <label className="block text-xs  text-gray-700 mb-1">VISIBILITY STATUS</label>
                     <select value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})} className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:border-black outline-none">
                       <option value="draft">Draft</option>
                       <option value="active">Active</option>
@@ -145,16 +145,16 @@ export function ProductForm({ initialData, categories, allProducts, onSubmit, on
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-1">IS FEATURED?</label>
+                    <label className="block text-xs  text-gray-700 mb-1">IS FEATURED?</label>
                     <div className="flex items-center gap-2 mt-2">
                       <input type="checkbox" checked={formData.isFeatured} onChange={e => setFormData({...formData, isFeatured: e.target.checked})} className="w-4 h-4 accent-black" />
-                      <span className="text-sm font-semibold">Promote to top</span>
+                      <span className="text-sm ">Promote to top</span>
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-1">MARKETING BADGES</label>
+                  <label className="block text-xs  text-gray-700 mb-1">MARKETING BADGES</label>
                   <div className="flex flex-wrap gap-2 mt-2">
                     {['NEW ARRIVAL', 'SALE', 'LIMITED STOCKS', 'BEST-SELLER', 'OUT OF STOCK'].map(badge => (
                       <button
@@ -166,7 +166,7 @@ export function ProductForm({ initialData, categories, allProducts, onSubmit, on
                             : [...formData.badges, badge];
                           setFormData({ ...formData, badges });
                         }}
-                        className={`px-3 py-1 rounded-full text-[10px] font-bold border transition-all ${
+                        className={`px-3 py-1 rounded-full text-[10px]  border transition-all ${
                           formData.badges.includes(badge) ? 'bg-black text-white border-black' : 'bg-white text-gray-400 border-gray-200'
                         }`}
                       >
@@ -177,12 +177,12 @@ export function ProductForm({ initialData, categories, allProducts, onSubmit, on
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-1">SHORT DESCRIPTION</label>
+                  <label className="block text-xs  text-gray-700 mb-1">SHORT DESCRIPTION</label>
                   <textarea value={formData.shortDescription} onChange={e => setFormData({...formData, shortDescription: e.target.value})} className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:border-black outline-none h-20" placeholder="Brief catchphrase for listing cards..." />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-1">FULL DESCRIPTION</label>
+                  <label className="block text-xs  text-gray-700 mb-1">FULL DESCRIPTION</label>
                   <textarea value={formData.fullDescription} onChange={e => setFormData({...formData, fullDescription: e.target.value})} className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:border-black outline-none h-32" placeholder="Detailed product information, origin, brewing guide..." />
                 </div>
               </div>
@@ -192,26 +192,26 @@ export function ProductForm({ initialData, categories, allProducts, onSubmit, on
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-1">BASE PRICE ({formData.currency})</label>
-                    <input required type="number" step="0.01" value={formData.price} onChange={e => setFormData({...formData, price: Number(e.target.value)})} className="w-full border border-gray-300 rounded px-3 py-2 text-sm font-bold focus:border-black outline-none" />
+                    <label className="block text-xs  text-gray-700 mb-1">BASE PRICE ({formData.currency})</label>
+                    <input required type="number" step="0.01" value={formData.price} onChange={e => setFormData({...formData, price: Number(e.target.value)})} className="w-full border border-gray-300 rounded px-3 py-2 text-sm  focus:border-black outline-none" />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-1">COMPARE-AT PRICE</label>
+                    <label className="block text-xs  text-gray-700 mb-1">COMPARE-AT PRICE</label>
                     <input type="number" step="0.01" value={formData.compareAtPrice} onChange={e => setFormData({...formData, compareAtPrice: Number(e.target.value)})} className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:border-black outline-none text-red-500" />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-1">COST PER ITEM (INTERNAL ONLY)</label>
+                  <label className="block text-xs  text-gray-700 mb-1">COST PER ITEM (INTERNAL ONLY)</label>
                   <input type="number" step="0.01" value={formData.cost} onChange={e => setFormData({...formData, cost: Number(e.target.value)})} className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:border-black outline-none bg-gray-50" />
                   <p className="text-[10px] text-gray-400 mt-1">Only visible to authorized admin roles. Used for margin reports.</p>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-1">EFFECTIVE START</label>
+                    <label className="block text-xs  text-gray-700 mb-1">EFFECTIVE START</label>
                     <input type="datetime-local" value={formData.effectiveDateStart} onChange={e => setFormData({...formData, effectiveDateStart: e.target.value})} className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:border-black outline-none" />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-1">EFFECTIVE END</label>
+                    <label className="block text-xs  text-gray-700 mb-1">EFFECTIVE END</label>
                     <input type="datetime-local" value={formData.effectiveDateEnd} onChange={e => setFormData({...formData, effectiveDateEnd: e.target.value})} className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:border-black outline-none" />
                   </div>
                 </div>
@@ -222,13 +222,13 @@ export function ProductForm({ initialData, categories, allProducts, onSubmit, on
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-1 flex items-center gap-1">
+                    <label className="block text-xs  text-gray-700 mb-1 flex items-center gap-1">
                       <Barcode size={12} /> SKU (INTERNAL ID)
                     </label>
                     <input type="text" value={formData.sku} onChange={e => setFormData({...formData, sku: e.target.value})} className="w-full border border-gray-300 rounded px-3 py-2 text-sm font-mono focus:border-black outline-none" />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-1">BARCODE (EAN/UPC)</label>
+                    <label className="block text-xs  text-gray-700 mb-1">BARCODE (EAN/UPC)</label>
                     <div className="flex gap-2">
                       <input type="text" value={formData.barcode} onChange={e => setFormData({...formData, barcode: e.target.value})} className="flex-1 border border-gray-300 rounded px-3 py-2 text-sm font-mono focus:border-black outline-none" />
                       <button 
@@ -245,18 +245,18 @@ export function ProductForm({ initialData, categories, allProducts, onSubmit, on
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-1 uppercase tracking-widest">Unit / Display Qty</label>
+                    <label className="block text-xs  text-gray-700 mb-1 uppercase tracking-widest">Unit / Display Qty</label>
                     <input type="text" value={formData.unitDisplay} onChange={e => setFormData({...formData, unitDisplay: e.target.value})} className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:border-black outline-none" placeholder="e.g. 500g, 1 Box, 6-Pack" />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-1 uppercase tracking-widest">Volumetric Weight</label>
+                    <label className="block text-xs  text-gray-700 mb-1 uppercase tracking-widest">Volumetric Weight</label>
                     <input type="text" value={formData.volumetricText} onChange={e => setFormData({...formData, volumetricText: e.target.value})} className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:border-black outline-none" placeholder="e.g. Approx 1.2kg" />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-1 uppercase">Stock Policy</label>
+                    <label className="block text-xs  text-gray-700 mb-1 uppercase">Stock Policy</label>
                     <select value={formData.stockPolicy} onChange={e => setFormData({...formData, stockPolicy: e.target.value})} className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:border-black outline-none">
                       <option value="tracked">Tracked Inventory</option>
                       <option value="untracked">Untracked (Always available)</option>
@@ -265,22 +265,22 @@ export function ProductForm({ initialData, categories, allProducts, onSubmit, on
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-1">CURRENT STOCK LEVEL</label>
-                    <input type="number" value={formData.stockQuantity} onChange={e => setFormData({...formData, stockQuantity: Number(e.target.value)})} className="w-full border border-gray-300 rounded px-3 py-2 text-sm font-bold focus:border-black outline-none" />
+                    <label className="block text-xs  text-gray-700 mb-1">CURRENT STOCK LEVEL</label>
+                    <input type="number" value={formData.stockQuantity} onChange={e => setFormData({...formData, stockQuantity: Number(e.target.value)})} className="w-full border border-gray-300 rounded px-3 py-2 text-sm  focus:border-black outline-none" />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-1 uppercase">Min Qty</label>
+                    <label className="block text-xs  text-gray-700 mb-1 uppercase">Min Qty</label>
                     <input type="number" value={formData.minOrderQuantity} onChange={e => setFormData({...formData, minOrderQuantity: Number(e.target.value)})} className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:border-black outline-none" />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-1 uppercase">Max Qty</label>
+                    <label className="block text-xs  text-gray-700 mb-1 uppercase">Max Qty</label>
                     <input type="number" value={formData.maxOrderQuantity} onChange={e => setFormData({...formData, maxOrderQuantity: Number(e.target.value)})} className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:border-black outline-none" />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-1 uppercase">Increment</label>
+                    <label className="block text-xs  text-gray-700 mb-1 uppercase">Increment</label>
                     <input type="number" value={formData.orderIncrement} onChange={e => setFormData({...formData, orderIncrement: Number(e.target.value)})} className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:border-black outline-none" />
                   </div>
                 </div>
@@ -313,7 +313,7 @@ export function ProductForm({ initialData, categories, allProducts, onSubmit, on
                       }}
                     />
                     <Plus size={32} />
-                    <span className="text-[10px] font-bold mt-2 uppercase tracking-widest">Add Media</span>
+                    <span className="text-[10px]  mt-2 uppercase tracking-widest">Add Media</span>
                   </div>
                 </div>
               </div>
@@ -323,7 +323,7 @@ export function ProductForm({ initialData, categories, allProducts, onSubmit, on
               <div className="space-y-4">
                 <div className="flex items-center gap-2 mb-4">
                   <input type="checkbox" checked={formData.isBundle} onChange={e => setFormData({...formData, isBundle: e.target.checked})} className="w-4 h-4 accent-black" />
-                  <span className="text-sm font-bold uppercase">This is a bundled product</span>
+                  <span className="text-sm  uppercase">This is a bundled product</span>
                 </div>
 
                 {formData.isBundle && (
@@ -334,22 +334,22 @@ export function ProductForm({ initialData, categories, allProducts, onSubmit, on
                         <div key={idx} className="flex items-center gap-4 p-3 bg-gray-50 border border-gray-200 rounded-md">
                           <img src={p?.media?.[0]?.url || 'https://placehold.co/100x100'} className="w-12 h-12 object-cover rounded border border-gray-200" />
                           <div className="flex-1">
-                            <div className="text-sm font-bold text-gray-900">{p?.name || 'Unknown Product'}</div>
+                            <div className="text-sm  text-gray-900">{p?.name || 'Unknown Product'}</div>
                             <div className="text-[10px] text-gray-500">#{item.productId}</div>
                           </div>
                           <div className="w-20">
-                            <label className="text-[9px] font-bold text-gray-400 uppercase">Qty</label>
+                            <label className="text-[9px]  text-gray-400 uppercase">Qty</label>
                             <input type="number" value={item.quantity} className="w-full border border-gray-300 rounded px-2 py-1 text-xs" />
                           </div>
                           <div className="w-24">
-                            <label className="text-[9px] font-bold text-gray-400 uppercase">Bundle Price</label>
-                            <input type="number" value={item.specialPrice} className="w-full border border-gray-300 rounded px-2 py-1 text-xs font-bold" />
+                            <label className="text-[9px]  text-gray-400 uppercase">Bundle Price</label>
+                            <input type="number" value={item.specialPrice} className="w-full border border-gray-300 rounded px-2 py-1 text-xs " />
                           </div>
                           <button type="button" className="text-gray-400 hover:text-red-500"><Trash2 size={16} /></button>
                         </div>
                       );
                     })}
-                    <button type="button" className="w-full py-3 border-2 border-dotted border-gray-300 rounded-md text-xs font-bold text-gray-400 hover:border-black hover:text-black transition-all uppercase tracking-widest">+ Add Secondary Product to Bundle</button>
+                    <button type="button" className="w-full py-3 border-2 border-dotted border-gray-300 rounded-md text-xs  text-gray-400 hover:border-black hover:text-black transition-all uppercase tracking-widest">+ Add Secondary Product to Bundle</button>
                   </div>
                 )}
               </div>
@@ -358,11 +358,11 @@ export function ProductForm({ initialData, categories, allProducts, onSubmit, on
             {activeTab === 'seo' && (
               <div className="space-y-4">
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-1">SEO TITLE</label>
+                  <label className="block text-xs  text-gray-700 mb-1">SEO TITLE</label>
                   <input type="text" value={formData.seo.title} onChange={e => setFormData({...formData, seo: {...formData.seo, title: e.target.value}})} className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:border-black outline-none" />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-1">META DESCRIPTION</label>
+                  <label className="block text-xs  text-gray-700 mb-1">META DESCRIPTION</label>
                   <textarea value={formData.seo.description} onChange={e => setFormData({...formData, seo: {...formData.seo, description: e.target.value}})} className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:border-black outline-none h-24" />
                 </div>
               </div>
@@ -372,12 +372,12 @@ export function ProductForm({ initialData, categories, allProducts, onSubmit, on
       </div>
 
       <div className="p-4 border-t border-gray-200 bg-gray-50 flex justify-between items-center rounded-b-lg">
-        <div className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+        <div className="text-[10px] text-gray-400  uppercase tracking-widest">
           Last Updated: {formData.updatedAt ? new Date(formData.updatedAt).toLocaleString() : 'Never'}
         </div>
         <div className="flex gap-2">
-          <button type="button" onClick={onClose} className="px-6 py-2 border border-gray-300 rounded font-bold text-xs uppercase tracking-widest hover:bg-gray-100 transition-colors shadow-sm">Cancel</button>
-          <button form="productForm" type="submit" className="px-6 py-2 bg-black text-white rounded font-bold text-xs uppercase tracking-widest hover:bg-gray-800 transition-all shadow-md shadow-black/20">Save Product Record</button>
+          <button type="button" onClick={onClose} className="px-6 py-2 border border-gray-300 rounded  text-xs uppercase tracking-widest hover:bg-gray-100 transition-colors shadow-sm">Cancel</button>
+          <button form="productForm" type="submit" className="px-6 py-2 bg-black text-white rounded  text-xs uppercase tracking-widest hover:bg-gray-800 transition-all shadow-md shadow-black/20">Save Product Record</button>
         </div>
       </div>
     </div>

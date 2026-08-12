@@ -177,7 +177,7 @@ export function CheckoutPage() {
   const [appliedPromo, setAppliedPromo] = useState<any>(null);
   const [promoError, setPromoError] = useState('');
 
-  if (!session) return <div className="p-8 text-center mt-10 font-black uppercase tracking-tighter animate-pulse">Initializing Prime Checkout...</div>;
+  if (!session) return <div className="p-8 text-center mt-10  uppercase tracking-tighter animate-pulse">Initializing Prime Checkout...</div>;
 
   const items = cart?.items || [];
   const subtotal = items.reduce((acc: number, i: any) => acc + (i.price * i.quantity), 0);
@@ -286,7 +286,7 @@ export function CheckoutPage() {
         <button onClick={() => navigate('/cart')} className="p-2 -ml-2 text-gray-900 hover:bg-gray-50 rounded-full transition-all">
           <ChevronLeft size={24} />
         </button>
-        <div className="font-black text-xs flex-1 text-center mr-6 flex items-center justify-center gap-2 uppercase tracking-tighter">
+        <div className=" text-xs flex-1 text-center mr-6 flex items-center justify-center gap-2 uppercase tracking-tighter">
           <ShieldCheck size={18} className="text-black" />
           Secure Checkout
         </div>
@@ -296,7 +296,7 @@ export function CheckoutPage() {
         
         {/* Destination Section */}
         <section className="space-y-4">
-          <h2 className="text-[10px] font-black uppercase tracking-widest text-gray-400 flex items-center gap-2">
+          <h2 className="text-[10px]  uppercase tracking-widest text-gray-400 flex items-center gap-2">
             <MapPin size={12} /> 01. Destination
           </h2>
           
@@ -306,7 +306,7 @@ export function CheckoutPage() {
               placeholder="Search street, building, or village..." 
               value={addressSearch}
               onChange={e => setAddressSearch(e.target.value)}
-              className="w-full border-2 border-gray-100 rounded-xl p-4 pr-12 text-sm font-bold bg-gray-50 focus:bg-white focus:border-black outline-none transition-all shadow-inner"
+              className="w-full border-2 border-gray-100 rounded-xl p-4 pr-12 text-sm  bg-gray-50 focus:bg-white focus:border-black outline-none transition-all shadow-inner"
             />
             {addressSearch && (
               <button
@@ -321,7 +321,7 @@ export function CheckoutPage() {
                 {addressSuggestions.map((s, i) => (
                   <div 
                     key={i} 
-                    className="p-4 text-xs font-bold hover:bg-gray-50 cursor-pointer flex items-center gap-3"
+                    className="p-4 text-xs  hover:bg-gray-50 cursor-pointer flex items-center gap-3"
                     onClick={() => selectAddress(s)}
                   >
                     <MapPin size={14} className="text-gray-300" />
@@ -352,7 +352,7 @@ export function CheckoutPage() {
               
               {isDroppingPin && (
                 <div className="absolute inset-0 bg-black/20 flex items-center justify-center pointer-events-none z-10">
-                   <div className="bg-black text-white px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest shadow-2xl animate-bounce">
+                   <div className="bg-black text-white px-4 py-2 rounded-full text-[10px]  uppercase tracking-widest shadow-2xl animate-bounce">
                       Tap map to drop pin
                    </div>
                 </div>
@@ -367,13 +367,13 @@ export function CheckoutPage() {
                       });
                     }
                   }}
-                  className="flex-1 bg-white/90 backdrop-blur text-black border border-white/20 rounded-full py-2.5 text-[9px] font-black uppercase tracking-widest shadow-xl hover:bg-white transition-all flex items-center justify-center gap-2"
+                  className="flex-1 bg-white/90 backdrop-blur text-black border border-white/20 rounded-full py-2.5 text-[9px]  uppercase tracking-widest shadow-xl hover:bg-white transition-all flex items-center justify-center gap-2"
                 >
                   <Navigation size={12} /> Use Current Location
                 </button>
                 <button 
                   onClick={() => setIsDroppingPin(!isDroppingPin)}
-                  className={`flex-1 backdrop-blur rounded-full py-2.5 text-[9px] font-black uppercase tracking-widest shadow-xl transition-all flex items-center justify-center gap-2 border ${isDroppingPin ? 'bg-black text-white border-black' : 'bg-white/90 text-black border-white/20'}`}
+                  className={`flex-1 backdrop-blur rounded-full py-2.5 text-[9px]  uppercase tracking-widest shadow-xl transition-all flex items-center justify-center gap-2 border ${isDroppingPin ? 'bg-black text-white border-black' : 'bg-white/90 text-black border-white/20'}`}
                 >
                   <MapPin size={12} /> Drop a Pin
                 </button>
@@ -383,7 +383,7 @@ export function CheckoutPage() {
           {selectedAddress && !addressConfirmed && (
             <button 
               onClick={handleConfirmAddress}
-              className="w-full py-4 bg-black text-white rounded-xl text-[10px] font-black uppercase tracking-[0.2em] shadow-xl shadow-black/10 animate-in zoom-in-95 duration-200"
+              className="w-full py-4 bg-black text-white rounded-xl text-[10px]  uppercase tracking-[0.2em] shadow-xl shadow-black/10 animate-in zoom-in-95 duration-200"
             >
               Confirm Delivery Address
             </button>
@@ -397,7 +397,7 @@ export function CheckoutPage() {
                 placeholder="Floor / Unit No. / Gate Instructions..." 
                 value={unitInstructions}
                 onChange={e => setUnitInstructions(e.target.value)}
-                className="w-full border-2 border-gray-100 rounded-xl p-4 text-sm font-bold bg-gray-50 focus:bg-white focus:border-black outline-none transition-all shadow-inner resize-none"
+                className="w-full border-2 border-gray-100 rounded-xl p-4 text-sm  bg-gray-50 focus:bg-white focus:border-black outline-none transition-all shadow-inner resize-none"
               />
             </div>
           )}
@@ -418,7 +418,7 @@ export function CheckoutPage() {
 
         {/* Contact Section */}
         <section className="space-y-4">
-          <h2 className="text-[10px] font-black uppercase tracking-widest text-gray-400 flex items-center gap-2">
+          <h2 className="text-[10px]  uppercase tracking-widest text-gray-400 flex items-center gap-2">
             <User size={12} /> 03. Receiver
           </h2>
           <div className="grid grid-cols-2 gap-4">
@@ -427,40 +427,40 @@ export function CheckoutPage() {
               placeholder="Legal Name" 
               value={receiverName}
               onChange={e => setReceiverName(e.target.value)}
-              className="w-full border-2 border-gray-100 rounded-xl p-4 text-sm font-bold bg-gray-50 focus:bg-white focus:border-black outline-none transition-all shadow-inner"
+              className="w-full border-2 border-gray-100 rounded-xl p-4 text-sm  bg-gray-50 focus:bg-white focus:border-black outline-none transition-all shadow-inner"
             />
             <input 
               type="tel" 
               placeholder="Phone (09xx)" 
               value={receiverPhone}
               onChange={e => setReceiverPhone(e.target.value)}
-              className="w-full border-2 border-gray-100 rounded-xl p-4 text-sm font-bold bg-gray-50 focus:bg-white focus:border-black outline-none transition-all shadow-inner"
+              className="w-full border-2 border-gray-100 rounded-xl p-4 text-sm  bg-gray-50 focus:bg-white focus:border-black outline-none transition-all shadow-inner"
             />
           </div>
         </section>
 
         {/* Financial Summary */}
         <section className="space-y-4">
-          <h2 className="text-[10px] font-black uppercase tracking-widest text-gray-400 flex items-center gap-2">
+          <h2 className="text-[10px]  uppercase tracking-widest text-gray-400 flex items-center gap-2">
             <CreditCard size={12} /> 04. Financial Settlement
           </h2>
 
           <div className="bg-gray-50 border-2 border-gray-100 rounded-2xl p-6 space-y-4">
              <div className="space-y-2 pb-4 border-b border-gray-200">
-               <div className="flex justify-between items-center text-xs font-bold text-gray-500">
+               <div className="flex justify-between items-center text-xs  text-gray-500">
                   <span>Merchandise Subtotal</span>
                   <span>₱{subtotal.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
                </div>
-               <div className="flex justify-between items-center text-xs font-bold text-gray-500">
+               <div className="flex justify-between items-center text-xs  text-gray-500">
                   <span>VAT (12% Included)</span>
                   <span>₱{tax.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
                </div>
-               <div className="flex justify-between items-center text-xs font-bold text-gray-500">
+               <div className="flex justify-between items-center text-xs  text-gray-500">
                   <span>Road Delivery Fee</span>
                   <span>₱{deliveryFee.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
                </div>
                {discount > 0 && (
-                 <div className="flex justify-between items-center text-xs font-black text-green-600 uppercase tracking-tighter">
+                 <div className="flex justify-between items-center text-xs  text-green-600 uppercase tracking-tighter">
                     <span>Promotion ({appliedPromo?.code})</span>
                     <span>-₱{discount.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
                  </div>
@@ -470,13 +470,13 @@ export function CheckoutPage() {
              <div className="space-y-3">
                <div className="flex justify-between items-center">
                   <div>
-                    <div className="text-[8px] font-black uppercase tracking-widest text-gray-400">Due at Checkout</div>
-                    <div className="text-lg font-black uppercase tracking-tighter text-black">₱{amountDueNow.toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
+                    <div className="text-[8px]  uppercase tracking-widest text-gray-400">Due at Checkout</div>
+                    <div className="text-lg  uppercase tracking-tighter text-black">₱{amountDueNow.toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
                   </div>
                   {amountDueOnDelivery > 0 && (
                     <div className="text-right">
-                      <div className="text-[8px] font-black uppercase tracking-widest text-gray-400">Due at Doorstep</div>
-                      <div className="text-lg font-black uppercase tracking-tighter text-gray-400">₱{amountDueOnDelivery.toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
+                      <div className="text-[8px]  uppercase tracking-widest text-gray-400">Due at Doorstep</div>
+                      <div className="text-lg  uppercase tracking-tighter text-gray-400">₱{amountDueOnDelivery.toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
                     </div>
                   )}
                </div>
@@ -485,7 +485,7 @@ export function CheckoutPage() {
 
           {paymentTiming === 'checkout' && (
             <div className="space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
-               <h3 className="text-[10px] font-black uppercase tracking-widest text-gray-400 flex items-center gap-2">
+               <h3 className="text-[10px]  uppercase tracking-widest text-gray-400 flex items-center gap-2">
                  <ShieldCheck size={12} /> 05. Receipt Analysis
                </h3>
                <div className="relative">
@@ -500,8 +500,8 @@ export function CheckoutPage() {
                      <>
                         <img src={receiptImage} className="w-20 h-20 object-cover rounded-xl shadow-lg border-2 border-white" />
                         <div className="text-center">
-                          <div className="text-[10px] font-black uppercase tracking-widest text-black">Receipt Captured</div>
-                          <div className="text-[8px] font-bold text-gray-400 uppercase tracking-widest mt-1">Ready for AI Validation</div>
+                          <div className="text-[10px]  uppercase tracking-widest text-black">Receipt Captured</div>
+                          <div className="text-[8px]  text-gray-400 uppercase tracking-widest mt-1">Ready for AI Validation</div>
                         </div>
                      </>
                    ) : (
@@ -510,8 +510,8 @@ export function CheckoutPage() {
                           <Wallet className="text-gray-400" size={24} />
                         </div>
                         <div className="text-center">
-                           <div className="text-[10px] font-black uppercase tracking-widest text-black">Upload Proof of Payment</div>
-                           <div className="text-[8px] font-bold text-gray-400 uppercase tracking-widest mt-1">Screenshots of GCash/Bank Transfer</div>
+                           <div className="text-[10px]  uppercase tracking-widest text-black">Upload Proof of Payment</div>
+                           <div className="text-[8px]  text-gray-400 uppercase tracking-widest mt-1">Screenshots of GCash/Bank Transfer</div>
                         </div>
                      </>
                    )}
@@ -527,13 +527,13 @@ export function CheckoutPage() {
       <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/80 backdrop-blur-xl border-t border-gray-100 z-[100] pb-[calc(16px+env(safe-area-inset-bottom,0px))]">
         <div className="max-w-lg mx-auto flex gap-3">
            <div className="flex-1">
-             <div className="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Grand Total</div>
-             <div className="text-xl font-black tracking-tighter">₱{totalOrderValue.toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
+             <div className="text-[8px]  text-gray-400 uppercase tracking-widest mb-0.5">Grand Total</div>
+             <div className="text-xl  tracking-tighter">₱{totalOrderValue.toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
            </div>
            <button 
             disabled={!selectedQuote || !paymentTiming || !receiverName || !receiverPhone || (paymentTiming === 'checkout' && !receiptImage) || isPlacing}
             onClick={handlePlaceOrder}
-            className="px-10 bg-black text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-gray-800 disabled:bg-gray-200 disabled:text-gray-400 transition-all shadow-2xl shadow-black/20"
+            className="px-10 bg-black text-white rounded-xl text-[10px]  uppercase tracking-widest hover:bg-gray-800 disabled:bg-gray-200 disabled:text-gray-400 transition-all shadow-2xl shadow-black/20"
           >
             {isPlacing ? (isAnalyzing ? 'ANALYZING LEDGER...' : 'PLACING ORDER...') : 'Authorize Payment'}
            </button>

@@ -39,7 +39,7 @@ export function CourierSelector({
 }: CourierSelectorProps) {
   return (
     <section className="space-y-4">
-      <h2 className="text-[10px] font-black uppercase tracking-widest text-gray-400 flex items-center gap-2">
+      <h2 className="text-[10px]  uppercase tracking-widest text-gray-400 flex items-center gap-2">
         <Truck size={12} /> 02. Delivery Fleet
       </h2>
 
@@ -60,11 +60,11 @@ export function CourierSelector({
                 <img src={quote.logoUrl} className="w-full h-full object-contain" />
               </div>
               <div className="relative z-10 flex flex-col items-center">
-                <div className="font-black text-[14px] tracking-tighter leading-none mb-0.5">
+                <div className=" text-[14px] tracking-tighter leading-none mb-0.5">
                   {isUnavailable ? 'OFFLINE' : `₱${(quote.totalMinor / 100).toFixed(0)}`}
                 </div>
                 {!isUnavailable && (
-                   <div className="text-[7px] font-black uppercase tracking-tighter text-gray-400">
+                   <div className="text-[7px]  uppercase tracking-tighter text-gray-400">
                       {quote.courierName.split(' ')[0]}
                    </div>
                 )}
@@ -78,17 +78,17 @@ export function CourierSelector({
           );
         })}
         {isQuoting && (
-          <div className="col-span-4 py-8 text-center text-[10px] font-black uppercase tracking-[0.2em] text-gray-300 animate-pulse">Calculating Road Route...</div>
+          <div className="col-span-4 py-8 text-center text-[10px]  uppercase tracking-[0.2em] text-gray-300 animate-pulse">Calculating Road Route...</div>
         )}
         {error && (
           <div className="col-span-4 p-4 bg-red-50 border-2 border-red-100 rounded-xl text-red-600 text-center">
-             <div className="text-[10px] font-black uppercase tracking-widest">{error}</div>
+             <div className="text-[10px]  uppercase tracking-widest">{error}</div>
           </div>
         )}
         {!isQuoting && !error && quotes.length === 0 && (
           <div className="col-span-4 p-8 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200 text-center">
              <Truck className="mx-auto text-gray-300 mb-2" size={24} />
-             <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest">
+             <p className="text-[10px]  uppercase text-gray-400 tracking-widest">
                {addressSelected && !addressConfirmed ? 'Confirm address above to view rates' : 'Select address to view rates'}
              </p>
           </div>
@@ -99,12 +99,12 @@ export function CourierSelector({
         <div className="animate-in fade-in slide-in-from-top-2 duration-300 space-y-4">
            <div className="p-4 bg-gray-900 rounded-xl text-white flex justify-between items-center shadow-xl shadow-black/10">
               <div>
-                <div className="text-[8px] font-black uppercase tracking-widest text-gray-400">Selected Fleet</div>
-                <div className="text-sm font-black uppercase tracking-tighter">{selectedQuote.courierName}</div>
+                <div className="text-[8px]  uppercase tracking-widest text-gray-400">Selected Fleet</div>
+                <div className="text-sm  uppercase tracking-tighter">{selectedQuote.courierName}</div>
               </div>
               <div className="text-right">
-                <div className="text-[8px] font-black uppercase tracking-widest text-gray-400">Road Distance</div>
-                <div className="text-sm font-black uppercase tracking-tighter">{(selectedQuote.route.distanceMeters / 1000).toFixed(1)} KM</div>
+                <div className="text-[8px]  uppercase tracking-widest text-gray-400">Road Distance</div>
+                <div className="text-sm  uppercase tracking-tighter">{(selectedQuote.route.distanceMeters / 1000).toFixed(1)} KM</div>
               </div>
            </div>
 
@@ -112,20 +112,20 @@ export function CourierSelector({
            <div className="bg-gray-50 border-2 border-gray-100 rounded-xl p-4 relative overflow-hidden">
               {!paymentTiming && (
                 <div className="absolute inset-0 bg-white/40 backdrop-blur-[1px] z-10 flex items-center justify-center">
-                   <div className="bg-black text-white px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest animate-pulse">Action Required</div>
+                   <div className="bg-black text-white px-4 py-1.5 rounded-full text-[9px]  uppercase tracking-widest animate-pulse">Action Required</div>
                 </div>
               )}
-              <div className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-3 text-center">Delivery Fee Settlement</div>
+              <div className="text-[10px]  uppercase tracking-widest text-gray-400 mb-3 text-center">Delivery Fee Settlement</div>
               <div className="flex gap-2 relative z-20">
                 <button 
                   onClick={() => onPaymentTimingSelect('checkout')}
-                  className={`flex-1 py-3 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all border-2 ${paymentTiming === 'checkout' ? 'bg-black text-white border-black' : 'bg-white text-gray-400 border-gray-100 hover:border-gray-200'}`}
+                  className={`flex-1 py-3 rounded-lg text-[9px]  uppercase tracking-widest transition-all border-2 ${paymentTiming === 'checkout' ? 'bg-black text-white border-black' : 'bg-white text-gray-400 border-gray-100 hover:border-gray-200'}`}
                 >
                   Pay at Checkout
                 </button>
                 <button 
                   onClick={() => onPaymentTimingSelect('delivery')}
-                  className={`flex-1 py-3 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all border-2 ${paymentTiming === 'delivery' ? 'bg-black text-white border-black' : 'bg-white text-gray-400 border-gray-100 hover:border-gray-200'}`}
+                  className={`flex-1 py-3 rounded-lg text-[9px]  uppercase tracking-widest transition-all border-2 ${paymentTiming === 'delivery' ? 'bg-black text-white border-black' : 'bg-white text-gray-400 border-gray-100 hover:border-gray-200'}`}
                 >
                   Pay on Delivery
                 </button>

@@ -15,7 +15,7 @@ export function OrdersPage() {
   return (
     <div className="p-2 md:p-3 max-w-3xl mx-auto flex flex-col min-h-[calc(100vh-55px-35px-44px-18px)]">
       <div className="flex justify-between items-center pb-2 border-b border-gray-200 mb-3">
-        <h2 className="text-xl font-bold">My Orders</h2>
+        <h2 className="text-xl ">My Orders</h2>
       </div>
 
       <div className="space-y-3">
@@ -30,10 +30,10 @@ export function OrdersPage() {
             >
               <div className="flex justify-between items-start mb-2">
                 <div>
-                  <div className="font-bold text-sm text-gray-900">{o.id}</div>
+                  <div className=" text-sm text-gray-900">{o.id}</div>
                   <div className="text-[11px] text-gray-500">{new Date(o.date).toLocaleString()}</div>
                 </div>
-                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px]  uppercase ${
                   o.status === 'QUEUED' || o.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
                   o.status === 'PROCESSING' ? 'bg-blue-100 text-blue-800' :
                   o.status === 'DISPATCHED' ? 'bg-purple-100 text-purple-800' :
@@ -45,11 +45,11 @@ export function OrdersPage() {
                 </span>
               </div>
               <div className="flex justify-between items-end mt-4">
-                <div className="text-[12px] text-gray-600 font-semibold flex items-center gap-1.5">
+                <div className="text-[12px] text-gray-600  flex items-center gap-1.5">
                   <Package size={14} /> {o.items?.length || 0} {o.items?.length === 1 ? 'Item' : 'Items'}
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="font-bold text-sm">₱{o.total.toLocaleString()}</div>
+                  <div className=" text-sm">₱{o.total.toLocaleString()}</div>
                   <ChevronRight size={16} className="text-gray-400" />
                 </div>
               </div>

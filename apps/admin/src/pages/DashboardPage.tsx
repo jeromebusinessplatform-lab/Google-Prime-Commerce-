@@ -65,7 +65,7 @@ export function DashboardPage() {
 
   return (
     <div className="p-4 max-w-6xl mx-auto w-full">
-      <h2 className="text-base font-bold mb-4">Business Overview</h2>
+      <h2 className="text-base  mb-4">Business Overview</h2>
       
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         {isLoading ? (
@@ -81,8 +81,8 @@ export function DashboardPage() {
           return (
             <div key={i} className="bg-white dark:bg-gray-900 p-3 rounded-md border border-gray-200 dark:border-gray-800 shadow-xs flex flex-col items-center justify-center text-center py-4 transition-colors text-gray-900 dark:text-gray-100">
               <Icon size={20} className="text-gray-400 dark:text-gray-500 mb-1" />
-              <div className="text-lg font-bold tracking-tight">{s.value}</div>
-              <div className="text-[11px] text-gray-500 dark:text-gray-400 uppercase font-semibold mt-0.5">{s.label}</div>
+              <div className="text-lg  tracking-tight">{s.value}</div>
+              <div className="text-[11px] text-gray-500 dark:text-gray-400 uppercase  mt-0.5">{s.label}</div>
             </div>
           );
         })}
@@ -90,7 +90,7 @@ export function DashboardPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="bg-white dark:bg-gray-900 p-4 rounded-md border border-gray-200 dark:border-gray-800 shadow-xs min-h-[260px] flex flex-col transition-colors">
-          <h3 className="font-bold text-xs uppercase tracking-wider mb-3 text-gray-600 dark:text-gray-400">SALES TREND</h3>
+          <h3 className=" text-xs uppercase tracking-wider mb-3 text-gray-600 dark:text-gray-400">SALES TREND</h3>
           <div className="flex-1 w-full h-[200px]">
             {isLoading ? (
               <div className="w-full h-full bg-gray-50 dark:bg-gray-900 rounded animate-pulse flex items-center justify-center">
@@ -121,7 +121,7 @@ export function DashboardPage() {
           </div>
         </div>
         <div className="bg-white dark:bg-gray-900 p-4 rounded-md border border-gray-200 dark:border-gray-800 shadow-xs min-h-[260px] transition-colors">
-          <h3 className="font-bold text-xs uppercase tracking-wider mb-3 text-gray-600 dark:text-gray-400">RECENT ACTIVITY</h3>
+          <h3 className=" text-xs uppercase tracking-wider mb-3 text-gray-600 dark:text-gray-400">RECENT ACTIVITY</h3>
           <div className="space-y-3">
             {isLoading ? (
               Array.from({ length: 5 }).map((_, i) => (
@@ -135,11 +135,11 @@ export function DashboardPage() {
               ))
             ) : orders.slice(0, 5).map((o, i) => (
               <div key={o.id} className="flex gap-3 items-start border-b border-gray-100 dark:border-gray-800 pb-2.5 last:border-0">
-                <div className="w-7 h-7 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0 text-blue-600 dark:text-blue-400 font-bold text-xs">
+                <div className="w-7 h-7 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0 text-blue-600 dark:text-blue-400  text-xs">
                   {i + 1}
                 </div>
                 <div>
-                  <div className="text-xs font-semibold">New order {o.id} received</div>
+                  <div className="text-xs ">New order {o.id} received</div>
                   <div className="text-[10px] text-gray-500 dark:text-gray-400">{new Date(o.date).toLocaleString()}</div>
                 </div>
               </div>

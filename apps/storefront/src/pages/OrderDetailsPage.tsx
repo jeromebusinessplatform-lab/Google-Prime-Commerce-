@@ -37,7 +37,7 @@ export function OrderDetailsPage() {
         <button onClick={() => navigate('/orders')} className="p-2 -ml-2 text-gray-700">
           <ChevronLeft size={24} />
         </button>
-        <div className="font-bold text-lg flex-1 text-center mr-6">
+        <div className=" text-lg flex-1 text-center mr-6">
           ORDER {order.id}
         </div>
       </div>
@@ -46,25 +46,25 @@ export function OrderDetailsPage() {
         
         {/* Status Tracker */}
         <div className="bg-white p-4 rounded-md border border-gray-200 shadow-sm">
-          <h3 className="font-bold text-sm mb-4">TRACKING</h3>
+          <h3 className=" text-sm mb-4">TRACKING</h3>
           <div className="relative border-l-2 border-gray-200 ml-3 space-y-6">
             <div className="relative pl-6">
               <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-black border-4 border-white"></div>
-              <div className="text-[13px] font-bold text-gray-900 leading-none">Order Placed</div>
+              <div className="text-[13px]  text-gray-900 leading-none">Order Placed</div>
               <div className="text-[11px] text-gray-500 mt-1">{new Date(order.date).toLocaleString()}</div>
             </div>
             <div className="relative pl-6">
               <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-blue-500 border-4 border-white"></div>
-              <div className="text-[13px] font-bold text-blue-600 leading-none">Processing</div>
+              <div className="text-[13px]  text-blue-600 leading-none">Processing</div>
               <div className="text-[11px] text-gray-500 mt-1">We are preparing your items.</div>
             </div>
             <div className="relative pl-6">
               <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-gray-200 border-4 border-white"></div>
-              <div className="text-[13px] font-bold text-gray-400 leading-none">Dispatched</div>
+              <div className="text-[13px]  text-gray-400 leading-none">Dispatched</div>
             </div>
             <div className="relative pl-6">
               <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-gray-200 border-4 border-white"></div>
-              <div className="text-[13px] font-bold text-gray-400 leading-none">Delivered</div>
+              <div className="text-[13px]  text-gray-400 leading-none">Delivered</div>
             </div>
           </div>
         </div>
@@ -72,13 +72,13 @@ export function OrderDetailsPage() {
         {/* Action Required: Proof of Payment */}
         {order.needsProof && (
           <div className="bg-yellow-50 p-4 rounded-md border border-yellow-200 shadow-sm">
-            <h3 className="font-bold text-sm text-yellow-800 mb-2 flex items-center gap-2">
+            <h3 className=" text-sm text-yellow-800 mb-2 flex items-center gap-2">
               <Receipt size={16} /> PAYMENT PROOF REQUIRED
             </h3>
             <p className="text-[12px] text-yellow-700 mb-3">
               Please upload your transfer screenshot for <strong>{order.paymentMethod}</strong> to confirm your order.
             </p>
-            <button className="w-full bg-white border border-yellow-400 text-yellow-800 font-bold py-2 rounded flex items-center justify-center gap-2 text-sm hover:bg-yellow-100">
+            <button className="w-full bg-white border border-yellow-400 text-yellow-800  py-2 rounded flex items-center justify-center gap-2 text-sm hover:bg-yellow-100">
               <Camera size={16} /> UPLOAD SCREENSHOT
             </button>
           </div>
@@ -86,7 +86,7 @@ export function OrderDetailsPage() {
 
         {/* Delivery Details */}
         <div className="bg-white p-3 rounded-md border border-gray-200 shadow-sm">
-          <h3 className="font-bold text-sm mb-2 flex items-center gap-2"><MapPin size={16} /> DELIVERY</h3>
+          <h3 className=" text-sm mb-2 flex items-center gap-2"><MapPin size={16} /> DELIVERY</h3>
           <div className="text-[13px] text-gray-700 leading-tight">
             {order.address}
           </div>
@@ -94,16 +94,16 @@ export function OrderDetailsPage() {
 
         {/* Items Details */}
         <div className="bg-white p-3 rounded-md border border-gray-200 shadow-sm">
-          <h3 className="font-bold text-sm mb-3">ITEMS</h3>
+          <h3 className=" text-sm mb-3">ITEMS</h3>
           <div className="space-y-3">
             {order.items.map(item => (
               <div key={item.id} className="flex gap-3">
                 <img src={item.image} alt={item.name} className="w-12 h-12 rounded bg-gray-100 object-cover" />
                 <div className="flex-1">
-                  <div className="text-[12px] font-semibold">{item.name}</div>
+                  <div className="text-[12px] ">{item.name}</div>
                   <div className="text-[11px] text-gray-500">Qty: {item.qty}</div>
                 </div>
-                <div className="text-[12px] font-bold">
+                <div className="text-[12px] ">
                   ₱{(item.price * item.qty).toLocaleString()}
                 </div>
               </div>
@@ -118,7 +118,7 @@ export function OrderDetailsPage() {
               <span className="text-gray-500">Delivery Fee</span>
               <span>₱{order.deliveryFee.toLocaleString()}</span>
             </div>
-            <div className="flex justify-between font-bold pt-1">
+            <div className="flex justify-between  pt-1">
               <span>Total Paid</span>
               <span>₱{order.total.toLocaleString()}</span>
             </div>

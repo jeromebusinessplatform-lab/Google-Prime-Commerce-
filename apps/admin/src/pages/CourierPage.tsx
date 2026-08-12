@@ -44,27 +44,27 @@ export function CourierPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-black tracking-tighter text-gray-900 uppercase">Courier Orchestration</h1>
-          <p className="text-xs font-bold text-gray-400 mt-1 uppercase tracking-widest">Last-Mile Delivery & Origin Registry</p>
+          <h1 className="text-3xl  tracking-tighter text-gray-900 uppercase">Courier Orchestration</h1>
+          <p className="text-xs  text-gray-400 mt-1 uppercase tracking-widest">Last-Mile Delivery & Origin Registry</p>
         </div>
         <div className="flex gap-2">
           <div className="bg-white border border-gray-200 rounded-lg p-1 flex">
             <button 
               onClick={() => setActiveTab('couriers')}
-              className={`px-4 py-1.5 rounded-md text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'couriers' ? 'bg-black text-white shadow-lg shadow-black/20' : 'text-gray-400 hover:text-black'}`}
+              className={`px-4 py-1.5 rounded-md text-[10px]  uppercase tracking-widest transition-all ${activeTab === 'couriers' ? 'bg-black text-white shadow-lg shadow-black/20' : 'text-gray-400 hover:text-black'}`}
             >
               Fleets
             </button>
             <button 
               onClick={() => setActiveTab('origins')}
-              className={`px-4 py-1.5 rounded-md text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'origins' ? 'bg-black text-white shadow-lg shadow-black/20' : 'text-gray-400 hover:text-black'}`}
+              className={`px-4 py-1.5 rounded-md text-[10px]  uppercase tracking-widest transition-all ${activeTab === 'origins' ? 'bg-black text-white shadow-lg shadow-black/20' : 'text-gray-400 hover:text-black'}`}
             >
               Origins
             </button>
           </div>
           <button 
             onClick={() => activeTab === 'couriers' ? setIsCourierModalOpen(true) : setIsOriginModalOpen(true)}
-            className="bg-black text-white px-6 py-2 rounded-md font-bold text-xs uppercase tracking-widest flex items-center gap-2 hover:bg-gray-800 shadow-lg shadow-black/20"
+            className="bg-black text-white px-6 py-2 rounded-md  text-xs uppercase tracking-widest flex items-center gap-2 hover:bg-gray-800 shadow-lg shadow-black/20"
           >
             <Plus size={16} /> New {activeTab === 'couriers' ? 'Courier' : 'Origin'}
           </button>
@@ -82,50 +82,50 @@ export function CourierPage() {
                   </div>
                   <button 
                     onClick={() => handleToggleCourier(courier.id, courier.status)}
-                    className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.2em] transition-all ${
+                    className={`px-3 py-1 rounded-full text-[9px]  uppercase tracking-[0.2em] transition-all ${
                       courier.status === 'available' ? 'bg-green-100 text-green-700 hover:bg-red-100 hover:text-red-700' : 'bg-red-100 text-red-700 hover:bg-green-100 hover:text-green-700'
                     }`}
                   >
                     {courier.status}
                   </button>
                 </div>
-                <h3 className="text-lg font-black tracking-tighter uppercase text-gray-900">{courier.name}</h3>
-                <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Code: {courier.code}</div>
+                <h3 className="text-lg  tracking-tighter uppercase text-gray-900">{courier.name}</h3>
+                <div className="text-[10px]  text-gray-400 uppercase tracking-widest mt-1">Code: {courier.code}</div>
               </div>
               
               <div className="p-6 space-y-4 bg-gray-50/30">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <div className="text-[8px] font-black text-gray-400 uppercase mb-1">Base Allowance</div>
-                    <div className="text-sm font-bold">{courier.config.baseDistanceKm} KM</div>
+                    <div className="text-[8px]  text-gray-400 uppercase mb-1">Base Allowance</div>
+                    <div className="text-sm ">{courier.config.baseDistanceKm} KM</div>
                   </div>
                   <div>
-                    <div className="text-[8px] font-black text-gray-400 uppercase mb-1">Base Fare</div>
-                    <div className="text-sm font-bold text-black">₱{(courier.config.baseFareMinor / 100).toFixed(2)}</div>
+                    <div className="text-[8px]  text-gray-400 uppercase mb-1">Base Fare</div>
+                    <div className="text-sm  text-black">₱{(courier.config.baseFareMinor / 100).toFixed(2)}</div>
                   </div>
                 </div>
                 
                 <div className="flex items-center gap-2">
                    <div className="p-1 bg-blue-50 text-blue-600 rounded"><Globe size={12} /></div>
-                   <div className="text-[10px] font-bold text-gray-600 uppercase tracking-widest">{courier.routingMode.replace('_', ' ')} Route</div>
+                   <div className="text-[10px]  text-gray-600 uppercase tracking-widest">{courier.routingMode.replace('_', ' ')} Route</div>
                 </div>
               </div>
 
               <div className="p-4 border-t border-gray-100 bg-white flex justify-between items-center opacity-0 group-hover:opacity-100 transition-opacity">
                 <button 
                   onClick={() => { setEditingCourier(courier); setIsCourierModalOpen(true); }}
-                  className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-gray-400 hover:text-black transition-colors"
+                  className="flex items-center gap-2 text-[10px]  uppercase tracking-widest text-gray-400 hover:text-black transition-colors"
                 >
                   <Edit2 size={12} /> Configure Fleet
                 </button>
-                <div className="text-[8px] font-bold text-gray-300 uppercase tracking-widest">v{courier.config.version}</div>
+                <div className="text-[8px]  text-gray-300 uppercase tracking-widest">v{courier.config.version}</div>
               </div>
             </div>
           ))}
           {couriers.length === 0 && (
              <div className="col-span-full py-20 text-center bg-white border-2 border-dashed border-gray-200 rounded-2xl flex flex-col items-center gap-4">
                 <Truck className="text-gray-200" size={48} />
-                <p className="text-sm font-black uppercase text-gray-300">No fleets mobilized in the registry</p>
+                <p className="text-sm  uppercase text-gray-300">No fleets mobilized in the registry</p>
              </div>
           )}
         </div>
