@@ -15,6 +15,7 @@ export function CatalogPage() {
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [isBulkStockModalOpen, setIsBulkStockModalOpen] = useState(false);
+  const [isBulkPriceModalOpen, setIsBulkPriceModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Partial<Product> | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
@@ -122,7 +123,7 @@ export function CatalogPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-black tracking-tighter text-gray-900 uppercase italic">Catalog Ledger</h1>
+          <h1 className="text-3xl font-black tracking-tighter text-gray-900 uppercase">Catalog Ledger</h1>
           <p className="text-xs font-bold text-gray-400 mt-1 uppercase tracking-widest">Inventory Control & Product Orchestration</p>
         </div>
         <div className="flex gap-2">
@@ -167,6 +168,7 @@ export function CatalogPage() {
             <div className="flex items-center gap-2 pl-4 border-l border-gray-200 animate-in fade-in slide-in-from-right-4">
               <span className="text-[10px] font-black text-gray-400 uppercase">{selectedIds.length} Selected</span>
               <button onClick={() => setIsBulkStockModalOpen(true)} className="text-[10px] font-bold text-black uppercase hover:underline">Adjust Stock</button>
+              <button onClick={() => setIsBulkPriceModalOpen(true)} className="text-[10px] font-bold text-black uppercase hover:underline ml-2">Update Price</button>
               <button onClick={() => setSelectedIds([])} className="text-[10px] font-bold text-gray-400 uppercase hover:underline">Clear</button>
             </div>
           )}
@@ -205,7 +207,7 @@ export function CatalogPage() {
                         <div className="font-black text-sm text-gray-900 leading-none mb-1 uppercase tracking-tighter">{p.name}</div>
                         <div className="text-[10px] font-bold text-gray-400 flex items-center gap-2">
                           <span className="bg-gray-100 px-1.5 py-0.5 rounded text-gray-500">{p.sku}</span>
-                          <span className="italic">{p.subname}</span>
+                          <span className="not-italic">{p.subname}</span>
                         </div>
                         <div className="mt-2 flex flex-wrap gap-1">
                           {p.badges?.map(b => <GlossyBadge key={b} type={b as any} />)}
@@ -255,7 +257,7 @@ export function CatalogPage() {
                   <Search size={32} />
                </div>
                <div>
-                  <p className="text-sm font-black uppercase italic text-gray-300">No matching records found in the ledger</p>
+                  <p className="text-sm font-black uppercase text-gray-300">No matching records found in the ledger</p>
                   <button onClick={() => {setSearchQuery(''); setCategoryFilter('all');}} className="text-[10px] font-bold text-black uppercase hover:underline mt-2">Clear all filters</button>
                </div>
             </div>
@@ -327,6 +329,40 @@ export function CatalogPage() {
             </div>
             <div className="mt-8 flex justify-end">
                <button onClick={() => setIsBulkStockModalOpen(false)} className="px-8 py-3 bg-black text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-gray-800 shadow-xl shadow-black/20">Done</button>
+            </div>
+          </div>
+        </div>
+      )}
+      {isBulkPriceModalOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 animate-in zoom-in-95 duration-200">
+            <div className="flex justify-between items-center mb-6">
+               <h3 className="font-black text-xs uppercase tracking-widest">Bulk Price Adjustment</h3>
+               <button onClick={() => setIsBulkPriceModalOpen(false)} className="p-2 hover:bg-gray-100 rounded-full"><X size={20}/></button>
+            </div>
+            <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
+               {products.filter(p => selectedIds.includes(p.id)).map(p => (
+                 <div key={p.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100">
+                    <div className="flex items-center gap-3">
+                       <img src={p.media?.[0]?.url || 'https://placehold.co/100x100'} className="w-8 h-10 object-cover rounded border" />
+                       <div>
+                          <div className="text-[10px] font-black uppercase tracking-tighter">{p.name}</div>
+                          <div className="text-[8px] font-bold text-gray-400">COST: ₱{p.cost || 0}</div>
+                       </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                       <span className="text-[10px] font-black">₱</span>
+                       <input 
+                         type="number" 
+                         value={p.price}
+                         onChange={(e) => handleProductSubmit({ price: parseFloat(e.target.value) || 0 }, p.id)}
+                         className="w-20 text-right text-xs font-black bg-white border border-gray-200 rounded py-1 px-2" />
+                    </div>
+                 </div>
+               ))}
+            </div>
+            <div className="mt-8 flex justify-end">
+               <button onClick={() => setIsBulkPriceModalOpen(false)} className="px-8 py-3 bg-black text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-gray-800 shadow-xl shadow-black/20">Save Prices</button>
             </div>
           </div>
         </div>

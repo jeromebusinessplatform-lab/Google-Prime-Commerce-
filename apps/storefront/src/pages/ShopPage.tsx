@@ -150,7 +150,7 @@ export function ShopPage() {
             </div>
             <div className="p-1.5 flex flex-col flex-1">
               <div className="text-[11px] font-semibold leading-tight line-clamp-1 text-gray-900 dark:text-gray-100 uppercase tracking-tighter">{p.name}</div>
-              {p.subname && <div className="text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase italic line-clamp-1">{p.subname}</div>}
+              {p.subname && <div className="text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase line-clamp-1">{p.subname}</div>}
               
               <div className="mt-1 flex items-center justify-between border-t border-gray-50 dark:border-gray-800 pt-1.5">
                 <div className="flex flex-col">

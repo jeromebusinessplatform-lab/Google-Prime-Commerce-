@@ -32,7 +32,7 @@ export function CategoryManager({ categories, onUpsert, onClose }: CategoryManag
   return (
     <div className="bg-white rounded-lg shadow-xl w-full max-w-md flex flex-col max-h-[80vh]">
       <div className="flex justify-between items-center p-4 border-b border-gray-200">
-        <h3 className="font-bold text-lg italic uppercase tracking-tighter">Category Architecture</h3>
+        <h3 className="font-bold text-lg uppercase tracking-tighter">Category Architecture</h3>
         <button onClick={onClose} className="text-gray-400 hover:text-black"><X size={20} /></button>
       </div>
 

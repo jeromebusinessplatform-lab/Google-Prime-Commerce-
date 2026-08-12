@@ -1,7 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ThemeToggle } from './ThemeToggle';
 
 export function GlobalHeader({ title }: { title?: string }) {
+  const [tenant, setTenant] = useState<any>(null);
+
+  useEffect(() => {
+    fetch('/v1/tenant')
+      .then(r => r.json())
+      .then(d => setTenant(d.data));
+  }, []);
+
   const shouldShowTitle = title && 
     !title.toLowerCase().includes('enterprise') && 
     !title.toLowerCase().includes('commerce');
@@ -10,13 +18,13 @@ export function GlobalHeader({ title }: { title?: string }) {
     <header className="fixed top-0 left-0 right-0 h-[55px] bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800 z-50 flex items-center px-4 pt-[env(safe-area-inset-top,0px)] transition-colors">
       <div className="flex-1 flex items-center">
         <img 
-          src="/logo.svg" 
-          alt="PRIME" 
+          src={tenant?.logoUrl || "/logo.svg"} 
+          alt={tenant?.name || "PRIME"} 
           className="h-7 object-contain max-w-[120px] dark:invert" 
         />
-        {shouldShowTitle && (
-          <span className="ml-3 font-semibold text-gray-800 dark:text-gray-200 border-l border-gray-300 dark:border-gray-700 pl-3 text-sm">
-            {title}
+        {(shouldShowTitle || tenant?.name) && (
+          <span className="ml-3 font-black uppercase tracking-tighter text-gray-900 dark:text-gray-100 border-l border-gray-200 dark:border-gray-800 pl-3 text-sm">
+            {title || tenant?.name}
           </span>
         )}
       </div>

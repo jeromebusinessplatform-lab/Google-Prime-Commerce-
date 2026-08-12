@@ -60,7 +60,7 @@ export function CourierSelector({
                 <img src={quote.logoUrl} className="w-full h-full object-contain" />
               </div>
               <div className="relative z-10 flex flex-col items-center">
-                <div className="font-black italic text-[11px] tracking-tighter leading-none mb-0.5">
+                <div className="font-black text-[11px] tracking-tighter leading-none mb-0.5">
                   {isUnavailable ? 'OFFLINE' : `₱${(quote.totalMinor / 100).toFixed(0)}`}
                 </div>
                 {!isUnavailable && (
@@ -100,11 +100,11 @@ export function CourierSelector({
            <div className="p-4 bg-gray-900 rounded-xl text-white flex justify-between items-center shadow-xl shadow-black/10">
               <div>
                 <div className="text-[8px] font-black uppercase tracking-widest text-gray-400">Selected Fleet</div>
-                <div className="text-sm font-black italic uppercase tracking-tighter">{selectedQuote.courierName}</div>
+                <div className="text-sm font-black uppercase tracking-tighter">{selectedQuote.courierName}</div>
               </div>
               <div className="text-right">
                 <div className="text-[8px] font-black uppercase tracking-widest text-gray-400">Road Distance</div>
-                <div className="text-sm font-black italic uppercase tracking-tighter">{(selectedQuote.route.distanceMeters / 1000).toFixed(1)} KM</div>
+                <div className="text-sm font-black uppercase tracking-tighter">{(selectedQuote.route.distanceMeters / 1000).toFixed(1)} KM</div>
               </div>
            </div>
 

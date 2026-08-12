@@ -8,9 +8,19 @@ interface PackingSlipModalProps {
 }
 
 function PackingSlipModal({ order, onClose }: PackingSlipModalProps) {
+  const [tenant, setTenant] = useState<any>(null);
+
+  useEffect(() => {
+    fetch('/v1/tenant')
+      .then(r => r.json())
+      .then(d => setTenant(d.data));
+  }, []);
+
   const handlePrint = () => {
     window.print();
   };
+
+  if (!tenant) return null;
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
@@ -29,29 +39,46 @@ function PackingSlipModal({ order, onClose }: PackingSlipModalProps) {
           <div className="border-4 border-black p-6 space-y-8">
             <div className="flex justify-between items-start">
               <div className="space-y-1">
-                <div className="text-2xl font-black tracking-tighter">PACKING SLIP</div>
-                <div className="text-xs font-bold text-gray-500">ORDER #{order.id}</div>
+                <div className="text-2xl font-black tracking-tighter uppercase">{tenant.name}</div>
+                <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">PACKING SLIP — ORDER #{order.id}</div>
               </div>
               <div className="text-right space-y-1">
-                <div className="text-xs font-black uppercase tracking-widest">DATE</div>
-                <div className="text-sm font-bold">{new Date(order.date).toLocaleDateString()}</div>
+                <div className="text-[8px] font-black uppercase tracking-widest text-gray-400">Order Date</div>
+                <div className="text-sm font-black">{new Date(order.date).toLocaleDateString()}</div>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-8 border-y-2 border-black py-6">
-              <div className="space-y-2">
-                <div className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Ship To</div>
-                <div className="text-sm font-black uppercase leading-tight">{order.customer.name}</div>
-                <div className="text-xs font-medium text-gray-600 uppercase leading-relaxed">{order.customer.address}</div>
-                <div className="text-xs font-bold">{order.customer.phone}</div>
+              <div className="space-y-4">
+                 <div>
+                    <div className="text-[9px] font-black uppercase tracking-[0.2em] text-gray-400 mb-1">From</div>
+                    <div className="text-[11px] font-black uppercase">{tenant.name}</div>
+                    <div className="text-[10px] font-medium text-gray-600 uppercase leading-relaxed max-w-[200px]">{tenant.address}</div>
+                    <div className="text-[10px] font-bold mt-1">{tenant.contactPhone}</div>
+                 </div>
+                 <div>
+                    <div className="text-[9px] font-black uppercase tracking-[0.2em] text-gray-400 mb-1">Ship To</div>
+                    <div className="text-[11px] font-black uppercase leading-tight">{order.customer.name}</div>
+                    <div className="text-[10px] font-medium text-gray-600 uppercase leading-relaxed">{order.customer.address}</div>
+                    <div className="text-[10px] font-bold">{order.customer.phone}</div>
+                 </div>
               </div>
-              <div className="space-y-2">
-                <div className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Order Status</div>
-                <div className="inline-block px-3 py-1 bg-black text-white text-[10px] font-black uppercase tracking-widest">
-                  {order.status}
+              <div className="space-y-4">
+                <div>
+                   <div className="text-[9px] font-black uppercase tracking-[0.2em] text-gray-400 mb-1">Logistics Orchestration</div>
+                   <div className="flex items-center gap-2">
+                     <div className="px-3 py-1 bg-black text-white text-[9px] font-black uppercase tracking-widest">
+                       {order.delivery?.courierName || 'SELF-PICKUP'}
+                     </div>
+                     {order.delivery?.mode && (
+                       <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">({order.delivery.mode})</span>
+                     )}
+                   </div>
                 </div>
-                <div className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 pt-2">Payment</div>
-                <div className="text-xs font-bold uppercase">{order.payment.method} — {order.payment.status}</div>
+                <div>
+                   <div className="text-[9px] font-black uppercase tracking-[0.2em] text-gray-400 mb-1">Financial State</div>
+                   <div className="text-[10px] font-black uppercase">{order.payment.method} — {order.payment.status}</div>
+                </div>
               </div>
             </div>
 
@@ -70,7 +97,7 @@ function PackingSlipModal({ order, onClose }: PackingSlipModalProps) {
                     <tr key={item.id}>
                       <td className="py-4">
                         <div className="text-xs font-black uppercase">{item.name}</div>
-                        <div className="text-[10px] text-gray-400 font-bold uppercase italic">Unit Price: ₱{item.price.toLocaleString()}</div>
+                        <div className="text-[10px] text-gray-400 font-bold uppercase">Unit Price: ₱{item.price.toLocaleString()}</div>
                       </td>
                       <td className="py-4 text-center text-sm font-black">{item.qty}</td>
                       <td className="py-4 text-right text-sm font-black">₱{(item.price * item.qty).toLocaleString()}</td>
@@ -87,7 +114,7 @@ function PackingSlipModal({ order, onClose }: PackingSlipModalProps) {
             </div>
 
             <div className="pt-8 border-t border-dashed border-gray-300">
-              <div className="text-[10px] font-black uppercase tracking-widest text-center text-gray-400 italic">
+              <div className="text-[10px] font-black uppercase tracking-widest text-center text-gray-400">
                 Thank you for your business. For support, contact logistics@example.com
               </div>
             </div>

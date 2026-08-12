@@ -86,8 +86,9 @@ export function CartPage() {
               <img src={item.image} alt={item.name} className="w-16 h-16 object-cover bg-gray-100 rounded" />
               <div className="flex-1 flex flex-col justify-between">
                 <div>
-                  <div className="font-semibold text-[13px] leading-tight text-gray-900">{item.name}</div>
-                  <div className="text-[14px] font-bold mt-0.5">₱{item.price.toLocaleString()}</div>
+                  <div className="font-black text-[12px] uppercase leading-tight text-gray-900 tracking-tighter">{item.name}</div>
+                  <div className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">{item.subname || 'Standard Edition'}</div>
+                  <div className="text-[14px] font-black mt-1 tracking-tight">₱{item.price.toLocaleString()}</div>
                 </div>
                 <div className="flex items-center justify-between mt-2">
                   <div className="flex items-center border border-gray-300 rounded overflow-hidden h-7">

@@ -44,7 +44,7 @@ export function CourierPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-black tracking-tighter text-gray-900 uppercase italic">Courier Orchestration</h1>
+          <h1 className="text-3xl font-black tracking-tighter text-gray-900 uppercase">Courier Orchestration</h1>
           <p className="text-xs font-bold text-gray-400 mt-1 uppercase tracking-widest">Last-Mile Delivery & Origin Registry</p>
         </div>
         <div className="flex gap-2">
@@ -89,7 +89,7 @@ export function CourierPage() {
                     {courier.status}
                   </button>
                 </div>
-                <h3 className="text-lg font-black tracking-tighter uppercase italic text-gray-900">{courier.name}</h3>
+                <h3 className="text-lg font-black tracking-tighter uppercase text-gray-900">{courier.name}</h3>
                 <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Code: {courier.code}</div>
               </div>
               
@@ -125,7 +125,7 @@ export function CourierPage() {
           {couriers.length === 0 && (
              <div className="col-span-full py-20 text-center bg-white border-2 border-dashed border-gray-200 rounded-2xl flex flex-col items-center gap-4">
                 <Truck className="text-gray-200" size={48} />
-                <p className="text-sm font-black uppercase italic text-gray-300">No fleets mobilized in the registry</p>
+                <p className="text-sm font-black uppercase text-gray-300">No fleets mobilized in the registry</p>
              </div>
           )}
         </div>

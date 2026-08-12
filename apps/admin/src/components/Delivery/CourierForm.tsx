@@ -74,7 +74,7 @@ export function CourierForm({ initialData, onClose, onSubmit }: CourierFormProps
     <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl flex flex-col max-h-[90vh] animate-in fade-in zoom-in-95 duration-200">
       <div className="flex justify-between items-center p-6 border-b border-gray-100">
         <div>
-          <h3 className="font-black text-xl italic uppercase tracking-tighter">Fleet Configuration</h3>
+          <h3 className="font-black text-xl uppercase tracking-tighter">Fleet Configuration</h3>
           <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">Version Control: v{formData.config.version}</p>
         </div>
         <button onClick={onClose} className="p-2 text-gray-400 hover:text-black hover:bg-gray-50 rounded-full transition-all"><X size={20} /></button>
@@ -132,15 +132,15 @@ export function CourierForm({ initialData, onClose, onSubmit }: CourierFormProps
                    </div>
                    
                    <div>
-                     <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2 italic">Fleet Name</label>
+                     <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2">Fleet Name</label>
                      <input required type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full border-2 border-gray-100 rounded-xl px-4 py-2.5 text-sm font-bold focus:border-black outline-none transition-all" />
                    </div>
                    <div>
-                     <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2 italic">Fleet Code</label>
+                     <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2">Fleet Code</label>
                      <input required type="text" value={formData.code} onChange={e => setFormData({...formData, code: e.target.value.toUpperCase()})} className="w-full border-2 border-gray-100 rounded-xl px-4 py-2.5 text-sm font-bold focus:border-black outline-none transition-all font-mono" />
                    </div>
                    <div>
-                     <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2 italic">Sort Priority</label>
+                     <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2">Sort Priority</label>
                      <input type="number" value={formData.sortOrder} onChange={e => setFormData({...formData, sortOrder: Number(e.target.value)})} className="w-full border-2 border-gray-100 rounded-xl px-4 py-2.5 text-sm font-bold focus:border-black outline-none transition-all" />
                    </div>
                 </div>
@@ -151,23 +151,23 @@ export function CourierForm({ initialData, onClose, onSubmit }: CourierFormProps
               <div className="space-y-6">
                 <div className="grid grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2 italic">Base Allowance (KM)</label>
+                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2">Base Allowance (KM)</label>
                     <input type="number" step="0.1" value={formData.config.baseDistanceKm} onChange={e => setFormData({...formData, config: {...formData.config, baseDistanceKm: Number(e.target.value)}})} className="w-full border-2 border-gray-100 rounded-xl px-4 py-2.5 text-sm font-bold focus:border-black outline-none transition-all" />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2 italic">Base Fare (MINORS)</label>
+                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2">Base Fare (MINORS)</label>
                     <input type="number" value={formData.config.baseFareMinor} onChange={e => setFormData({...formData, config: {...formData.config, baseFareMinor: Number(e.target.value)}})} className="w-full border-2 border-gray-100 rounded-xl px-4 py-2.5 text-sm font-bold focus:border-black outline-none transition-all" />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2 italic">Excess / KM (MINORS)</label>
+                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2">Excess / KM (MINORS)</label>
                     <input type="number" value={formData.config.excessPerKmMinor} onChange={e => setFormData({...formData, config: {...formData.config, excessPerKmMinor: Number(e.target.value)}})} className="w-full border-2 border-gray-100 rounded-xl px-4 py-2.5 text-sm font-bold focus:border-black outline-none transition-all" />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2 italic">Platform Fee (MINORS)</label>
+                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2">Platform Fee (MINORS)</label>
                     <input type="number" value={formData.config.platformFeeMinor} onChange={e => setFormData({...formData, config: {...formData.config, platformFeeMinor: Number(e.target.value)}})} className="w-full border-2 border-gray-100 rounded-xl px-4 py-2.5 text-sm font-bold focus:border-black outline-none transition-all" />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2 italic">Night Surcharge (MINORS)</label>
+                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2">Night Surcharge (MINORS)</label>
                     <input type="number" value={formData.config.nightFeeMinor} onChange={e => setFormData({...formData, config: {...formData.config, nightFeeMinor: Number(e.target.value)}})} className="w-full border-2 border-gray-100 rounded-xl px-4 py-2.5 text-sm font-bold focus:border-black outline-none transition-all" />
                   </div>
                 </div>
@@ -209,8 +209,8 @@ export function CourierForm({ initialData, onClose, onSubmit }: CourierFormProps
                   </div>
 
                   <div className="flex justify-between items-baseline pt-2 border-t border-gray-800">
-                     <span className="text-xs font-black text-white uppercase tracking-[0.2em] italic">Total Delivery Fee</span>
-                     <span className="text-2xl font-black italic tracking-tighter">
+                     <span className="text-xs font-black text-white uppercase tracking-[0.2em]">Total Delivery Fee</span>
+                     <span className="text-2xl font-black tracking-tighter">
                        ₱{((formData.config.baseFareMinor + (Math.max(0, (formData._testDist || 5) - formData.config.baseDistanceKm) * formData.config.excessPerKmMinor) + formData.config.platformFeeMinor) / 100).toFixed(2)}
                      </span>
                   </div>
@@ -221,7 +221,7 @@ export function CourierForm({ initialData, onClose, onSubmit }: CourierFormProps
             {activeTab === 'routing' && (
               <div className="space-y-6">
                 <div>
-                   <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2 italic">Geoapify Routing Mode</label>
+                   <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2">Geoapify Routing Mode</label>
                    <select 
                      value={formData.routingMode} 
                      onChange={e => setFormData({...formData, routingMode: e.target.value})}
@@ -234,7 +234,7 @@ export function CourierForm({ initialData, onClose, onSubmit }: CourierFormProps
                    </select>
                 </div>
                 <div>
-                   <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2 italic">Tracking URL Template</label>
+                   <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2">Tracking URL Template</label>
                    <input type="text" placeholder="https://track.fleet.com/{id}" value={formData.trackingUrlTemplate} onChange={e => setFormData({...formData, trackingUrlTemplate: e.target.value})} className="w-full border-2 border-gray-100 rounded-xl px-4 py-2.5 text-sm font-bold focus:border-black outline-none transition-all font-mono" />
                 </div>
               </div>

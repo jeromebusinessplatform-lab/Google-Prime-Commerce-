@@ -152,6 +152,24 @@ async function startServer() {
   });
 
   // Identity & Customer
+  app.get("/v1/tenant", async (req, res, next) => {
+    try {
+      const { getTenantHandler } = await import("./apps/core-service/tenant.js");
+      await getTenantHandler(req, res);
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  app.patch("/v1/tenant", async (req, res, next) => {
+    try {
+      const { updateTenantHandler } = await import("./apps/core-service/tenant.js");
+      await updateTenantHandler(req, res);
+    } catch (e) {
+      next(e);
+    }
+  });
+
   app.get("/v1/customer", async (req, res, next) => {
     try {
       const { getCustomerHandler } = await import("./apps/core-service/identity.js");

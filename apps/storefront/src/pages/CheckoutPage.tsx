@@ -177,7 +177,7 @@ export function CheckoutPage() {
   const [appliedPromo, setAppliedPromo] = useState<any>(null);
   const [promoError, setPromoError] = useState('');
 
-  if (!session) return <div className="p-8 text-center mt-10 font-black italic uppercase tracking-tighter animate-pulse">Initializing Prime Checkout...</div>;
+  if (!session) return <div className="p-8 text-center mt-10 font-black uppercase tracking-tighter animate-pulse">Initializing Prime Checkout...</div>;
 
   const items = cart?.items || [];
   const subtotal = items.reduce((acc: number, i: any) => acc + (i.price * i.quantity), 0);
@@ -255,7 +255,7 @@ export function CheckoutPage() {
         <button onClick={() => navigate('/cart')} className="p-2 -ml-2 text-gray-900 hover:bg-gray-50 rounded-full transition-all">
           <ChevronLeft size={24} />
         </button>
-        <div className="font-black text-xs flex-1 text-center mr-6 flex items-center justify-center gap-2 italic uppercase tracking-tighter">
+        <div className="font-black text-xs flex-1 text-center mr-6 flex items-center justify-center gap-2 uppercase tracking-tighter">
           <ShieldCheck size={18} className="text-black" />
           Secure Checkout
         </div>
@@ -429,7 +429,7 @@ export function CheckoutPage() {
                   <span>₱{deliveryFee.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
                </div>
                {discount > 0 && (
-                 <div className="flex justify-between items-center text-xs font-black italic text-green-600 uppercase tracking-tighter">
+                 <div className="flex justify-between items-center text-xs font-black text-green-600 uppercase tracking-tighter">
                     <span>Promotion ({appliedPromo?.code})</span>
                     <span>-₱{discount.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
                  </div>
@@ -440,12 +440,12 @@ export function CheckoutPage() {
                <div className="flex justify-between items-center">
                   <div>
                     <div className="text-[8px] font-black uppercase tracking-widest text-gray-400">Due at Checkout</div>
-                    <div className="text-lg font-black italic uppercase tracking-tighter text-black">₱{amountDueNow.toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
+                    <div className="text-lg font-black uppercase tracking-tighter text-black">₱{amountDueNow.toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
                   </div>
                   {amountDueOnDelivery > 0 && (
                     <div className="text-right">
                       <div className="text-[8px] font-black uppercase tracking-widest text-gray-400">Due at Doorstep</div>
-                      <div className="text-lg font-black italic uppercase tracking-tighter text-gray-400">₱{amountDueOnDelivery.toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
+                      <div className="text-lg font-black uppercase tracking-tighter text-gray-400">₱{amountDueOnDelivery.toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
                     </div>
                   )}
                </div>
@@ -460,7 +460,7 @@ export function CheckoutPage() {
         <div className="max-w-lg mx-auto flex gap-3">
            <div className="flex-1">
              <div className="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Grand Total</div>
-             <div className="text-xl font-black italic tracking-tighter">₱{totalOrderValue.toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
+             <div className="text-xl font-black tracking-tighter">₱{totalOrderValue.toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
            </div>
            <button 
             disabled={!selectedQuote || !paymentTiming || !receiverName || !receiverPhone}

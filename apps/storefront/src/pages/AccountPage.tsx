@@ -60,11 +60,11 @@ export function AccountPage() {
             <User size={32} />
           </div>
           <div>
-            <h2 className="text-xl font-black italic tracking-tighter uppercase leading-none">
+            <h2 className="text-xl font-black tracking-tighter uppercase leading-none">
               {customer.telegramProfile.firstName} {customer.telegramProfile.lastName}
             </h2>
             <div className="flex items-center gap-2 mt-1">
-              <span className="text-[10px] font-black bg-white text-black px-2 py-0.5 rounded italic">PRIME MEMBER</span>
+              <span className="text-[10px] font-black bg-white text-black px-2 py-0.5 rounded">PRIME MEMBER</span>
               <span className="text-[10px] font-bold text-gray-400 tracking-widest uppercase">ID: {customer.primeMemberId}</span>
             </div>
           </div>
@@ -73,17 +73,17 @@ export function AccountPage() {
         <div className="mt-6 pt-6 border-t border-white/10 flex justify-between items-center">
           <div className="text-center">
             <div className="text-[10px] font-bold text-gray-400 uppercase mb-1">Status</div>
-            <div className="text-xs font-black italic">{customer.tier}</div>
+            <div className="text-xs font-black">{customer.tier}</div>
           </div>
           <div className="w-px h-8 bg-white/10" />
           <div className="text-center">
             <div className="text-[10px] font-bold text-gray-400 uppercase mb-1">Joined</div>
-            <div className="text-xs font-black italic">{new Date(customer.createdAt).toLocaleDateString()}</div>
+            <div className="text-xs font-black">{new Date(customer.createdAt).toLocaleDateString()}</div>
           </div>
           <div className="w-px h-8 bg-white/10" />
           <div className="text-center">
             <div className="text-[10px] font-bold text-gray-400 uppercase mb-1">Orders</div>
-            <div className="text-xs font-black italic">12</div>
+            <div className="text-xs font-black">12</div>
           </div>
         </div>
       </div>
@@ -96,7 +96,7 @@ export function AccountPage() {
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1">
             <div className="text-[9px] font-bold text-gray-500 uppercase">Profile Handle</div>
-            <div className="text-sm font-bold text-gray-900 dark:text-gray-100 italic">
+            <div className="text-sm font-bold text-gray-900 dark:text-gray-100">
               {customer.telegramProfile.username ? `@${customer.telegramProfile.username}` : <span className="text-gray-400">No handle</span>}
             </div>
           </div>
@@ -132,7 +132,7 @@ export function AccountPage() {
                   className="w-full text-sm font-bold bg-transparent outline-none border-b border-gray-200 focus:border-black transition-colors"
                 />
               ) : (
-                <div className="text-sm font-bold">{formData.fullName || <span className="text-gray-300 italic font-normal">Not provided</span>}</div>
+                <div className="text-sm font-bold">{formData.fullName || <span className="text-gray-300 font-normal">Not provided</span>}</div>
               )}
             </div>
           </div>
@@ -149,7 +149,7 @@ export function AccountPage() {
                   className="w-full text-sm font-bold bg-transparent outline-none border-b border-gray-200 focus:border-black transition-colors"
                 />
               ) : (
-                <div className="text-sm font-bold">{formData.phoneNumber || <span className="text-gray-300 italic font-normal">Not provided</span>}</div>
+                <div className="text-sm font-bold">{formData.phoneNumber || <span className="text-gray-300 font-normal">Not provided</span>}</div>
               )}
             </div>
           </div>
@@ -166,7 +166,7 @@ export function AccountPage() {
                   className="w-full text-sm font-bold bg-transparent outline-none border-b border-gray-200 focus:border-black transition-colors"
                 />
               ) : (
-                <div className="text-sm font-bold">{formData.email || <span className="text-gray-300 italic font-normal">Not provided</span>}</div>
+                <div className="text-sm font-bold">{formData.email || <span className="text-gray-300 font-normal">Not provided</span>}</div>
               )}
             </div>
           </div>
@@ -177,10 +177,10 @@ export function AccountPage() {
       <section className="bg-yellow-50 dark:bg-yellow-950/20 rounded-2xl p-5 border border-yellow-200/50 dark:border-yellow-900/50">
         <div className="flex justify-between items-start mb-4">
           <div>
-            <h3 className="text-sm font-black italic uppercase tracking-tighter text-yellow-900 dark:text-yellow-500">Referral Program</h3>
+            <h3 className="text-sm font-black uppercase tracking-tighter text-yellow-900 dark:text-yellow-500">Referral Program</h3>
             <p className="text-[10px] font-bold text-yellow-700 dark:text-yellow-700 uppercase tracking-widest">Share the prime experience</p>
           </div>
-          <div className="bg-yellow-900 text-white text-[10px] font-black px-3 py-1 rounded-full italic shadow-lg shadow-yellow-900/20">
+          <div className="bg-yellow-900 text-white text-[10px] font-black px-3 py-1 rounded-full shadow-lg shadow-yellow-900/20">
             {customer.referralCode}
           </div>
         </div>
@@ -188,11 +188,11 @@ export function AccountPage() {
         <div className="grid grid-cols-2 gap-3 mb-4">
           <div className="bg-white dark:bg-black/40 p-3 rounded-xl border border-yellow-100 dark:border-yellow-900/30">
             <div className="text-[8px] font-bold text-yellow-800/50 dark:text-yellow-700 uppercase mb-1">Qualified</div>
-            <div className="text-xl font-black italic text-yellow-900 dark:text-yellow-500">{customer.referralSummary.qualifiedCount}</div>
+            <div className="text-xl font-black text-yellow-900 dark:text-yellow-500">{customer.referralSummary.qualifiedCount}</div>
           </div>
           <div className="bg-white dark:bg-black/40 p-3 rounded-xl border border-yellow-100 dark:border-yellow-900/30">
             <div className="text-[8px] font-bold text-yellow-800/50 dark:text-yellow-700 uppercase mb-1">Pending</div>
-            <div className="text-xl font-black italic text-yellow-900 dark:text-yellow-500">{customer.referralSummary.pendingCount}</div>
+            <div className="text-xl font-black text-yellow-900 dark:text-yellow-500">{customer.referralSummary.pendingCount}</div>
           </div>
         </div>
 

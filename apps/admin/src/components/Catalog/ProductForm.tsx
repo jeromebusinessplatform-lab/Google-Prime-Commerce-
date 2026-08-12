@@ -102,7 +102,7 @@ export function ProductForm({ initialData, categories, allProducts, onSubmit, on
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="col-span-2">
-                    <label className="block text-xs font-bold text-gray-700 mb-1 italic">PRODUCT NAME</label>
+                    <label className="block text-xs font-bold text-gray-700 mb-1">PRODUCT NAME</label>
                     <input required type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:border-black outline-none" placeholder="e.g. Premium Espresso Roast" />
                   </div>
                   <div>
@@ -131,7 +131,7 @@ export function ProductForm({ initialData, categories, allProducts, onSubmit, on
                       <option key={cat.id} value={cat.id}>{cat.name}</option>
                     ))}
                   </select>
-                  <p className="text-[10px] text-gray-400 mt-1 italic">Hold Ctrl/Cmd to select multiple categories</p>
+                  <p className="text-[10px] text-gray-400 mt-1">Hold Ctrl/Cmd to select multiple categories</p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -203,7 +203,7 @@ export function ProductForm({ initialData, categories, allProducts, onSubmit, on
                 <div>
                   <label className="block text-xs font-bold text-gray-700 mb-1">COST PER ITEM (INTERNAL ONLY)</label>
                   <input type="number" step="0.01" value={formData.cost} onChange={e => setFormData({...formData, cost: Number(e.target.value)})} className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:border-black outline-none bg-gray-50" />
-                  <p className="text-[10px] text-gray-400 mt-1 italic">Only visible to authorized admin roles. Used for margin reports.</p>
+                  <p className="text-[10px] text-gray-400 mt-1">Only visible to authorized admin roles. Used for margin reports.</p>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -323,7 +323,7 @@ export function ProductForm({ initialData, categories, allProducts, onSubmit, on
               <div className="space-y-4">
                 <div className="flex items-center gap-2 mb-4">
                   <input type="checkbox" checked={formData.isBundle} onChange={e => setFormData({...formData, isBundle: e.target.checked})} className="w-4 h-4 accent-black" />
-                  <span className="text-sm font-bold uppercase italic">This is a bundled product</span>
+                  <span className="text-sm font-bold uppercase">This is a bundled product</span>
                 </div>
 
                 {formData.isBundle && (
