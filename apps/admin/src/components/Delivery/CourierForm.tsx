@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Save, Truck, DollarSign, Clock, Map, Image as ImageIcon, Barcode, Shield } from 'lucide-react';
+import { X, Save, Truck, DollarSign, Clock, Map, Image as ImageIcon, Barcode, Shield, AlertTriangle } from 'lucide-react';
 import { Courier } from '../../../../../packages/domain/courier';
 
 interface CourierFormProps {
@@ -9,6 +9,8 @@ interface CourierFormProps {
 }
 
 export function CourierForm({ initialData, onClose, onSubmit }: CourierFormProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('general');
   const [formData, setFormData] = useState<any>({
     name: '',
@@ -34,16 +36,31 @@ export function CourierForm({ initialData, onClose, onSubmit }: CourierFormProps
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const url = initialData?.id ? `/v1/couriers/${initialData.id}` : '/v1/couriers';
-    const method = initialData?.id ? 'PATCH' : 'POST';
-    
-    await fetch(url, {
-      method,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formData)
-    });
-    onSubmit();
-    onClose();
+    setIsSubmitting(true);
+    setError('');
+
+    try {
+      const url = initialData?.id ? `/v1/couriers/${initialData.id}` : '/v1/couriers';
+      const method = initialData?.id ? 'PATCH' : 'POST';
+      
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.error || 'Failed to save courier provider');
+      }
+
+      onSubmit();
+      onClose();
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const tabs = [
@@ -78,6 +95,13 @@ export function CourierForm({ initialData, onClose, onSubmit }: CourierFormProps
               {tab.label}
             </button>
           ))}
+          
+          {error && (
+            <div className="mt-4 p-3 bg-red-50 border border-red-100 rounded-xl flex gap-2 items-start text-red-600 animate-in fade-in slide-in-from-top-2">
+               <AlertTriangle size={14} className="shrink-0 mt-0.5" />
+               <p className="text-[8px] font-bold uppercase leading-tight">{error}</p>
+            </div>
+          )}
         </div>
 
         <div className="flex-1 overflow-y-auto p-8">
@@ -221,8 +245,8 @@ export function CourierForm({ initialData, onClose, onSubmit }: CourierFormProps
 
       <div className="p-6 border-t border-gray-100 bg-gray-50/50 flex justify-end gap-3 rounded-b-2xl">
         <button onClick={onClose} className="px-6 py-2.5 border-2 border-gray-100 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-white transition-all">Cancel</button>
-        <button form="courierForm" type="submit" className="px-8 py-2.5 bg-black text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-gray-800 transition-all shadow-xl shadow-black/20 flex items-center gap-2">
-          <Save size={14} /> Commit Fleet Config
+        <button form="courierForm" type="submit" disabled={isSubmitting} className="px-8 py-2.5 bg-black text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-gray-800 disabled:opacity-50 transition-all shadow-xl shadow-black/20 flex items-center gap-2">
+          <Save size={14} /> {isSubmitting ? 'Saving...' : 'Commit Fleet Config'}
         </button>
       </div>
     </div>

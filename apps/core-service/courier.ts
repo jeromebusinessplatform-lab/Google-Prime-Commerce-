@@ -12,38 +12,48 @@ export const getDeliveryOriginsHandler = async (req: Request, res: Response) => 
 };
 
 export const upsertDeliveryOriginHandler = async (req: Request, res: Response) => {
-  const tenantId = DEFAULT_TENANT;
-  const { id } = req.params;
-  const data = req.body;
-  
-  const originsRef = db.collection(`tenants/${tenantId}/delivery_origins`);
-  
-  if (id) {
-    const doc = await originsRef.doc(id).get();
-    const oldData = doc.data() as any;
+  try {
+    const tenantId = DEFAULT_TENANT;
+    const { id } = req.params;
+    const { id: _, ...data } = req.body; // sanitize
     
-    // revalidate lat/lng ranges
-    if (data.lat < -90 || data.lat > 90 || data.lng < -180 || data.lng > 180) {
-      return res.status(400).json({ error: "Invalid coordinates" });
-    }
+    const originsRef = db.collection(`tenants/${tenantId}/delivery_origins`);
+    
+    if (id) {
+      const doc = await originsRef.doc(id).get();
+      if (!doc.exists) return res.status(404).json({ error: "Origin not found" });
+      
+      const oldData = doc.data() as any;
+      
+      // revalidate lat/lng ranges
+      if (data.lat !== undefined && (data.lat < -90 || data.lat > 90)) {
+        return res.status(400).json({ error: "Invalid latitude" });
+      }
+      if (data.lng !== undefined && (data.lng < -180 || data.lng > 180)) {
+        return res.status(400).json({ error: "Invalid longitude" });
+      }
 
-    const update = {
-      ...data,
-      version: (oldData.version || 0) + 1,
-      updatedAt: new Date().toISOString()
-    };
-    await originsRef.doc(id).update(update);
-    res.json({ success: true });
-  } else {
-    const newOrigin = {
-      ...data,
-      status: 'active',
-      isDefault: false,
-      version: 1,
-      updatedAt: new Date().toISOString()
-    };
-    const ref = await originsRef.add(newOrigin);
-    res.json({ id: ref.id });
+      const update = {
+        ...data,
+        version: (oldData.version || 0) + 1,
+        updatedAt: new Date().toISOString()
+      };
+      await originsRef.doc(id).update(update);
+      res.json({ success: true });
+    } else {
+      const newOrigin = {
+        ...data,
+        status: 'active',
+        isDefault: false,
+        version: 1,
+        updatedAt: new Date().toISOString()
+      };
+      const ref = await originsRef.add(newOrigin);
+      res.json({ id: ref.id });
+    }
+  } catch (err: any) {
+    console.error("Origin upsert error:", err);
+    res.status(500).json({ error: err.message });
   }
 };
 
@@ -88,27 +98,45 @@ export const getCouriersHandler = async (req: Request, res: Response) => {
 };
 
 export const upsertCourierHandler = async (req: Request, res: Response) => {
-  const tenantId = DEFAULT_TENANT;
-  const { id } = req.params;
-  const data = req.body;
-  
-  const couriersRef = db.collection(`tenants/${tenantId}/couriers`);
-  
-  if (id) {
-    await couriersRef.doc(id).update({
-      ...data,
-      "config.version": (data.config?.version || 0) + 1,
-      updatedAt: new Date().toISOString()
-    });
-  } else {
-    await couriersRef.add({
-      ...data,
-      status: 'available',
-      updatedAt: new Date().toISOString(),
-      availabilityHistory: []
-    });
+  try {
+    const tenantId = DEFAULT_TENANT;
+    const { id } = req.params;
+    const { id: _, availabilityHistory, _testDist, ...data } = req.body; // sanitize
+    
+    const couriersRef = db.collection(`tenants/${tenantId}/couriers`);
+    
+    if (id) {
+      const doc = await couriersRef.doc(id).get();
+      if (!doc.exists) return res.status(404).json({ error: "Courier not found" });
+      
+      const oldData = doc.data() as any;
+      const newVersion = (oldData.config?.version || 0) + 1;
+      
+      // Merge config carefully
+      const config = {
+        ...(oldData.config || {}),
+        ...(data.config || {}),
+        version: newVersion
+      };
+      
+      await couriersRef.doc(id).update({
+        ...data,
+        config,
+        updatedAt: new Date().toISOString()
+      });
+    } else {
+      await couriersRef.add({
+        ...data,
+        status: 'available',
+        updatedAt: new Date().toISOString(),
+        availabilityHistory: []
+      });
+    }
+    res.json({ success: true });
+  } catch (err: any) {
+    console.error("Courier upsert error:", err);
+    res.status(500).json({ error: err.message });
   }
-  res.json({ success: true });
 };
 
 export const toggleCourierAvailabilityHandler = async (req: Request, res: Response) => {

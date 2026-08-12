@@ -91,7 +91,7 @@ export function ShopPage() {
                     }}
                     className="flex items-center gap-3 p-2 border-b border-gray-100 dark:border-gray-800 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors"
                   >
-                    <img src={p.image} alt={p.name} className="w-10 h-10 object-cover rounded bg-gray-100 dark:bg-gray-800" />
+                    <img src={p.media?.[0]?.url || p.image || 'https://placehold.co/400x500'} alt={p.name} className="w-10 h-10 object-cover rounded bg-gray-100 dark:bg-gray-800" />
                     <div className="flex-1">
                       <div className="text-sm font-bold text-gray-900 dark:text-gray-100 line-clamp-1">{p.name}</div>
                       <div className="text-xs text-gray-500 dark:text-gray-400">₱{p.price.toLocaleString()}</div>
@@ -121,7 +121,7 @@ export function ShopPage() {
         {filteredProducts.map((p) => (
           <div key={p.id} className="flex flex-col border border-gray-200 dark:border-gray-800 rounded-md overflow-hidden bg-white dark:bg-gray-900 cursor-pointer relative shadow-sm group transition-colors">
             <div className="w-full aspect-[4/5] bg-gray-100 dark:bg-gray-800 relative overflow-hidden">
-              <img src={p.image} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+              <img src={p.media?.[0]?.url || p.image || 'https://placehold.co/400x500'} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
               {p.availability !== "in_stock" && (
                 <div className="absolute top-1 left-1 bg-gray-800 text-white text-[9px] font-bold px-1.5 py-0.5 rounded">
                   {p.availability === "out_of_stock" ? "OUT OF STOCK" : "LOW STOCK"}
@@ -129,11 +129,15 @@ export function ShopPage() {
               )}
             </div>
             <div className="p-1.5 flex flex-col flex-1">
-              <div className="text-[11px] font-semibold leading-tight line-clamp-2 text-gray-900 dark:text-gray-100">{p.name}</div>
-              <div className="mt-auto pt-1 flex items-end justify-between">
-                <div>
-                  <div className="text-[12px] font-bold">₱{p.price.toLocaleString()}</div>
-                  {p.compareAtPrice && <div className="text-[10px] text-gray-400 dark:text-gray-500 line-through">₱{p.compareAtPrice.toLocaleString()}</div>}
+              <div className="text-[11px] font-semibold leading-tight line-clamp-1 text-gray-900 dark:text-gray-100 uppercase tracking-tighter">{p.name}</div>
+              {p.subname && <div className="text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase italic line-clamp-1">{p.subname}</div>}
+              
+              <div className="mt-1 flex items-center justify-between border-t border-gray-50 dark:border-gray-800 pt-1.5">
+                <div className="flex flex-col">
+                  <div className="text-[12px] font-black tracking-tighter">₱{p.price.toLocaleString()}</div>
+                  <div className={`text-[8px] font-black uppercase tracking-widest ${p.stockQuantity <= 5 ? 'text-red-500' : 'text-gray-400'}`}>
+                    STOCKS: {p.stockQuantity || 0}
+                  </div>
                 </div>
                 <button 
                   className="w-6 h-6 bg-gray-100 dark:bg-gray-800 flex items-center justify-center rounded text-lg font-bold text-gray-600 dark:text-gray-300 hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-colors"

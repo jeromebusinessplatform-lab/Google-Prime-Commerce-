@@ -21,15 +21,24 @@ export function OriginManager({ origins, onUpdate }: OriginManagerProps) {
     status: 'active' as const
   });
 
+  const [error, setError] = useState('');
+
   const handleSetDefault = async (id: string) => {
     setIsSwitching(true);
+    setError('');
     try {
-      await fetch('/v1/delivery-origins/set-default', {
+      const res = await fetch('/v1/delivery-origins/set-default', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id })
       });
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.error || 'Failed to set default origin');
+      }
       onUpdate();
+    } catch (err: any) {
+      setError(err.message);
     } finally {
       setIsSwitching(false);
     }
@@ -38,12 +47,17 @@ export function OriginManager({ origins, onUpdate }: OriginManagerProps) {
   const handleAddOrigin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setError('');
     try {
-      await fetch('/v1/delivery-origins', {
+      const res = await fetch('/v1/delivery-origins', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newOrigin)
       });
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.error || 'Failed to add origin');
+      }
       setShowAddForm(false);
       setNewOrigin({
         name: '',
@@ -55,6 +69,8 @@ export function OriginManager({ origins, onUpdate }: OriginManagerProps) {
         status: 'active'
       });
       onUpdate();
+    } catch (err: any) {
+      setError(err.message);
     } finally {
       setIsSubmitting(false);
     }
@@ -62,6 +78,13 @@ export function OriginManager({ origins, onUpdate }: OriginManagerProps) {
 
   return (
     <div className="space-y-6">
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex gap-4 items-center text-red-700 animate-in fade-in slide-in-from-top-2">
+           <AlertCircle size={20} />
+           <p className="text-xs font-bold uppercase tracking-widest">{error}</p>
+           <button onClick={() => setError('')} className="ml-auto p-1 hover:bg-red-100 rounded-full transition-all"><X size={16} /></button>
+        </div>
+      )}
       <div className="flex justify-between items-center">
         <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex gap-4 items-start max-w-2xl">
           <div className="p-2 bg-amber-100 text-amber-700 rounded-lg shrink-0">
