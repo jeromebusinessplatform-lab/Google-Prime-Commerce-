@@ -215,8 +215,10 @@ export function OrderFulfillmentPage() {
               phone: found.customerPhone || 'N/A',
               address: found.address || 'In-store'
             },
-            items: (found.items || []).map((i: any) => ({ ...i, qty: i.quantity || 1 })),
-            payment: { method: 'Cash', status: 'VERIFIED', proofUrl: null },
+            items: (found.items || []).map((i: any) => ({ ...i, qty: i.quantity || i.qty || 1 })),
+            payment: found.payment || { method: 'COD', status: 'PENDING' },
+            delivery: found.delivery || { courierName: 'SELF-PICKUP', fee: 0 },
+            receipt: found.receipt,
             total: found.total || 0
           });
         }
@@ -243,7 +245,7 @@ export function OrderFulfillmentPage() {
     return null;
   };
 
-  const nextStatus = getNextStatus(order.status);
+  const nextStatus = order ? getNextStatus(order.status) : null;
 
   const approvePayment = async () => {
     try {

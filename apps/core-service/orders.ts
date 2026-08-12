@@ -83,10 +83,24 @@ export const getOrderHandler = async (req: Request, res: Response) => {
   res.json({ data: { id: doc.id, ...doc.data() } });
 };
 
+const sanitize = (obj: any) => {
+  const result: any = {};
+  Object.keys(obj).forEach(key => {
+    if (obj[key] !== undefined) {
+      if (typeof obj[key] === 'object' && obj[key] !== null && !Array.isArray(obj[key])) {
+        result[key] = sanitize(obj[key]);
+      } else {
+        result[key] = obj[key];
+      }
+    }
+  });
+  return result;
+};
+
 export const updateOrderHandler = async (req: Request, res: Response) => {
   const tenantId = "default";
   const { id } = req.params;
-  const updateData = req.body;
+  const updateData = sanitize(req.body);
   
   await db.collection(`tenants/${tenantId}/orders`).doc(id).update(updateData);
   
@@ -101,7 +115,7 @@ export const createOrderHandler = async (req: Request, res: Response) => {
   
   const orderId = 'ORD-' + Math.floor(1000 + Math.random() * 9000);
   
-  const orderData = {
+  const orderData = sanitize({
     id: orderId,
     customerId,
     customerName: receiverName,
@@ -117,7 +131,7 @@ export const createOrderHandler = async (req: Request, res: Response) => {
     status: 'PENDING',
     date: new Date().toISOString(),
     time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-  };
+  });
   
   await db.collection(`tenants/${tenantId}/orders`).doc(orderId).set(orderData);
   

@@ -61,6 +61,29 @@ export function CheckoutPage() {
   const [isQuoting, setIsQuoting] = useState(false);
   const [paymentTiming, setPaymentTiming] = useState<'checkout' | 'delivery' | null>(null);
 
+  // Define payment options UI before proof upload
+  const PaymentOptions = () => (
+    <div className="space-y-2">
+      <h3 className="text-[10px] uppercase tracking-widest text-gray-400">Payment Method</h3>
+      <div className="grid grid-cols-2 gap-2">
+        <button 
+          onClick={() => setPaymentMethod('card')}
+          className={`p-3 border rounded-lg text-center transition-all ${paymentMethod === 'card' ? 'border-black bg-gray-50' : 'border-gray-200 hover:border-gray-300'}`}
+        >
+          <CreditCard className="mx-auto mb-1" size={16} />
+          <span className="text-[9px] uppercase tracking-widest block">Card</span>
+        </button>
+        <button 
+          onClick={() => setPaymentMethod('wallet')}
+          className={`p-3 border rounded-lg text-center transition-all ${paymentMethod === 'wallet' ? 'border-black bg-gray-50' : 'border-gray-200 hover:border-gray-300'}`}
+        >
+          <Wallet className="mx-auto mb-1" size={16} />
+          <span className="text-[9px] uppercase tracking-widest block">Wallet</span>
+        </button>
+      </div>
+    </div>
+  );
+
   useEffect(() => {
     fetch('/v1/cart')
       .then(r => r.json())
@@ -181,7 +204,7 @@ export function CheckoutPage() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<any>(null);
 
-  if (!session) return <div className="p-8 text-center mt-10  uppercase tracking-tighter animate-pulse">Initializing Prime Checkout...</div>;
+  if (!session || !session.id) return <div className="p-8 text-center mt-10  uppercase tracking-tighter animate-pulse">Initializing Prime Checkout...</div>;
 
   const items = cart?.items || [];
   const subtotal = items.reduce((acc: number, i: any) => acc + (i.price * i.quantity), 0);
