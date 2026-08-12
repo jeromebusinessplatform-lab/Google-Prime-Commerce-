@@ -43,6 +43,16 @@ export const analyzeReceiptHandler = async (req: Request, res: Response) => {
       }
     });
 
+    // Send Telegram Notification for Receipt
+    if (analysis && !analysis.error) {
+      const message = `<b>📄 RECEIPT ANALYZED: ${id}</b>\n\n` +
+                     `💰 <b>Amount:</b> ₱${analysis.amount}\n` +
+                     `🔢 <b>Ref:</b> ${analysis.referenceNumber}\n` +
+                     `👤 <b>Sender:</b> ${analysis.senderName}\n\n` +
+                     `<i>Check admin to verify and fulfill.</i>`;
+      await sendTelegramMessage(message);
+    }
+
     res.json({ data: analysis });
   } catch (e: any) {
     console.error("Receipt analysis error:", e);

@@ -20,18 +20,39 @@ export function CatalogPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
 
+  const [orders, setOrders] = useState<any[]>([]);
+
   const fetchData = async () => {
     try {
-      const [prodRes, catRes] = await Promise.all([
+      const [prodRes, catRes, orderRes] = await Promise.all([
         fetch('/v1/catalog'),
-        fetch('/v1/catalog/categories')
+        fetch('/v1/catalog/categories'),
+        fetch('/v1/orders')
       ]);
-      const [prodData, catData] = await Promise.all([prodRes.json(), catRes.json()]);
+      const [prodData, catData, orderData] = await Promise.all([prodRes.json(), catRes.json(), orderRes.json()]);
       setProducts(prodData.data || []);
       setCategories(catData.data || []);
+      setOrders(orderData.data || []);
     } catch (e) {
       console.error(e);
     }
+  };
+
+  const calculateVelocity = (productId: string) => {
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    
+    const relevantOrders = orders.filter(o => 
+      new Date(o.date) > thirtyDaysAgo && 
+      o.items?.some((i: any) => i.id === productId || i.sku === productId)
+    );
+
+    const totalSold = relevantOrders.reduce((acc, o) => {
+      const item = o.items.find((i: any) => i.id === productId || i.sku === productId);
+      return acc + (item?.qty || 0);
+    }, 0);
+
+    return totalSold / 30; // Daily velocity
   };
 
   useEffect(() => {
@@ -224,6 +245,21 @@ export function CatalogPage() {
                          </span>
                          <span className="text-[8px]  px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 uppercase">{p.stockPolicy.replace('_', ' ')}</span>
                       </div>
+                      {(() => {
+                        const velocity = calculateVelocity(p.id);
+                        const daysRemaining = velocity > 0 ? Math.floor(p.stockQuantity / velocity) : Infinity;
+                        if (velocity > 0) {
+                          return (
+                            <div className="flex items-center gap-1 mt-1">
+                               <div className={`w-1 h-1 rounded-full ${daysRemaining < 7 ? 'bg-red-500' : 'bg-green-500'}`} />
+                               <span className="text-[8px] text-gray-400 uppercase tracking-widest">
+                                 {daysRemaining < 7 ? `Stockout in ${daysRemaining}d` : `${velocity.toFixed(1)} sold/day`}
+                               </span>
+                            </div>
+                          );
+                        }
+                        return null;
+                      })()}
                     </div>
                   </td>
                   <td className="p-4">
