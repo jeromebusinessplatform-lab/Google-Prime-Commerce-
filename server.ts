@@ -1,0 +1,253 @@
+import express from "express";
+import path from "path";
+import fs from "fs/promises";
+import { createServer as createViteServer } from "vite";
+
+async function startServer() {
+  const app = express();
+  const PORT = 3000;
+
+  // Add JSON parsing middleware
+  app.use(express.json());
+
+  // API Routes
+  app.get("/api/health", (req, res) => {
+    res.json({ status: "ok" });
+  });
+
+  app.post("/v1/auth/telegram/exchange", async (req, res, next) => {
+    try {
+      const { telegramExchangeHandler } = await import("./apps/core-service/auth.js");
+      await telegramExchangeHandler(req, res);
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  app.post("/v1/webhooks/telegram/:botKey", async (req, res, next) => {
+    try {
+      const { telegramWebhookHandler } = await import("./apps/core-service/telegram-webhook.js");
+      await telegramWebhookHandler(req, res);
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  app.post("/v1/admin/auth/login", async (req, res, next) => {
+    try {
+      const { adminLoginHandler } = await import("./apps/core-service/auth.js");
+      await adminLoginHandler(req, res);
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  app.get("/v1/catalog", async (req, res, next) => {
+    try {
+      const { getCatalogHandler } = await import("./apps/core-service/catalog.js");
+      await getCatalogHandler(req, res);
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  app.get("/v1/catalog/products/:id", async (req, res, next) => {
+    try {
+      const { getProductHandler } = await import("./apps/core-service/catalog.js");
+      await getProductHandler(req, res);
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  app.post("/v1/catalog/products", async (req, res, next) => {
+    try {
+      const { createProductHandler } = await import("./apps/core-service/catalog.js");
+      await createProductHandler(req, res);
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  app.patch("/v1/catalog/products/:id", async (req, res, next) => {
+    try {
+      const { updateProductHandler } = await import("./apps/core-service/catalog.js");
+      await updateProductHandler(req, res);
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  app.delete("/v1/catalog/products/:id", async (req, res, next) => {
+    try {
+      const { deleteProductHandler } = await import("./apps/core-service/catalog.js");
+      await deleteProductHandler(req, res);
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  app.get("/v1/order-queue/summary", async (req, res, next) => {
+    try {
+      const { getOrderQueueSummaryHandler } = await import("./apps/core-service/order-queue.js");
+      await getOrderQueueSummaryHandler(req, res);
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  app.get("/v1/cart", async (req, res, next) => {
+    try {
+      const { getCartHandler } = await import("./apps/core-service/cart.js");
+      await getCartHandler(req, res);
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  app.patch("/v1/cart/items/:id", async (req, res, next) => {
+    try {
+      const { updateCartItemHandler } = await import("./apps/core-service/cart.js");
+      await updateCartItemHandler(req, res);
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  app.post("/v1/cart/clear", async (req, res, next) => {
+    try {
+      const { clearCartHandler } = await import("./apps/core-service/cart.js");
+      await clearCartHandler(req, res);
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  app.get("/v1/orders", async (req, res, next) => {
+    try {
+      const { getOrdersHandler } = await import("./apps/core-service/orders.js");
+      await getOrdersHandler(req, res);
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  app.post("/v1/orders", async (req, res, next) => {
+    try {
+      const { createOrderHandler } = await import("./apps/core-service/orders.js");
+      await createOrderHandler(req, res);
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  app.get("/v1/location/autocomplete", async (req, res, next) => {
+    try {
+      const { autocompleteHandler } = await import("./apps/core-service/location.js");
+      await autocompleteHandler(req, res);
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  app.get("/v1/location/geocode", async (req, res, next) => {
+    try {
+      const { geocodeHandler } = await import("./apps/core-service/location.js");
+      await geocodeHandler(req, res);
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  app.get("/v1/location/reverse-geocode", async (req, res, next) => {
+    try {
+      const { reverseGeocodeHandler } = await import("./apps/core-service/location.js");
+      await reverseGeocodeHandler(req, res);
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  app.post("/v1/location/route", async (req, res, next) => {
+    try {
+      const { routeHandler } = await import("./apps/core-service/location.js");
+      await routeHandler(req, res);
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  app.post("/v1/checkout/sessions", async (req, res, next) => {
+    try {
+      const { createCheckoutSessionHandler } = await import("./apps/core-service/checkout.js");
+      await createCheckoutSessionHandler(req, res);
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  app.patch("/v1/checkout/sessions/:id", async (req, res, next) => {
+    try {
+      const { updateCheckoutSessionHandler } = await import("./apps/core-service/checkout.js");
+      await updateCheckoutSessionHandler(req, res);
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  // Vite middleware for development
+  if (process.env.NODE_ENV !== "production") {
+    const vite = await createViteServer({
+      server: { middlewareMode: true },
+      appType: "custom",
+    });
+    app.use(vite.middlewares);
+    
+    app.use('/admin', async (req, res, next) => {
+      try {
+        const url = req.originalUrl;
+        let template = await fs.readFile(path.resolve(process.cwd(), 'apps/admin/src/index.html'), 'utf-8');
+        template = await vite.transformIndexHtml(url, template);
+        res.status(200).set({ 'Content-Type': 'text/html' }).end(template);
+      } catch (e) {
+        vite.ssrFixStacktrace(e as Error);
+        next(e);
+      }
+    });
+
+    app.use('*', async (req, res, next) => {
+      if (req.originalUrl.startsWith('/api') || req.originalUrl.startsWith('/v1')) return next();
+      try {
+        const url = req.originalUrl;
+        let template = await fs.readFile(path.resolve(process.cwd(), 'apps/storefront/src/index.html'), 'utf-8');
+        template = await vite.transformIndexHtml(url, template);
+        res.status(200).set({ 'Content-Type': 'text/html' }).end(template);
+      } catch (e) {
+        vite.ssrFixStacktrace(e as Error);
+        next(e);
+      }
+    });
+
+  } else {
+    const distPath = path.join(process.cwd(), 'dist');
+    app.use(express.static(distPath));
+    app.get('/admin*', (req, res) => {
+      res.sendFile(path.join(distPath, 'apps/admin/src/index.html'));
+    });
+    app.get('*', (req, res) => {
+      if (req.originalUrl.startsWith('/api') || req.originalUrl.startsWith('/v1')) return res.status(404).end();
+      res.sendFile(path.join(distPath, 'apps/storefront/src/index.html'));
+    });
+  }
+
+  app.use(async (err: any, req: any, res: any, next: any) => {
+    const { errorHandler } = await import("./apps/core-service/error-handler.js");
+    errorHandler(err, req, res, next);
+  });
+
+  app.listen(PORT, "0.0.0.0", () => {
+    console.log(`Server running on http://0.0.0.0:${PORT}`);
+  });
+}
+
+startServer();
