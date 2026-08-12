@@ -3,6 +3,7 @@ import { CheckCircle2, Search } from 'lucide-react';
 
 export function ShopPage() {
   const [products, setProducts] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [toast, setToast] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
@@ -10,9 +11,14 @@ export function ShopPage() {
   const searchRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    setIsLoading(true);
     fetch('/v1/catalog')
       .then(r => r.json())
-      .then(d => setProducts(d.data || []));
+      .then(d => {
+        setProducts(d.data || []);
+        setIsLoading(false);
+      })
+      .catch(() => setIsLoading(false));
   }, []);
 
   useEffect(() => {
@@ -118,7 +124,21 @@ export function ShopPage() {
       </div>
 
       <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2 mt-3">
-        {filteredProducts.map((p) => (
+        {isLoading ? (
+          Array.from({ length: 15 }).map((_, i) => (
+            <div key={i} className="flex flex-col border border-gray-100 dark:border-gray-900 rounded-md overflow-hidden bg-white dark:bg-gray-950 animate-pulse">
+              <div className="w-full aspect-[4/5] bg-gray-100 dark:bg-gray-900" />
+              <div className="p-1.5 space-y-1.5">
+                <div className="h-3 bg-gray-100 dark:bg-gray-900 rounded w-3/4" />
+                <div className="h-2 bg-gray-50 dark:bg-gray-900 rounded w-1/2" />
+                <div className="pt-2 flex justify-between items-center">
+                  <div className="h-3 bg-gray-100 dark:bg-gray-900 rounded w-1/3" />
+                  <div className="w-6 h-6 bg-gray-100 dark:bg-gray-900 rounded" />
+                </div>
+              </div>
+            </div>
+          ))
+        ) : filteredProducts.map((p) => (
           <div key={p.id} className="flex flex-col border border-gray-200 dark:border-gray-800 rounded-md overflow-hidden bg-white dark:bg-gray-900 cursor-pointer relative shadow-sm group transition-colors">
             <div className="w-full aspect-[4/5] bg-gray-100 dark:bg-gray-800 relative overflow-hidden">
               <img src={p.media?.[0]?.url || p.image || 'https://placehold.co/400x500'} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />

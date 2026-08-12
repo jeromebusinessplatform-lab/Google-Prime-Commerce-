@@ -1,11 +1,134 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ChevronLeft, PackageCheck, Truck, CheckCircle2, Receipt, AlertCircle } from 'lucide-react';
+import { ChevronLeft, PackageCheck, Truck, CheckCircle2, Receipt, AlertCircle, Printer, X } from 'lucide-react';
+
+interface PackingSlipModalProps {
+  order: any;
+  onClose: () => void;
+}
+
+function PackingSlipModal({ order, onClose }: PackingSlipModalProps) {
+  const handlePrint = () => {
+    window.print();
+  };
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
+      <div className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden animate-in zoom-in-95 duration-300">
+        <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+          <div className="flex items-center gap-2">
+            <Printer size={18} className="text-gray-400" />
+            <h3 className="font-black text-[10px] uppercase tracking-widest text-gray-500">Packing Slip Preview</h3>
+          </div>
+          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+            <X size={20} />
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-8 print:p-0" id="printable-slip">
+          <div className="border-4 border-black p-6 space-y-8">
+            <div className="flex justify-between items-start">
+              <div className="space-y-1">
+                <div className="text-2xl font-black tracking-tighter">PACKING SLIP</div>
+                <div className="text-xs font-bold text-gray-500">ORDER #{order.id}</div>
+              </div>
+              <div className="text-right space-y-1">
+                <div className="text-xs font-black uppercase tracking-widest">DATE</div>
+                <div className="text-sm font-bold">{new Date(order.date).toLocaleDateString()}</div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-8 border-y-2 border-black py-6">
+              <div className="space-y-2">
+                <div className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Ship To</div>
+                <div className="text-sm font-black uppercase leading-tight">{order.customer.name}</div>
+                <div className="text-xs font-medium text-gray-600 uppercase leading-relaxed">{order.customer.address}</div>
+                <div className="text-xs font-bold">{order.customer.phone}</div>
+              </div>
+              <div className="space-y-2">
+                <div className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Order Status</div>
+                <div className="inline-block px-3 py-1 bg-black text-white text-[10px] font-black uppercase tracking-widest">
+                  {order.status}
+                </div>
+                <div className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 pt-2">Payment</div>
+                <div className="text-xs font-bold uppercase">{order.payment.method} — {order.payment.status}</div>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Manifest</div>
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b-2 border-black text-left text-[10px] font-black uppercase tracking-widest">
+                    <th className="pb-2">Description</th>
+                    <th className="pb-2 text-center w-20">Qty</th>
+                    <th className="pb-2 text-right w-32">Total</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {order.items.map((item: any) => (
+                    <tr key={item.id}>
+                      <td className="py-4">
+                        <div className="text-xs font-black uppercase">{item.name}</div>
+                        <div className="text-[10px] text-gray-400 font-bold uppercase italic">Unit Price: ₱{item.price.toLocaleString()}</div>
+                      </td>
+                      <td className="py-4 text-center text-sm font-black">{item.qty}</td>
+                      <td className="py-4 text-right text-sm font-black">₱{(item.price * item.qty).toLocaleString()}</td>
+                    </tr>
+                  ))}
+                </tbody>
+                <tfoot>
+                  <tr className="border-t-2 border-black">
+                    <td colSpan={2} className="py-4 text-right text-[10px] font-black uppercase tracking-widest">Total Value</td>
+                    <td className="py-4 text-right text-lg font-black tracking-tighter">₱{order.total.toLocaleString()}</td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+
+            <div className="pt-8 border-t border-dashed border-gray-300">
+              <div className="text-[10px] font-black uppercase tracking-widest text-center text-gray-400 italic">
+                Thank you for your business. For support, contact logistics@example.com
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="p-6 border-t border-gray-100 bg-gray-50 flex justify-end gap-3">
+          <button onClick={onClose} className="px-6 py-2.5 bg-white border-2 border-gray-200 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-gray-50 transition-all">
+            Cancel
+          </button>
+          <button onClick={handlePrint} className="px-8 py-2.5 bg-black text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-gray-800 transition-all shadow-xl shadow-black/20 flex items-center gap-2">
+            <Printer size={14} /> Send to Printer
+          </button>
+        </div>
+      </div>
+      
+      <style>{`
+        @media print {
+          body * {
+            visibility: hidden;
+          }
+          #printable-slip, #printable-slip * {
+            visibility: visible;
+          }
+          #printable-slip {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+          }
+        }
+      `}</style>
+    </div>
+  );
+}
 
 export function OrderFulfillmentPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [order, setOrder] = useState<any>(null);
+  const [showPrintModal, setShowPrintModal] = useState(false);
 
   useEffect(() => {
     fetch('/v1/orders')
@@ -75,7 +198,13 @@ export function OrderFulfillmentPage() {
             <div className="text-xs text-gray-500">{new Date(order.date).toLocaleString()}</div>
           </div>
         </div>
-        <div>
+        <div className="flex items-center gap-2">
+          <button 
+            onClick={() => setShowPrintModal(true)}
+            className="flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 rounded text-xs font-bold hover:bg-gray-50 transition-colors"
+          >
+            <Printer size={16} /> PRINT SLIP
+          </button>
           <span className={`inline-flex items-center px-3 py-1 rounded text-xs font-bold uppercase ${
             order.status === 'QUEUED' ? 'bg-yellow-100 text-yellow-800' :
             order.status === 'PROCESSING' ? 'bg-blue-100 text-blue-800' :
@@ -86,6 +215,8 @@ export function OrderFulfillmentPage() {
           </span>
         </div>
       </div>
+
+      {showPrintModal && <PackingSlipModal order={order} onClose={() => setShowPrintModal(false)} />}
 
       <div className="p-4 max-w-6xl mx-auto w-full grid grid-cols-1 md:grid-cols-3 gap-4 pb-[100px]">
         <div className="md:col-span-2 space-y-4">

@@ -21,6 +21,9 @@ interface CourierSelectorProps {
   isQuoting: boolean;
   paymentTiming: 'checkout' | 'delivery' | null;
   onPaymentTimingSelect: (timing: 'checkout' | 'delivery') => void;
+  error?: string;
+  addressSelected?: boolean;
+  addressConfirmed?: boolean;
 }
 
 export function CourierSelector({ 
@@ -29,7 +32,10 @@ export function CourierSelector({
   onSelect, 
   isQuoting,
   paymentTiming,
-  onPaymentTimingSelect
+  onPaymentTimingSelect,
+  error,
+  addressSelected,
+  addressConfirmed
 }: CourierSelectorProps) {
   return (
     <section className="space-y-4">
@@ -74,10 +80,17 @@ export function CourierSelector({
         {isQuoting && (
           <div className="col-span-4 py-8 text-center text-[10px] font-black uppercase tracking-[0.2em] text-gray-300 animate-pulse">Calculating Road Route...</div>
         )}
-        {!isQuoting && quotes.length === 0 && (
+        {error && (
+          <div className="col-span-4 p-4 bg-red-50 border-2 border-red-100 rounded-xl text-red-600 text-center">
+             <div className="text-[10px] font-black uppercase tracking-widest">{error}</div>
+          </div>
+        )}
+        {!isQuoting && !error && quotes.length === 0 && (
           <div className="col-span-4 p-8 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200 text-center">
              <Truck className="mx-auto text-gray-300 mb-2" size={24} />
-             <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Select address to view rates</p>
+             <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest">
+               {addressSelected && !addressConfirmed ? 'Confirm address above to view rates' : 'Select address to view rates'}
+             </p>
           </div>
         )}
       </div>

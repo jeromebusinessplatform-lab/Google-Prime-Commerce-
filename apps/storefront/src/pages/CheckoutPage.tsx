@@ -105,10 +105,13 @@ export function CheckoutPage() {
     }
   }, [addressSearch, selectedAddress]);
 
+  const [quoteError, setQuoteError] = useState('');
+
   // Delivery Quoting
   useEffect(() => {
     if (addressConfirmed && selectedCoordinates) {
       setIsQuoting(true);
+      setQuoteError('');
       fetch('/v1/delivery-quote', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -118,9 +121,17 @@ export function CheckoutPage() {
           paymentTiming 
         })
       })
-        .then(r => r.json())
+        .then(r => {
+          if (!r.ok) return r.json().then(d => { throw new Error(d.error || 'Failed to fetch quotes'); });
+          return r.json();
+        })
         .then(d => {
           setDeliveryQuotes(d.data || []);
+          setIsQuoting(false);
+        })
+        .catch(err => {
+          console.error(err);
+          setQuoteError(err.message);
           setIsQuoting(false);
         });
     }
@@ -369,6 +380,9 @@ export function CheckoutPage() {
           isQuoting={isQuoting}
           paymentTiming={paymentTiming}
           onPaymentTimingSelect={setPaymentTiming}
+          error={quoteError}
+          addressSelected={!!selectedAddress}
+          addressConfirmed={addressConfirmed}
         />
 
         {/* Contact Section */}

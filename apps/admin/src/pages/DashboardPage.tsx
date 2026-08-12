@@ -4,11 +4,17 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 
 export function DashboardPage() {
   const [orders, setOrders] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    setIsLoading(true);
     fetch('/v1/orders')
       .then(r => r.json())
-      .then(d => setOrders(d.data || []));
+      .then(d => {
+        setOrders(d.data || []);
+        setIsLoading(false);
+      })
+      .catch(() => setIsLoading(false));
   }, []);
 
   const totalSales = orders.reduce((acc, o) => acc + (o.total || 0), 0);
@@ -62,10 +68,18 @@ export function DashboardPage() {
       <h2 className="text-base font-bold mb-4">Business Overview</h2>
       
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-        {stats.map((s, i) => {
+        {isLoading ? (
+          Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="bg-white dark:bg-gray-900 p-3 rounded-md border border-gray-100 dark:border-gray-800 shadow-xs flex flex-col items-center justify-center text-center py-4 animate-pulse">
+              <div className="w-5 h-5 bg-gray-100 dark:bg-gray-800 rounded-full mb-2" />
+              <div className="h-5 bg-gray-100 dark:bg-gray-800 rounded w-2/3 mb-1" />
+              <div className="h-2 bg-gray-50 dark:bg-gray-800 rounded w-1/2" />
+            </div>
+          ))
+        ) : stats.map((s, i) => {
           const Icon = s.icon;
           return (
-            <div key={i} className="bg-white dark:bg-gray-900 p-3 rounded-md border border-gray-200 dark:border-gray-800 shadow-xs flex flex-col items-center justify-center text-center py-4 transition-colors">
+            <div key={i} className="bg-white dark:bg-gray-900 p-3 rounded-md border border-gray-200 dark:border-gray-800 shadow-xs flex flex-col items-center justify-center text-center py-4 transition-colors text-gray-900 dark:text-gray-100">
               <Icon size={20} className="text-gray-400 dark:text-gray-500 mb-1" />
               <div className="text-lg font-bold tracking-tight">{s.value}</div>
               <div className="text-[11px] text-gray-500 dark:text-gray-400 uppercase font-semibold mt-0.5">{s.label}</div>
@@ -78,30 +92,48 @@ export function DashboardPage() {
         <div className="bg-white dark:bg-gray-900 p-4 rounded-md border border-gray-200 dark:border-gray-800 shadow-xs min-h-[260px] flex flex-col transition-colors">
           <h3 className="font-bold text-xs uppercase tracking-wider mb-3 text-gray-600 dark:text-gray-400">SALES TREND</h3>
           <div className="flex-1 w-full h-[200px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#000000" stopOpacity={0.1}/>
-                    <stop offset="95%" stopColor="#000000" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#888' }} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#888' }} tickFormatter={(val) => `₱${val}`} />
-                <Tooltip 
-                  contentStyle={{ borderRadius: '4px', border: '1px solid #eaeaea', fontSize: '12px', fontWeight: 'bold' }}
-                  formatter={(value: number) => [`₱${value.toLocaleString()}`, 'Sales']}
-                />
-                <Area type="monotone" dataKey="sales" stroke="#000000" strokeWidth={2} fillOpacity={1} fill="url(#colorSales)" />
-              </AreaChart>
-            </ResponsiveContainer>
+            {isLoading ? (
+              <div className="w-full h-full bg-gray-50 dark:bg-gray-900 rounded animate-pulse flex items-center justify-center">
+                 <div className="w-[80%] h-[60%] border-b border-l border-gray-200 dark:border-gray-800 relative">
+                   <div className="absolute inset-0 bg-gradient-to-t from-gray-100/50 to-transparent dark:from-gray-800/50" />
+                 </div>
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#000000" stopOpacity={0.1}/>
+                      <stop offset="95%" stopColor="#000000" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#888' }} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#888' }} tickFormatter={(val) => `₱${val}`} />
+                  <Tooltip 
+                    contentStyle={{ borderRadius: '4px', border: '1px solid #eaeaea', fontSize: '12px', fontWeight: 'bold' }}
+                    formatter={(value: number) => [`₱${value.toLocaleString()}`, 'Sales']}
+                  />
+                  <Area type="monotone" dataKey="sales" stroke="#000000" strokeWidth={2} fillOpacity={1} fill="url(#colorSales)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            )}
           </div>
         </div>
         <div className="bg-white dark:bg-gray-900 p-4 rounded-md border border-gray-200 dark:border-gray-800 shadow-xs min-h-[260px] transition-colors">
           <h3 className="font-bold text-xs uppercase tracking-wider mb-3 text-gray-600 dark:text-gray-400">RECENT ACTIVITY</h3>
           <div className="space-y-3">
-            {orders.slice(0, 5).map((o, i) => (
+            {isLoading ? (
+              Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="flex gap-3 items-start border-b border-gray-100 dark:border-gray-800 pb-2.5 last:border-0 animate-pulse">
+                  <div className="w-7 h-7 rounded-full bg-gray-100 dark:bg-gray-800 shrink-0" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-3 bg-gray-100 dark:bg-gray-800 rounded w-3/4" />
+                    <div className="h-2 bg-gray-50 dark:bg-gray-900 rounded w-1/4" />
+                  </div>
+                </div>
+              ))
+            ) : orders.slice(0, 5).map((o, i) => (
               <div key={o.id} className="flex gap-3 items-start border-b border-gray-100 dark:border-gray-800 pb-2.5 last:border-0">
                 <div className="w-7 h-7 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0 text-blue-600 dark:text-blue-400 font-bold text-xs">
                   {i + 1}

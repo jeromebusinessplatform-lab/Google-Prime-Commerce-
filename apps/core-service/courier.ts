@@ -175,61 +175,103 @@ export const toggleCourierAvailabilityHandler = async (req: Request, res: Respon
 };
 
 export const getDeliveryQuoteHandler = async (req: Request, res: Response) => {
-  const tenantId = DEFAULT_TENANT;
-  const { destinationLat, destinationLng, paymentTiming } = req.body;
-  
-  // 1. Get default origin
-  const originsRef = db.collection(`tenants/${tenantId}/delivery_origins`);
-  const originQuery = await originsRef.where("isDefault", "==", true).limit(1).get();
-  if (originQuery.empty) return res.status(500).json({ error: "No default delivery origin configured" });
-  
-  const origin = originQuery.docs[0].data() as any;
-  const originId = originQuery.docs[0].id;
-  
-  // 2. Get available couriers
-  const couriersSnapshot = await db.collection(`tenants/${tenantId}/couriers`).where("status", "==", "available").get();
-  const couriers = couriersSnapshot.docs.map((d: any) => ({ id: d.id, ...d.data() }));
-  
-  // 3. For each courier, get road distance via Geoapify (Mocked for now, will integrate Geoapify properly in geoapify.ts)
-  // Authoritative distance must come from Geoapify Routing
-  const quotes = await Promise.all(couriers.map(async (courier) => {
-    // This should call Geoapify Routing API
-    // const route = await getRoute(origin.lat, origin.lng, destinationLat, destinationLng, courier.routingMode);
-    const routeDistanceMeters = 5000; // Mock 5km
+  try {
+    const tenantId = DEFAULT_TENANT;
+    const { destinationLat, destinationLng, paymentTiming } = req.body;
     
-    const isNight = false; // logic to check based on tenant timezone
+    if (!destinationLat || !destinationLng) {
+      return res.status(400).json({ error: "Destination coordinates are required" });
+    }
+
+    // 1. Get origin (prefer default, fallback to first)
+    const originsRef = db.collection(`tenants/${tenantId}/delivery_origins`);
+    let originDoc = null;
     
-    const feeResult = calculateDeliveryFee(routeDistanceMeters, courier.config, isNight);
+    const defaultOriginQuery = await originsRef.where("isDefault", "==", true).limit(1).get();
+    if (!defaultOriginQuery.empty) {
+      originDoc = defaultOriginQuery.docs[0];
+    } else {
+      const allOrigins = await originsRef.limit(1).get();
+      if (allOrigins.empty) return res.status(500).json({ error: "No delivery origins configured. Please add an origin in Admin -> Courier Management." });
+      originDoc = allOrigins.docs[0];
+    }
     
-    return {
-      courierId: courier.id,
-      courierName: courier.name,
-      logoUrl: courier.logoUrl,
-      configVersion: courier.config.version,
-      origin: {
-        id: originId,
-        name: origin.name,
-        lat: origin.lat,
-        lng: origin.lng,
-        version: origin.version
-      },
-      route: {
-        mode: courier.routingMode,
-        distanceMeters: routeDistanceMeters
-      },
-      components: {
-        baseFareMinor: feeResult.baseFareMinor,
-        excessChargeMinor: feeResult.excessChargeMinor,
-        platformFeeMinor: feeResult.platformFeeMinor,
-        distanceSurchargeMinor: feeResult.distanceSurchargeMinor,
-        nightFeeMinor: feeResult.nightFeeMinor
-      },
-      totalMinor: feeResult.totalMinor,
-      currency: "PHP",
-      paymentTiming: paymentTiming || 'checkout',
-      expiresAt: new Date(Date.now() + 15 * 60000).toISOString()
-    };
-  }));
-  
-  res.json({ data: quotes });
+    const origin = originDoc.data() as any;
+    const originId = originDoc.id;
+    
+    // 2. Get available couriers
+    const couriersSnapshot = await db.collection(`tenants/${tenantId}/couriers`).where("status", "==", "available").get();
+    const couriers = couriersSnapshot.docs.map((d: any) => ({ id: d.id, ...d.data() }));
+    
+    if (couriers.length === 0) {
+      return res.json({ data: [] });
+    }
+
+    const GEOAPIFY_API_KEY = process.env.GEOAPIFY_API_KEY;
+
+    // 3. Calculate quotes for each courier
+    const quotes = await Promise.all(couriers.map(async (courier) => {
+      let routeDistanceMeters = 5000; // Mock 5km default
+      let durationSeconds = 900; // Mock 15 mins
+
+      if (GEOAPIFY_API_KEY) {
+        try {
+          const mode = courier.routingMode || 'motorcycle';
+          const url = `https://api.geoapify.com/v1/routing?waypoints=${origin.lat},${origin.lng}|${destinationLat},${destinationLng}&mode=${mode}&apiKey=${GEOAPIFY_API_KEY}`;
+          const routeRes = await fetch(url);
+          const routeData = await routeRes.json() as any;
+          const feature = routeData.features?.[0];
+          if (feature) {
+            routeDistanceMeters = feature.properties.distance;
+            durationSeconds = feature.properties.time;
+          }
+        } catch (e) {
+          console.error("Routing error for courier", courier.id, e);
+        }
+      }
+      
+      const isNight = false; // logic to check based on tenant timezone can be added here
+      
+      const feeResult = calculateDeliveryFee(routeDistanceMeters, courier.config, isNight);
+      
+      const quoteId = `quote_${Date.now()}_${courier.id}`;
+      
+      return {
+        id: quoteId, // Add ID for the quote session
+        courierId: courier.id,
+        courierName: courier.name,
+        logoUrl: courier.logoUrl,
+        configVersion: courier.config?.version || 1,
+        status: courier.status,
+        origin: {
+          id: originId,
+          name: origin.name,
+          lat: origin.lat,
+          lng: origin.lng,
+          version: origin.version || 1
+        },
+        route: {
+          mode: courier.routingMode || 'motorcycle',
+          distanceMeters: routeDistanceMeters,
+          durationSeconds: durationSeconds
+        },
+        components: {
+          baseFareMinor: feeResult.baseFareMinor,
+          excessChargeMinor: feeResult.excessChargeMinor,
+          platformFeeMinor: feeResult.platformFeeMinor,
+          distanceSurchargeMinor: feeResult.distanceSurchargeMinor,
+          nightFeeMinor: feeResult.nightFeeMinor
+        },
+        totalMinor: feeResult.totalMinor,
+        currency: "PHP",
+        paymentTiming: paymentTiming || 'checkout',
+        expiresAt: new Date(Date.now() + 15 * 60000).toISOString()
+      };
+    }));
+    
+    res.json({ data: quotes });
+  } catch (err: any) {
+    console.error("Delivery quote error:", err);
+    res.status(500).json({ error: err.message });
+  }
 };
