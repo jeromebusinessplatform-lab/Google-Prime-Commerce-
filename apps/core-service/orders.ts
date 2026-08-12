@@ -37,7 +37,8 @@ export const updateOrderHandler = async (req: Request, res: Response) => {
 
 export const createOrderHandler = async (req: Request, res: Response) => {
   const tenantId = "default";
-  const customerId = req.headers["x-customer-id"] || "preview-user-id";
+  const customerIdRaw = req.headers["x-customer-id"] || "preview-user-id";
+  const customerId = Array.isArray(customerIdRaw) ? customerIdRaw[0] : customerIdRaw;
   const { items, receiverName, receiverPhone, address, totals } = req.body;
   
   const orderId = 'ORD-' + Math.floor(1000 + Math.random() * 9000);

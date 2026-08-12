@@ -150,6 +150,145 @@ async function startServer() {
     }
   });
 
+  // Identity & Customer
+  app.get("/v1/customer", async (req, res, next) => {
+    try {
+      const { getCustomerHandler } = await import("./apps/core-service/identity.js");
+      await getCustomerHandler(req, res);
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  app.patch("/v1/customer/:id", async (req, res, next) => {
+    try {
+      const { updateCustomerHandler } = await import("./apps/core-service/identity.js");
+      await updateCustomerHandler(req, res);
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  // Delivery Origins
+  app.get("/v1/delivery-origins", async (req, res, next) => {
+    try {
+      const { getDeliveryOriginsHandler } = await import("./apps/core-service/courier.js");
+      await getDeliveryOriginsHandler(req, res);
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  app.post("/v1/delivery-origins", async (req, res, next) => {
+    try {
+      const { upsertDeliveryOriginHandler } = await import("./apps/core-service/courier.js");
+      await upsertDeliveryOriginHandler(req, res);
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  app.patch("/v1/delivery-origins/:id", async (req, res, next) => {
+    try {
+      const { upsertDeliveryOriginHandler } = await import("./apps/core-service/courier.js");
+      await upsertDeliveryOriginHandler(req, res);
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  app.post("/v1/delivery-origins/set-default", async (req, res, next) => {
+    try {
+      const { setDefaultDeliveryOriginHandler } = await import("./apps/core-service/courier.js");
+      await setDefaultDeliveryOriginHandler(req, res);
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  // Couriers
+  app.get("/v1/couriers", async (req, res, next) => {
+    try {
+      const { getCouriersHandler } = await import("./apps/core-service/courier.js");
+      await getCouriersHandler(req, res);
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  app.post("/v1/couriers", async (req, res, next) => {
+    try {
+      const { upsertCourierHandler } = await import("./apps/core-service/courier.js");
+      await upsertCourierHandler(req, res);
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  app.patch("/v1/couriers/:id", async (req, res, next) => {
+    try {
+      const { upsertCourierHandler } = await import("./apps/core-service/courier.js");
+      await upsertCourierHandler(req, res);
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  app.post("/v1/couriers/:id/toggle", async (req, res, next) => {
+    try {
+      const { toggleCourierAvailabilityHandler } = await import("./apps/core-service/courier.js");
+      await toggleCourierAvailabilityHandler(req, res);
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  app.post("/v1/delivery-quote", async (req, res, next) => {
+    try {
+      const { getDeliveryQuoteHandler } = await import("./apps/core-service/courier.js");
+      await getDeliveryQuoteHandler(req, res);
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  // Geoapify Proxy
+  app.post("/v1/geo/autocomplete", async (req, res, next) => {
+    try {
+      const { autocompleteHandler } = await import("./apps/core-service/geoapify.js");
+      await autocompleteHandler(req, res);
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  app.post("/v1/geo/geocode", async (req, res, next) => {
+    try {
+      const { geocodeHandler } = await import("./apps/core-service/geoapify.js");
+      await geocodeHandler(req, res);
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  app.post("/v1/geo/reverse-geocode", async (req, res, next) => {
+    try {
+      const { reverseGeocodeHandler } = await import("./apps/core-service/geoapify.js");
+      await reverseGeocodeHandler(req, res);
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  app.post("/v1/geo/routing", async (req, res, next) => {
+    try {
+      const { routingHandler } = await import("./apps/core-service/geoapify.js");
+      await routingHandler(req, res);
+    } catch (e) {
+      next(e);
+    }
+  });
+
   app.get("/v1/order-queue/summary", async (req, res, next) => {
     try {
       const { getOrderQueueSummaryHandler } = await import("./apps/core-service/order-queue.js");

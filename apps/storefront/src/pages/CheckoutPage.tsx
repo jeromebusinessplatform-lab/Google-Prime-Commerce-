@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, MapPin, User, Tag, ShieldCheck, X, Navigation, CreditCard, Wallet } from 'lucide-react';
+import { ChevronLeft, MapPin, User, Tag, ShieldCheck, X, Navigation, CreditCard, Wallet, Truck, Clock, Info, CheckCircle2 } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -54,6 +54,10 @@ export function CheckoutPage() {
   const [referralCode, setReferralCode] = useState("");
 
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'wallet'>('card');
+  const [deliveryQuotes, setDeliveryQuotes] = useState<any[]>([]);
+  const [selectedQuote, setSelectedQuote] = useState<any>(null);
+  const [isQuoting, setIsQuoting] = useState(false);
+  const [paymentTiming, setPaymentTiming] = useState<'checkout' | 'delivery' | null>(null);
 
   useEffect(() => {
     fetch('/v1/cart')
@@ -73,10 +77,11 @@ export function CheckoutPage() {
     }
   }, [cart]);
 
+  // Geoapify Autocomplete via Proxy
   useEffect(() => {
     if (addressSearch.length > 2) {
       if (selectedAddress) {
-        const selectedStr = selectedAddress.formatted || selectedAddress.properties?.formatted || '';
+        const selectedStr = selectedAddress.properties?.formatted || selectedAddress.formatted || '';
         if (addressSearch === selectedStr) {
           setAddressSuggestions([]);
           return;
@@ -84,9 +89,13 @@ export function CheckoutPage() {
       }
       
       const delay = setTimeout(() => {
-        fetch(`/v1/location/autocomplete?q=${encodeURIComponent(addressSearch)}`)
+        fetch('/v1/geo/autocomplete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: addressSearch, proximity: selectedCoordinates })
+        })
           .then(r => r.json())
-          .then(d => setAddressSuggestions(d.results || []));
+          .then(d => setAddressSuggestions(d.data || []));
       }, 300);
       return () => clearTimeout(delay);
     } else {
@@ -94,13 +103,35 @@ export function CheckoutPage() {
     }
   }, [addressSearch, selectedAddress]);
 
+  // Delivery Quoting
+  useEffect(() => {
+    if (selectedAddress && selectedCoordinates) {
+      setIsQuoting(true);
+      fetch('/v1/delivery-quote', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          destinationLat: selectedCoordinates.lat, 
+          destinationLng: selectedCoordinates.lng,
+          paymentTiming 
+        })
+      })
+        .then(r => r.json())
+        .then(d => {
+          setDeliveryQuotes(d.data || []);
+          setIsQuoting(false);
+        });
+    }
+  }, [selectedCoordinates, selectedAddress, paymentTiming]);
+
   const selectAddress = (suggestion: any) => {
+    const props = suggestion.properties || suggestion;
     setSelectedAddress(suggestion);
-    setAddressSearch(suggestion.formatted || suggestion.properties?.formatted || '');
+    setAddressSearch(props.formatted);
     setAddressSuggestions([]);
 
-    const lat = suggestion.properties?.lat || suggestion.lat;
-    const lng = suggestion.properties?.lon || suggestion.lon;
+    const lat = props.lat;
+    const lng = props.lon || props.lng;
     if (lat && lng) {
       setSelectedCoordinates({ lat: Number(lat), lng: Number(lng) });
     }
@@ -110,15 +141,31 @@ export function CheckoutPage() {
     }, 100);
   };
 
-  if (!session) return <div className="p-3 text-center mt-10">Initializing secure checkout...</div>;
+  const handleReverseGeocode = async (lat: number, lng: number) => {
+    try {
+      const res = await fetch('/v1/geo/reverse-geocode', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lat, lng })
+      });
+      const data = await res.json();
+      if (data.data) {
+        selectAddress(data.data);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const [appliedPromo, setAppliedPromo] = useState<any>(null);
+  const [promoError, setPromoError] = useState('');
+
+  if (!session) return <div className="p-8 text-center mt-10 font-black italic uppercase tracking-tighter animate-pulse">Initializing Prime Checkout...</div>;
 
   const items = cart?.items || [];
   const subtotal = items.reduce((acc: number, i: any) => acc + (i.price * i.quantity), 0);
-  const tax = subtotal * 0.12; // 12% VAT
-  const deliveryFee = 50; // Mock delivery fee
-  
-  const [appliedPromo, setAppliedPromo] = useState<any>(null);
-  const [promoError, setPromoError] = useState('');
+  const tax = subtotal * 0.12; 
+  const deliveryFee = selectedQuote ? selectedQuote.totalMinor / 100 : 0;
   
   const handleApplyPromo = async () => {
     if (!promoCode) return;
@@ -152,10 +199,12 @@ export function CheckoutPage() {
     }
   }
 
-  const total = Math.max(0, subtotal + tax + deliveryFee - discount);
+  const amountDueNow = Math.max(0, subtotal + tax + (paymentTiming === 'checkout' ? deliveryFee : 0) - discount);
+  const amountDueOnDelivery = paymentTiming === 'delivery' ? deliveryFee : 0;
+  const totalOrderValue = subtotal + tax + deliveryFee - discount;
 
   const handlePlaceOrder = async () => {
-    if (!items.length) return;
+    if (!items.length || !selectedQuote || !paymentTiming) return;
     try {
       const res = await fetch('/v1/orders', {
         method: 'POST',
@@ -165,8 +214,13 @@ export function CheckoutPage() {
           receiverName,
           receiverPhone,
           paymentMethod,
-          address: selectedAddress ? (selectedAddress.formatted || selectedAddress.properties?.formatted || addressSearch) : addressSearch,
-          totals: { subtotal, tax, deliveryFee, total }
+          paymentTiming,
+          selectedQuoteId: selectedQuote.id,
+          address: selectedAddress ? (selectedAddress.properties?.formatted || selectedAddress.formatted) : addressSearch,
+          lat: selectedCoordinates.lat,
+          lng: selectedCoordinates.lng,
+          floorUnit: unitInstructions,
+          totals: { subtotal, tax, deliveryFee, total: totalOrderValue, amountDueNow, amountDueOnDelivery }
         })
       });
       const data = await res.json();
@@ -178,285 +232,288 @@ export function CheckoutPage() {
   };
 
   return (
-    <div className="bg-gray-50 min-h-screen">
-      {/* Checkout Header - overrides global header */}
-      <div className="fixed top-0 left-0 right-0 h-[64px] bg-white border-b border-gray-200 z-50 flex items-center px-4 pt-[env(safe-area-inset-top,0px)]">
-        <button onClick={() => navigate('/cart')} className="p-2 -ml-2 text-gray-900 hover:bg-gray-100 rounded-full transition-colors">
-          <ChevronLeft size={28} />
+    <div className="bg-white min-h-screen pb-40">
+      {/* Checkout Header */}
+      <div className="fixed top-0 left-0 right-0 h-[64px] bg-white border-b border-gray-100 z-[100] flex items-center px-4 pt-[env(safe-area-inset-top,0px)]">
+        <button onClick={() => navigate('/cart')} className="p-2 -ml-2 text-gray-900 hover:bg-gray-50 rounded-full transition-all">
+          <ChevronLeft size={24} />
         </button>
-        <div className="font-bold text-sm flex-1 text-center mr-6 flex items-center justify-center gap-2">
-          <ShieldCheck size={20} className="text-green-700" />
-          SECURE CHECKOUT
+        <div className="font-black text-xs flex-1 text-center mr-6 flex items-center justify-center gap-2 italic uppercase tracking-tighter">
+          <ShieldCheck size={18} className="text-black" />
+          Secure Checkout
         </div>
       </div>
 
-      <div className="pt-[calc(64px+env(safe-area-inset-top,0px))] pb-[140px] max-w-2xl mx-auto px-4 md:px-6">
+      <div className="pt-[calc(64px+env(safe-area-inset-top,0px))] max-w-lg mx-auto p-4 md:p-6 space-y-8 animate-in fade-in duration-500">
         
-        {/* Identity & Delivery Box - Flat Layout */}
-        <div className="py-2">
-          <h2 className="text-sm font-bold mb-3 flex items-center gap-2"><MapPin size={24} /> Delivery Address</h2>
+        {/* Destination Section */}
+        <section className="space-y-4">
+          <h2 className="text-[10px] font-black uppercase tracking-widest text-gray-400 flex items-center gap-2">
+            <MapPin size={12} /> 01. Destination
+          </h2>
           
-          <div className="space-y-6">
-            <div className="relative">
-              <input 
-                type="text" 
-                placeholder="Search street, building, or village" 
-                value={addressSearch}
-                onChange={e => setAddressSearch(e.target.value)}
-                className="w-full border border-gray-300 rounded-md p-3 pr-12 text-sm bg-white focus:border-black focus:ring-1 focus:ring-black outline-none transition-shadow"
-              />
-              {addressSearch && (
-                <button
-                  onClick={() => {
-                    setAddressSearch("");
-                    setSelectedAddress(null);
-                    setIsDroppingPin(false);
-                  }}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black transition-colors"
-                >
-                  <X size={20} />
-                </button>
-              )}
-              {addressSuggestions.length > 0 && (
-                <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 mt-2 rounded-md shadow-xl z-50 max-h-60 overflow-y-auto divide-y divide-gray-100">
-                  {addressSuggestions.map((s, i) => (
-                    <div 
-                      key={i} 
-                      className="p-3 text-sm hover:bg-gray-50 cursor-pointer transition-colors"
-                      onClick={() => selectAddress(s)}
-                    >
-                      {s.formatted || s.properties?.formatted || ''}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <div className="w-full h-48 rounded-md overflow-hidden relative border border-gray-300">
-                <MapContainer 
-                  center={[selectedCoordinates.lat, selectedCoordinates.lng]}
-                  zoom={16} 
-                  style={{ height: '100%', width: '100%', zIndex: 0 }}
-                  dragging={true}
-                  touchZoom={true}
-                  scrollWheelZoom={true}
-                  doubleClickZoom={true}
-                >
-                  <TileLayer
-                    attribution='Powered by Geoapify | &copy; OpenStreetMap contributors'
-                    url={`https://maps.geoapify.com/v1/tile/osm-carto/{z}/{x}/{y}.png?apiKey=${(process.env as any).GEOAPIFY_API_KEY || '6d0e711d72d74daeb2b0bfd2a5cdfd3a'}`}
-                  />
-                  <Marker position={[selectedCoordinates.lat, selectedCoordinates.lng]} />
-                  <MapUpdater center={selectedCoordinates} />
-                  <LocationPicker 
-                    isDroppingPin={isDroppingPin} 
-                    onLocationSelect={async (lat, lng) => {
-                      try {
-                        const res = await fetch(`/v1/location/reverse-geocode?lat=${lat}&lon=${lng}`);
-                        const data = await res.json();
-                        if (data.results?.[0]) {
-                          const suggestion = data.results[0];
-                          setSelectedAddress(suggestion);
-                          setAddressSearch(suggestion.formatted || suggestion.properties?.formatted || '');
-                          setSelectedCoordinates({ lat, lng });
-                          setIsDroppingPin(false);
-                          setTimeout(() => unitRef.current?.focus(), 100);
-                        }
-                      } catch (err) {
-                        console.error(err);
-                      }
-                    }} 
-                  />
-                </MapContainer>
-                {isDroppingPin && (
-                  <div className="absolute top-2 left-1/2 -translate-x-1/2 bg-black text-white px-3 py-1 rounded-full text-xs font-bold shadow-md z-10 pointer-events-none">
-                    TAP ON MAP TO DROP PIN
-                  </div>
-                )}
-              </div>
-
-            <div className="flex gap-2 w-full">
-              <button 
-                onClick={() => {
-                  if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(async (pos) => {
-                      const lat = pos.coords.latitude;
-                      const lng = pos.coords.longitude;
-                      try {
-                        const res = await fetch(`/v1/location/reverse-geocode?lat=${lat}&lon=${lng}`);
-                        const data = await res.json();
-                        if (data.results?.[0]) {
-                          const suggestion = data.results[0];
-                          setSelectedAddress(suggestion);
-                          setAddressSearch(suggestion.formatted || suggestion.properties?.formatted || '');
-                          setSelectedCoordinates({ lat, lng });
-                          setTimeout(() => unitRef.current?.focus(), 100);
-                        }
-                      } catch (err) {
-                        console.error(err);
-                      }
-                    });
-                  }
-                }}
-                className="flex-1 flex items-center justify-center gap-2 rounded-full py-3 text-xs md:text-sm font-semibold text-white bg-gradient-to-b from-gray-700 to-black shadow-[0_4px_10px_rgba(0,0,0,0.3),inset_0_1px_1px_rgba(255,255,255,0.3)] hover:from-gray-600 hover:to-gray-900 transition-all border border-gray-900"
-              >
-                <Navigation size={16} /> USE CURRENT LOCATION
-              </button>
-              <button 
-                onClick={() => {
-                  setIsDroppingPin(true);
-                }}
-                className={`flex-1 flex items-center justify-center gap-2 rounded-full py-3 text-xs md:text-sm font-semibold text-white shadow-[0_4px_10px_rgba(0,0,0,0.3),inset_0_1px_1px_rgba(255,255,255,0.3)] hover:from-gray-600 hover:to-gray-900 transition-all border border-gray-900 ${isDroppingPin ? 'bg-gradient-to-b from-blue-700 to-blue-900 border-blue-900' : 'bg-gradient-to-b from-gray-700 to-black'}`}
-              >
-                <MapPin size={16} /> {isDroppingPin ? 'TAP MAP' : 'DROP A PIN'}
-              </button>
-            </div>
-
-            <textarea 
-              ref={unitRef}
-              rows={3} 
-              placeholder="Floor / Unit No. / Instructions" 
-              value={unitInstructions}
-              onChange={e => setUnitInstructions(e.target.value)}
-              className="w-full border border-gray-300 rounded-md p-3 text-sm resize-none bg-white focus:border-black focus:ring-1 focus:ring-black outline-none transition-shadow"
-            />
-          </div>
-        </div>
-
-        <hr className="border-gray-200" />
-
-        <div className="py-2">
-          <h2 className="text-sm font-bold mb-3 flex items-center gap-2"><User size={24} /> Receiver Details</h2>
-          
-          <div className="flex flex-col sm:flex-row gap-3">
+          <div className="relative group">
             <input 
               type="text" 
-              placeholder="Full Name" 
+              placeholder="Search street, building, or village..." 
+              value={addressSearch}
+              onChange={e => setAddressSearch(e.target.value)}
+              className="w-full border-2 border-gray-100 rounded-xl p-4 pr-12 text-sm font-bold bg-gray-50 focus:bg-white focus:border-black outline-none transition-all shadow-inner"
+            />
+            {addressSearch && (
+              <button
+                onClick={() => { setAddressSearch(""); setSelectedAddress(null); setIsDroppingPin(false); }}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300 hover:text-black"
+              >
+                <X size={18} />
+              </button>
+            )}
+            {addressSuggestions.length > 0 && (
+              <div className="absolute top-full left-0 right-0 bg-white border-2 border-gray-100 mt-2 rounded-xl shadow-2xl z-[110] max-h-60 overflow-y-auto divide-y divide-gray-50">
+                {addressSuggestions.map((s, i) => (
+                  <div 
+                    key={i} 
+                    className="p-4 text-xs font-bold hover:bg-gray-50 cursor-pointer flex items-center gap-3"
+                    onClick={() => selectAddress(s)}
+                  >
+                    <MapPin size={14} className="text-gray-300" />
+                    {s.properties?.formatted || s.formatted}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="w-full h-56 rounded-2xl overflow-hidden relative border-2 border-gray-100 bg-gray-100 shadow-inner group">
+              <MapContainer 
+                center={[selectedCoordinates.lat, selectedCoordinates.lng]}
+                zoom={16} 
+                style={{ height: '100%', width: '100%', zIndex: 0 }}
+              >
+                <TileLayer
+                  attribution='&copy; OpenStreetMap contributors | Geoapify'
+                  url="https://maps.geoapify.com/v1/tile/osm-carto/{z}/{x}/{y}.png?apiKey=6d0e711d72d74daeb2b0bfd2a5cdfd3a"
+                />
+                <Marker position={[selectedCoordinates.lat, selectedCoordinates.lng]} />
+                <MapUpdater center={selectedCoordinates} />
+                <LocationPicker 
+                  isDroppingPin={isDroppingPin} 
+                  onLocationSelect={(lat, lng) => { handleReverseGeocode(lat, lng); setIsDroppingPin(false); }} 
+                />
+              </MapContainer>
+              
+              {isDroppingPin && (
+                <div className="absolute inset-0 bg-black/20 flex items-center justify-center pointer-events-none z-10">
+                   <div className="bg-black text-white px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest shadow-2xl animate-bounce">
+                      Tap map to drop pin
+                   </div>
+                </div>
+              )}
+
+              <div className="absolute bottom-4 left-4 right-4 flex gap-2 z-10">
+                <button 
+                  onClick={() => {
+                    if (navigator.geolocation) {
+                      navigator.geolocation.getCurrentPosition(async (pos) => handleReverseGeocode(pos.coords.latitude, pos.coords.longitude));
+                    }
+                  }}
+                  className="flex-1 bg-white/90 backdrop-blur text-black border border-white/20 rounded-full py-2.5 text-[9px] font-black uppercase tracking-widest shadow-xl hover:bg-white transition-all flex items-center justify-center gap-2"
+                >
+                  <Navigation size={12} /> My Location
+                </button>
+                <button 
+                  onClick={() => setIsDroppingPin(!isDroppingPin)}
+                  className={`flex-1 backdrop-blur rounded-full py-2.5 text-[9px] font-black uppercase tracking-widest shadow-xl transition-all flex items-center justify-center gap-2 border ${isDroppingPin ? 'bg-black text-white border-black' : 'bg-white/90 text-black border-white/20'}`}
+                >
+                  <MapPin size={12} /> Drop a Pin
+                </button>
+              </div>
+          </div>
+
+          <textarea 
+            ref={unitRef}
+            rows={2} 
+            placeholder="Floor / Unit No. / Gate Instructions..." 
+            value={unitInstructions}
+            onChange={e => setUnitInstructions(e.target.value)}
+            className="w-full border-2 border-gray-100 rounded-xl p-4 text-sm font-bold bg-gray-50 focus:bg-white focus:border-black outline-none transition-all shadow-inner resize-none"
+          />
+        </section>
+
+        {/* Courier Section */}
+        <section className="space-y-4">
+          <h2 className="text-[10px] font-black uppercase tracking-widest text-gray-400 flex items-center gap-2">
+            <Truck size={12} /> 02. Delivery Fleet
+          </h2>
+
+          <div className="grid grid-cols-4 gap-2">
+            {deliveryQuotes.map((quote) => {
+              const isUnavailable = quote.status === 'unavailable';
+              return (
+                <button
+                  key={quote.courierId}
+                  disabled={isUnavailable}
+                  onClick={() => setSelectedQuote(quote)}
+                  className={`relative aspect-square rounded-xl border-2 flex flex-col items-center justify-center overflow-hidden transition-all ${
+                    isUnavailable ? 'opacity-40 grayscale cursor-not-allowed border-gray-100 bg-gray-50' :
+                    selectedQuote?.courierId === quote.courierId ? 'border-black bg-gray-50 shadow-lg scale-[1.02]' : 'border-gray-100 bg-white hover:border-gray-300'
+                  }`}
+                >
+                  <div className="absolute inset-0 opacity-10 p-3">
+                    <img src={quote.logoUrl} className="w-full h-full object-contain" />
+                  </div>
+                  <div className="relative z-10 flex flex-col items-center">
+                    <div className="font-black italic text-[11px] tracking-tighter leading-none mb-0.5">
+                      {isUnavailable ? 'OFFLINE' : `₱${(quote.totalMinor / 100).toFixed(0)}`}
+                    </div>
+                    {!isUnavailable && (
+                       <div className="text-[7px] font-black uppercase tracking-tighter text-gray-400">
+                          {quote.courierName.split(' ')[0]}
+                       </div>
+                    )}
+                  </div>
+                  {selectedQuote?.courierId === quote.courierId && (
+                     <div className="absolute top-1 right-1 text-black">
+                        <CheckCircle2 size={10} fill="currentColor" className="text-white bg-black rounded-full" />
+                     </div>
+                  )}
+                </button>
+              );
+            })}
+            {isQuoting && (
+              <div className="col-span-4 py-8 text-center text-[10px] font-black uppercase tracking-[0.2em] text-gray-300 animate-pulse">Calculating Road Route...</div>
+            )}
+            {!isQuoting && deliveryQuotes.length === 0 && (
+              <div className="col-span-4 p-8 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200 text-center">
+                 <Truck className="mx-auto text-gray-300 mb-2" size={24} />
+                 <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Select address to view rates</p>
+              </div>
+            )}
+          </div>
+
+          {selectedQuote && (
+            <div className="animate-in fade-in slide-in-from-top-2 duration-300 space-y-4">
+               <div className="p-4 bg-gray-900 rounded-xl text-white flex justify-between items-center shadow-xl shadow-black/10">
+                  <div>
+                    <div className="text-[8px] font-black uppercase tracking-widest text-gray-400">Selected Fleet</div>
+                    <div className="text-sm font-black italic uppercase tracking-tighter">{selectedQuote.courierName}</div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-[8px] font-black uppercase tracking-widest text-gray-400">Road Distance</div>
+                    <div className="text-sm font-black italic uppercase tracking-tighter">{(selectedQuote.route.distanceMeters / 1000).toFixed(1)} KM</div>
+                  </div>
+               </div>
+
+               {/* Payment Timing Prompt */}
+               <div className="bg-gray-50 border-2 border-gray-100 rounded-xl p-4 relative overflow-hidden">
+                  {!paymentTiming && (
+                    <div className="absolute inset-0 bg-white/40 backdrop-blur-[1px] z-10 flex items-center justify-center">
+                       <div className="bg-black text-white px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest animate-pulse">Action Required</div>
+                    </div>
+                  )}
+                  <div className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-3 text-center">Delivery Fee Settlement</div>
+                  <div className="flex gap-2 relative z-20">
+                    <button 
+                      onClick={() => setPaymentTiming('checkout')}
+                      className={`flex-1 py-3 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all border-2 ${paymentTiming === 'checkout' ? 'bg-black text-white border-black' : 'bg-white text-gray-400 border-gray-100 hover:border-gray-200'}`}
+                    >
+                      Pay at Checkout
+                    </button>
+                    <button 
+                      onClick={() => setPaymentTiming('delivery')}
+                      className={`flex-1 py-3 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all border-2 ${paymentTiming === 'delivery' ? 'bg-black text-white border-black' : 'bg-white text-gray-400 border-gray-100 hover:border-gray-200'}`}
+                    >
+                      Pay on Delivery
+                    </button>
+                  </div>
+               </div>
+            </div>
+          )}
+        </section>
+
+        {/* Contact Section */}
+        <section className="space-y-4">
+          <h2 className="text-[10px] font-black uppercase tracking-widest text-gray-400 flex items-center gap-2">
+            <User size={12} /> 03. Receiver
+          </h2>
+          <div className="grid grid-cols-2 gap-4">
+            <input 
+              type="text" 
+              placeholder="Legal Name" 
               value={receiverName}
               onChange={e => setReceiverName(e.target.value)}
-              className="w-full sm:w-1/2 border border-gray-300 rounded-md p-3 text-sm bg-white focus:border-black focus:ring-1 focus:ring-black outline-none transition-shadow"
+              className="w-full border-2 border-gray-100 rounded-xl p-4 text-sm font-bold bg-gray-50 focus:bg-white focus:border-black outline-none transition-all shadow-inner"
             />
             <input 
               type="tel" 
-              placeholder="Phone Number" 
+              placeholder="Phone (09xx)" 
               value={receiverPhone}
               onChange={e => setReceiverPhone(e.target.value)}
-              className="w-full sm:w-1/2 border border-gray-300 rounded-md p-3 text-sm bg-white focus:border-black focus:ring-1 focus:ring-black outline-none transition-shadow"
+              className="w-full border-2 border-gray-100 rounded-xl p-4 text-sm font-bold bg-gray-50 focus:bg-white focus:border-black outline-none transition-all shadow-inner"
             />
           </div>
-        </div>
+        </section>
 
-        <hr className="border-gray-200" />
+        {/* Financial Summary */}
+        <section className="space-y-4">
+          <h2 className="text-[10px] font-black uppercase tracking-widest text-gray-400 flex items-center gap-2">
+            <CreditCard size={12} /> 04. Financial Settlement
+          </h2>
 
-        {/* Promos */}
-        <div className="py-2">
-          <h2 className="text-sm font-bold mb-3">Promotions</h2>
-          <div className="flex flex-col sm:flex-row gap-3">
-            <div className="flex-1">
-              <div className="relative flex">
-                <Tag size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-                <input 
-                  type="text" 
-                  placeholder="Promo Code" 
-                  value={promoCode}
-                  onChange={e => setPromoCode(e.target.value)}
-                  disabled={!!appliedPromo}
-                  className="w-full border border-gray-300 rounded-l-md py-2 pl-12 pr-4 text-sm uppercase outline-none focus:border-black focus:ring-1 focus:ring-black transition-shadow disabled:bg-gray-100"
-                />
-                {!appliedPromo ? (
-                  <button 
-                    onClick={handleApplyPromo}
-                    disabled={!promoCode}
-                    className="bg-black text-white px-4 text-sm font-bold rounded-r-md hover:bg-gray-800 disabled:opacity-50"
-                  >
-                    APPLY
-                  </button>
-                ) : (
-                  <button 
-                    onClick={() => { setAppliedPromo(null); setPromoCode(''); }}
-                    className="bg-red-50 text-red-600 border border-red-200 px-4 text-sm font-bold rounded-r-md hover:bg-red-100"
-                  >
-                    REMOVE
-                  </button>
-                )}
-              </div>
-              {promoError && <div className="text-red-500 text-xs mt-1 font-semibold">{promoError}</div>}
-              {appliedPromo && <div className="text-green-600 text-xs mt-1 font-semibold">Promo applied successfully!</div>}
-            </div>
-            <div className="flex-1 relative">
-              <Tag size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-              <input 
-                type="text" 
-                placeholder="Referral Code" 
-                value={referralCode}
-                onChange={e => setReferralCode(e.target.value)}
-                className="w-full border border-gray-300 rounded-md py-2 pl-12 pr-4 text-sm uppercase outline-none focus:border-black focus:ring-1 focus:ring-black transition-shadow"
-              />
-            </div>
+          <div className="bg-gray-50 border-2 border-gray-100 rounded-2xl p-6 space-y-4">
+             <div className="space-y-2 pb-4 border-b border-gray-200">
+               <div className="flex justify-between items-center text-xs font-bold text-gray-500">
+                  <span>Merchandise Subtotal</span>
+                  <span>₱{subtotal.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+               </div>
+               <div className="flex justify-between items-center text-xs font-bold text-gray-500">
+                  <span>VAT (12% Included)</span>
+                  <span>₱{tax.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+               </div>
+               <div className="flex justify-between items-center text-xs font-bold text-gray-500">
+                  <span>Road Delivery Fee</span>
+                  <span>₱{deliveryFee.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+               </div>
+               {discount > 0 && (
+                 <div className="flex justify-between items-center text-xs font-black italic text-green-600 uppercase tracking-tighter">
+                    <span>Promotion ({appliedPromo?.code})</span>
+                    <span>-₱{discount.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+                 </div>
+               )}
+             </div>
+
+             <div className="space-y-3">
+               <div className="flex justify-between items-center">
+                  <div>
+                    <div className="text-[8px] font-black uppercase tracking-widest text-gray-400">Due at Checkout</div>
+                    <div className="text-lg font-black italic uppercase tracking-tighter text-black">₱{amountDueNow.toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
+                  </div>
+                  {amountDueOnDelivery > 0 && (
+                    <div className="text-right">
+                      <div className="text-[8px] font-black uppercase tracking-widest text-gray-400">Due at Doorstep</div>
+                      <div className="text-lg font-black italic uppercase tracking-tighter text-gray-400">₱{amountDueOnDelivery.toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
+                    </div>
+                  )}
+               </div>
+             </div>
           </div>
-        </div>
-        <hr className="border-gray-200" />
+        </section>
 
-        {/* Payment Method */}
-        <div className="py-2">
-          <h2 className="text-sm font-bold mb-3 flex items-center gap-2"><CreditCard size={24} /> Payment Method</h2>
-          <div className="flex gap-3">
-            <button
-              onClick={() => setPaymentMethod('card')}
-              className={`flex-1 flex flex-col items-center justify-center p-3 border rounded-md transition-colors ${paymentMethod === 'card' ? 'border-black bg-gray-50' : 'border-gray-300 hover:bg-gray-50'}`}
-            >
-              <CreditCard size={32} className="mb-2" />
-              <span className="font-semibold">Credit/Debit Card</span>
-            </button>
-            <button
-              onClick={() => setPaymentMethod('wallet')}
-              className={`flex-1 flex flex-col items-center justify-center p-3 border rounded-md transition-colors ${paymentMethod === 'wallet' ? 'border-black bg-gray-50' : 'border-gray-300 hover:bg-gray-50'}`}
-            >
-              <Wallet size={32} className="mb-2" />
-              <span className="font-semibold">Digital Wallet</span>
-            </button>
-          </div>
-        </div>
-        <hr className="border-gray-200" />
-
-        {/* Order Summary */}
-        <div className="py-2">
-          <h2 className="text-sm font-bold mb-3">Order Summary</h2>
-          <div className="space-y-4 text-sm">
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600">Subtotal</span>
-              <span className="font-semibold">₱{subtotal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600">Tax (12% VAT)</span>
-              <span className="font-semibold">₱{tax.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600">Delivery Fee</span>
-              <span className="font-semibold text-gray-500">₱{deliveryFee.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
-            </div>
-            {discount > 0 && (
-              <div className="flex justify-between items-center text-green-700 font-bold">
-                <span>Discount ({appliedPromo?.code})</span>
-                <span>-₱{discount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
-              </div>
-            )}
-            <div className="pt-4 mt-2 border-t border-gray-900 flex justify-between items-center font-bold text-sm">
-              <span>Total to Pay</span>
-              <span>₱{total.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
-            </div>
-          </div>
-        </div>
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-3 pb-[calc(16px+env(safe-area-inset-bottom,0px))] z-50">
-        <div className="max-w-2xl mx-auto">
-          <button 
-            disabled={!selectedAddress || !receiverName || !receiverPhone}
+      {/* Floating Action Button */}
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/80 backdrop-blur-xl border-t border-gray-100 z-[100] pb-[calc(16px+env(safe-area-inset-bottom,0px))]">
+        <div className="max-w-lg mx-auto flex gap-3">
+           <div className="flex-1">
+             <div className="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Grand Total</div>
+             <div className="text-xl font-black italic tracking-tighter">₱{totalOrderValue.toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
+           </div>
+           <button 
+            disabled={!selectedQuote || !paymentTiming || !receiverName || !receiverPhone}
             onClick={handlePlaceOrder}
-            className="w-full bg-black text-white font-bold py-2 px-8 rounded-md hover:bg-gray-800 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed text-sm tracking-wide transition-colors"
+            className="px-10 bg-black text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-gray-800 disabled:bg-gray-200 disabled:text-gray-400 transition-all shadow-2xl shadow-black/20"
           >
-            PLACE ORDER (₱{total.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})})
+            Authorize Payment
           </button>
         </div>
       </div>

@@ -37,7 +37,7 @@ export async function appendAuditEvent(tenantCtx: TenantContext, eventInput: Aud
   let sequence = 1;
   
   if (!latestQuery.empty) {
-    const latestEvent = latestQuery.docs[0].data();
+    const latestEvent = latestQuery.docs[0].data() as any;
     previousHash = latestEvent.currentHash || "GENESIS";
     sequence = (latestEvent.sequence || 0) + 1;
   }

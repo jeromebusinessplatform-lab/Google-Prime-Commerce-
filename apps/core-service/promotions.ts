@@ -44,7 +44,7 @@ export const validatePromotionHandler = async (req: Request, res: Response) => {
     return res.status(404).json({ error: "Invalid promo code" });
   }
   
-  const promo = { id: snapshot.docs[0].id, ...snapshot.docs[0].data() };
+  const promo = { id: snapshot.docs[0].id, ...(snapshot.docs[0].data() as any) };
   
   if (promo.status !== 'active') {
     return res.status(400).json({ error: "Promo code is expired or inactive" });

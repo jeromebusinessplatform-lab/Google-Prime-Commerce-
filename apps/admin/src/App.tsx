@@ -11,6 +11,7 @@ import { DashboardPage } from './pages/DashboardPage';
 import { POSPage } from './pages/POSPage';
 import { PromotionsPage } from './pages/PromotionsPage';
 import { SettingsPage } from './pages/SettingsPage';
+import { CourierPage } from './pages/CourierPage';
 import { Lock, Bell, X } from 'lucide-react';
 
 function OrderNotifier() {
@@ -63,6 +64,7 @@ function AdminNav() {
     { name: "DASHBOARD", path: "/dashboard" },
     { name: "CATALOG", path: "/catalog" },
     { name: "ORDERS", path: "/orders" },
+    { name: "COURIERS", path: "/couriers" },
     { name: "PROMOTIONS", path: "/promotions" },
     { name: "SETTINGS", path: "/settings" },
     { name: "POS", path: "/pos" },
@@ -151,6 +153,7 @@ export default function App() {
             <Route path="/catalog" element={<CatalogPage />} />
             <Route path="/orders" element={<OrdersPage />} />
             <Route path="/orders/:id" element={<OrderFulfillmentPage />} />
+            <Route path="/couriers" element={<CourierPage />} />
             <Route path="/promotions" element={<PromotionsPage />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/pos" element={<POSPage />} />
