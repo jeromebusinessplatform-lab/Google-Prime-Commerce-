@@ -132,9 +132,14 @@ export default function App() {
   return (
     <BrowserRouter basename="/admin">
       <div className="min-h-screen bg-gray-50 flex flex-col">
-        <GlobalHeader title="Enterprise Admin" />
+        <GlobalHeader title="Admin" />
         <QueueMonitor />
         <div className="pt-[calc(55px+35px+env(safe-area-inset-top,0px))] pb-[calc(18px+env(safe-area-inset-bottom,0px))] flex-1 flex flex-col">
+          {isPreview && (
+            <div className="bg-amber-400 text-black text-center text-[10px] font-bold py-1 px-2 border-b border-amber-500 tracking-wider uppercase">
+              Preview Mode — No Live Transactions
+            </div>
+          )}
           <AdminNav />
           <Routes>
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
@@ -149,11 +154,6 @@ export default function App() {
         </div>
         <GlobalFooter hasBottomNav={false} />
         <OrderNotifier />
-        {isPreview && (
-          <div className="fixed top-0 left-0 right-0 bg-yellow-400 text-black text-center text-[10px] font-bold py-0.5 z-[100] pointer-events-none">
-            PREVIEW MODE — NO LIVE TRANSACTIONS
-          </div>
-        )}
       </div>
     </BrowserRouter>
   );
