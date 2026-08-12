@@ -87,7 +87,6 @@ function AdminNav() {
 }
 
 export default function App() {
-  const isPreview = true;
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [accessCode, setAccessCode] = useState('');
   const [error, setError] = useState('');
@@ -143,11 +142,6 @@ export default function App() {
         <GlobalHeader title="Admin" />
         <QueueMonitor />
         <div className="pt-[calc(55px+35px+env(safe-area-inset-top,0px))] pb-[calc(18px+env(safe-area-inset-bottom,0px))] flex-1 flex flex-col">
-          {isPreview && (
-            <div className="bg-amber-400 text-black text-center text-[10px]  py-1 px-2 border-b border-amber-500 tracking-wider uppercase">
-              Preview Mode — No Live Transactions
-            </div>
-          )}
           <AdminNav />
           <Routes>
             <Route path="/" element={<Navigate to="/dashboard" replace />} />

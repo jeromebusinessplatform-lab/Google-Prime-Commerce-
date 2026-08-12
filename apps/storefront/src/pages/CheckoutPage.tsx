@@ -176,6 +176,10 @@ export function CheckoutPage() {
 
   const [appliedPromo, setAppliedPromo] = useState<any>(null);
   const [promoError, setPromoError] = useState('');
+  const [isPlacing, setIsPlacing] = useState(false);
+  const [receiptImage, setReceiptImage] = useState<string | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState<any>(null);
 
   if (!session) return <div className="p-8 text-center mt-10  uppercase tracking-tighter animate-pulse">Initializing Prime Checkout...</div>;
 
@@ -219,11 +223,6 @@ export function CheckoutPage() {
   const amountDueNow = Math.max(0, subtotal + tax + (paymentTiming === 'checkout' ? deliveryFee : 0) - discount);
   const amountDueOnDelivery = paymentTiming === 'delivery' ? deliveryFee : 0;
   const totalOrderValue = subtotal + tax + deliveryFee - discount;
-
-  const [isPlacing, setIsPlacing] = useState(false);
-  const [receiptImage, setReceiptImage] = useState<string | null>(null);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [analysisResult, setAnalysisResult] = useState<any>(null);
 
   const handleReceiptUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
