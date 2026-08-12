@@ -236,6 +236,15 @@ export function OrderFulfillmentPage() {
     }
   };
 
+  const getNextStatus = (current: string) => {
+    const sequence = ['PENDING', 'CONFIRMED', 'PREPARING', 'READY', 'FOR_PICKUP', 'DISPATCHED', 'DELIVERED'];
+    const idx = sequence.indexOf(current);
+    if (idx !== -1 && idx < sequence.length - 1) return sequence[idx + 1];
+    return null;
+  };
+
+  const nextStatus = getNextStatus(order.status);
+
   const approvePayment = async () => {
     try {
       await fetch(`/v1/orders/${id}`, {
@@ -259,29 +268,62 @@ export function OrderFulfillmentPage() {
     <div className="bg-gray-50 flex-1 flex flex-col">
       <div className="bg-white border-b border-gray-200 p-4 sticky top-0 z-20 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <button onClick={() => navigate('/orders')} className="text-gray-500 hover:text-black">
+          <button onClick={() => navigate('/orders')} className="p-2 -ml-2 text-gray-500 hover:text-black">
             <ChevronLeft size={24} />
           </button>
           <div>
-            <h2 className="text-lg ">Order {order.id}</h2>
-            <div className="text-xs text-gray-500">{new Date(order.date).toLocaleString()}</div>
+            <h2 className="text-lg tracking-tighter uppercase font-bold">Order {order.id}</h2>
+            <div className="text-[10px] text-gray-400 uppercase tracking-widest">{new Date(order.date).toLocaleString()}</div>
           </div>
         </div>
         <div className="flex items-center gap-2">
           <button 
             onClick={() => setShowPrintModal(true)}
-            className="flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 rounded text-xs  hover:bg-gray-50 transition-colors"
+            className="flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-[10px] uppercase tracking-widest hover:bg-gray-50 transition-colors"
           >
-            <Printer size={16} /> PRINT SLIP
+            <Printer size={14} /> Print Slip
           </button>
-          <span className={`inline-flex items-center px-3 py-1 rounded text-xs  uppercase ${
-            order.status === 'QUEUED' ? 'bg-yellow-100 text-yellow-800' :
-            order.status === 'PROCESSING' ? 'bg-blue-100 text-blue-800' :
-            order.status === 'DISPATCHED' ? 'bg-purple-100 text-purple-800' :
-            'bg-green-100 text-green-800'
+          <span className={`inline-flex items-center px-3 py-1 rounded-[4px] text-[10px] font-bold uppercase tracking-widest ${
+            order.status === 'PENDING' ? 'bg-amber-100 text-amber-700' :
+            order.status === 'CONFIRMED' ? 'bg-blue-100 text-blue-700' :
+            order.status === 'PREPARING' ? 'bg-indigo-100 text-indigo-700' :
+            order.status === 'READY' ? 'bg-purple-100 text-purple-700' :
+            order.status === 'DISPATCHED' ? 'bg-black text-white' :
+            order.status === 'DELIVERED' ? 'bg-emerald-100 text-emerald-700' :
+            order.status.startsWith('HOLD') ? 'bg-red-100 text-red-700' :
+            'bg-gray-100 text-gray-600'
           }`}>
-            {order.status}
+            {order.status.replace('_', ' ')}
           </span>
+        </div>
+      </div>
+
+      {/* Visual Progress Tracker */}
+      <div className="bg-white border-b border-gray-100 px-4 py-6 overflow-x-auto">
+        <div className="max-w-4xl mx-auto flex items-center justify-between min-w-[600px]">
+          {['PENDING', 'CONFIRMED', 'PREPARING', 'READY', 'FOR_PICKUP', 'DISPATCHED', 'DELIVERED'].map((s, idx, arr) => {
+            const isCurrent = order.status === s;
+            const isPast = arr.indexOf(order.status) > idx;
+            return (
+              <React.Fragment key={s}>
+                <div className="flex flex-col items-center gap-2 relative">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-500 border-2 ${
+                    isCurrent ? 'bg-black border-black text-white' :
+                    isPast ? 'bg-black border-black text-white' :
+                    'bg-white border-gray-200 text-gray-300'
+                  }`}>
+                    {isPast ? <CheckCircle2 size={16} /> : <span className="text-[10px] font-bold">{idx + 1}</span>}
+                  </div>
+                  <span className={`text-[9px] uppercase tracking-widest font-black ${isCurrent ? 'text-black' : 'text-gray-400'}`}>
+                    {s.replace('_', ' ')}
+                  </span>
+                </div>
+                {idx < arr.length - 1 && (
+                  <div className={`flex-1 h-[2px] mx-2 -mt-6 transition-all duration-500 ${isPast ? 'bg-black' : 'bg-gray-100'}`} />
+                )}
+              </React.Fragment>
+            );
+          })}
         </div>
       </div>
 
@@ -296,29 +338,53 @@ export function OrderFulfillmentPage() {
       <div className="p-4 max-w-6xl mx-auto w-full grid grid-cols-1 md:grid-cols-3 gap-4 pb-[100px]">
         <div className="md:col-span-2 space-y-4">
           
-          {/* Action Bar */}
-          <div className="bg-white p-4 rounded-md border border-gray-200 shadow-sm flex gap-2">
-            <button 
-              disabled={order.status !== 'QUEUED'}
-              onClick={() => updateStatus('PROCESSING')}
-              className="flex-1 py-2 px-3 bg-blue-50 text-blue-700  text-sm rounded border border-blue-200 hover:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            >
-              <PackageCheck size={18} /> PREPARE ORDER
-            </button>
-            <button 
-              disabled={order.status !== 'PROCESSING'}
-              onClick={() => updateStatus('DISPATCHED')}
-              className="flex-1 py-2 px-3 bg-purple-50 text-purple-700  text-sm rounded border border-purple-200 hover:bg-purple-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            >
-              <Truck size={18} /> DISPATCH
-            </button>
-            <button 
-              disabled={order.status !== 'DISPATCHED'}
-              onClick={() => updateStatus('DELIVERED')}
-              className="flex-1 py-2 px-3 bg-green-50 text-green-700  text-sm rounded border border-green-200 hover:bg-green-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            >
-              <CheckCircle2 size={18} /> DELIVERED
-            </button>
+          {/* Dynamic Order Management Actions */}
+          <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm space-y-6">
+            <div className="space-y-4">
+              <h3 className="text-[10px] font-black uppercase tracking-widest text-gray-400">Logistics Execution</h3>
+              <div className="flex flex-col sm:flex-row gap-3">
+                {nextStatus ? (
+                  <button 
+                    onClick={() => updateStatus(nextStatus)}
+                    className="flex-1 py-4 px-6 bg-black text-white text-[11px] font-black uppercase tracking-[0.2em] rounded-xl hover:bg-gray-800 transition-all shadow-xl shadow-black/20 flex items-center justify-center gap-3 active:scale-95"
+                  >
+                    Validate: Next Stage → {nextStatus.replace('_', ' ')}
+                  </button>
+                ) : order.status === 'DELIVERED' ? (
+                  <div className="flex-1 py-4 px-6 bg-emerald-50 text-emerald-700 text-[11px] font-black uppercase tracking-[0.2em] rounded-xl border border-emerald-100 flex items-center justify-center gap-2">
+                    <CheckCircle2 size={18} /> Cycle Completed
+                  </div>
+                ) : null}
+                
+                <button 
+                  onClick={() => updateStatus('CANCELLED')}
+                  className="px-6 py-4 bg-white border-2 border-red-100 text-red-600 text-[11px] font-black uppercase tracking-[0.2em] rounded-xl hover:bg-red-50 transition-all flex items-center justify-center gap-2"
+                >
+                  <X size={18} /> Cancel
+                </button>
+              </div>
+            </div>
+
+            <div className="pt-6 border-t border-gray-50 space-y-4">
+              <h3 className="text-[10px] font-black uppercase tracking-widest text-gray-400">Exception Handling (HOLD)</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                {[
+                  { label: 'Resubmit', val: 'HOLD_RESUBMIT' },
+                  { label: 'Follow-up', val: 'HOLD_FOLLOWUP' },
+                  { label: 'Final Call', val: 'HOLD_FINAL_CALL' }
+                ].map(h => (
+                  <button 
+                    key={h.val}
+                    onClick={() => updateStatus(h.val)}
+                    className={`py-3 px-2 border-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${
+                      order.status === h.val ? 'bg-red-600 border-red-600 text-white shadow-lg shadow-red-600/20' : 'bg-white border-gray-100 text-gray-400 hover:border-red-200 hover:text-red-500'
+                    }`}
+                  >
+                    {h.label}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
 
           <div className="bg-white p-4 rounded-md border border-gray-200 shadow-sm">

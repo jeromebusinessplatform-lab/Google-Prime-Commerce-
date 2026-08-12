@@ -59,14 +59,14 @@ export function AnalyticsPage() {
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {stats.map(s => (
-          <div key={s.label} className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
-            <div className="flex items-center gap-3 mb-2">
+          <div key={s.label} className="bg-white p-5 rounded-2xl border border-gray-100 shadow-lg hover:shadow-xl transition-all">
+            <div className="flex items-center gap-3 mb-3">
               <div className={`p-2 rounded-lg bg-gray-50 ${s.color}`}>
                 <s.icon size={16} />
               </div>
-              <div className="text-[10px] uppercase tracking-widest text-gray-400">{s.label}</div>
+              <div className="text-[10px] font-semibold uppercase tracking-widest text-black dark:text-white">{s.label}</div>
             </div>
-            <div className="text-xl tracking-tighter">{s.value}</div>
+            <div className="text-2xl font-sans font-semibold tracking-tighter text-gray-900 dark:text-gray-100">{s.value}</div>
           </div>
         ))}
       </div>

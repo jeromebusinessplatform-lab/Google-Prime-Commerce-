@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ChevronLeft, MapPin, Receipt, Camera } from 'lucide-react';
+import { ChevronLeft, MapPin, Receipt, Camera, CheckCircle2 } from 'lucide-react';
 
 export function OrderDetailsPage() {
   const { id } = useParams();
@@ -40,37 +40,48 @@ export function OrderDetailsPage() {
 
       <div className="pt-[calc(55px+env(safe-area-inset-top,0px))] pb-[100px] max-w-2xl mx-auto p-3 space-y-3">
         
-        {/* Status Tracker */}
-        <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
-          <h3 className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-4">Tracking Manifest</h3>
-          <div className="relative border-l-2 border-gray-100 ml-3 space-y-8">
-            <div className="relative pl-6">
-              <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-black border-4 border-white shadow-sm"></div>
-              <div className="text-[13px] leading-none uppercase tracking-tighter">Order Synchronized</div>
-              <div className="text-[10px] text-gray-400 mt-1">{new Date(order.date).toLocaleString()}</div>
-            </div>
+        {/* Visual Progress Manifest */}
+        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+          <h3 className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-6">Status Orchestration</h3>
+          <div className="relative border-l-2 border-gray-100 ml-3 space-y-8 pb-2">
+            {[
+              { id: 'PENDING', label: 'Order Synchronized', desc: 'Received and registered in system' },
+              { id: 'CONFIRMED', label: 'Payment Validated', desc: 'Financial state confirmed by AI' },
+              { id: 'PREPARING', label: 'Logistics Prep', desc: 'Items are being packed and verified' },
+              { id: 'READY', label: 'Ready for Courier', desc: 'Package sealed and awaiting pickup' },
+              { id: 'DISPATCHED', label: 'In Transit', desc: 'Order is moving via chosen logistics' },
+              { id: 'DELIVERED', label: 'Final Fulfillment', desc: 'Order successfully delivered' }
+            ].map((s, idx, arr) => {
+              const sequence = ['PENDING', 'CONFIRMED', 'PREPARING', 'READY', 'FOR_PICKUP', 'DISPATCHED', 'DELIVERED'];
+              const currentIdx = sequence.indexOf(order.status === 'FOR_PICKUP' ? 'READY' : order.status);
+              const stepIdx = sequence.indexOf(s.id);
+              
+              const isPast = currentIdx > stepIdx;
+              const isCurrent = currentIdx === stepIdx;
+              const isHold = order.status.startsWith('HOLD');
 
-            {order.payment?.method !== 'COD' && (
-              <div className="relative pl-6">
-                <div className={`absolute -left-[9px] top-0 w-4 h-4 rounded-full border-4 border-white shadow-sm transition-all ${order.receipt ? (isVerified ? 'bg-green-500' : 'bg-blue-500 animate-pulse') : 'bg-gray-100'}`}></div>
-                <div className={`text-[13px] leading-none uppercase tracking-tighter ${order.receipt ? (isVerified ? 'text-green-600' : 'text-blue-600') : 'text-gray-400'}`}>
-                  {isVerified ? 'Payment Verified' : (order.receipt ? 'AI Receipt Audit' : 'Awaiting Payment')}
+              return (
+                <div key={s.id} className="relative pl-8">
+                  <div className={`absolute -left-[11px] top-0 w-5 h-5 rounded-full border-4 border-white shadow-sm transition-all duration-500 ${
+                    isHold && isCurrent ? 'bg-red-500 animate-pulse' :
+                    isCurrent ? 'bg-black animate-pulse' :
+                    isPast ? 'bg-black' :
+                    'bg-gray-100'
+                  }`}>
+                    {isPast && <CheckCircle2 size={12} className="text-white p-0.5" />}
+                  </div>
+                  <div className={`text-[13px] font-black uppercase tracking-tighter transition-colors duration-500 ${
+                    isHold && isCurrent ? 'text-red-600' :
+                    isCurrent || isPast ? 'text-black' : 'text-gray-300'
+                  }`}>
+                    {isHold && isCurrent ? `ON HOLD: ${order.status.replace('HOLD_', '')}` : s.label}
+                  </div>
+                  <div className="text-[10px] text-gray-400 mt-1 lowercase first-letter:uppercase tracking-tight">
+                    {isCurrent ? (isHold ? 'Attention required - check your notifications' : 'Processing current stage...') : s.desc}
+                  </div>
                 </div>
-                <div className="text-[10px] text-gray-400 mt-1">
-                  {isVerified ? `Verified by AI Engine` : (order.receipt ? 'Gemini is analyzing your receipt...' : 'Please upload your proof of payment')}
-                </div>
-              </div>
-            )}
-
-            <div className="relative pl-6">
-              <div className={`absolute -left-[9px] top-0 w-4 h-4 rounded-full border-4 border-white shadow-sm ${order.status === 'SHIPPED' || order.status === 'DELIVERED' ? 'bg-black' : 'bg-gray-100'}`}></div>
-              <div className={`text-[13px] leading-none uppercase tracking-tighter ${order.status === 'SHIPPED' || order.status === 'DELIVERED' ? 'text-black' : 'text-gray-400'}`}>Logistics Dispatch</div>
-            </div>
-
-            <div className="relative pl-6">
-              <div className={`absolute -left-[9px] top-0 w-4 h-4 rounded-full border-4 border-white shadow-sm ${order.status === 'DELIVERED' ? 'bg-black' : 'bg-gray-100'}`}></div>
-              <div className={`text-[13px] leading-none uppercase tracking-tighter ${order.status === 'DELIVERED' ? 'text-black' : 'text-gray-400'}`}>Final Fulfillment</div>
-            </div>
+              );
+            })}
           </div>
         </div>
 

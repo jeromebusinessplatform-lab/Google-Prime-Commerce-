@@ -79,10 +79,10 @@ export function DashboardPage() {
         ) : stats.map((s, i) => {
           const Icon = s.icon;
           return (
-            <div key={i} className="bg-white dark:bg-gray-900 p-3 rounded-md border border-gray-200 dark:border-gray-800 shadow-xs flex flex-col items-center justify-center text-center py-4 transition-colors text-gray-900 dark:text-gray-100">
-              <Icon size={20} className="text-gray-400 dark:text-gray-500 mb-1" />
-              <div className="text-lg  tracking-tight">{s.value}</div>
-              <div className="text-[11px] text-gray-500 dark:text-gray-400 uppercase  mt-0.5">{s.label}</div>
+            <div key={i} className="bg-white dark:bg-gray-900 p-3 rounded-xl border border-gray-100 dark:border-gray-800 shadow-lg flex flex-col items-center justify-center text-center py-5 transition-all text-gray-900 dark:text-gray-100 hover:shadow-xl">
+              <Icon size={20} className="text-gray-400 dark:text-gray-500 mb-2" />
+              <div className="text-2xl font-sans font-semibold tracking-tighter">{s.value}</div>
+              <div className="text-[10px] font-semibold text-black dark:text-white uppercase tracking-widest mt-1">{s.label}</div>
             </div>
           );
         })}

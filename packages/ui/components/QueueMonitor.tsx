@@ -35,14 +35,14 @@ export function QueueMonitor() {
   ];
 
   return (
-    <div className="font-heading fixed top-[calc(55px+env(safe-area-inset-top,0px))] left-0 right-0 h-[35px] bg-gray-100 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 z-40 flex transition-colors">
+    <div className="font-heading fixed top-[calc(55px+env(safe-area-inset-top,0px))] left-0 right-0 h-[35px] bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 z-40 flex shadow-md transition-colors">
       {blocks.map((block, idx) => (
         <div 
           key={idx} 
-          className="flex-1 flex flex-col justify-center items-center border-r border-gray-200 dark:border-gray-800 last:border-r-0 px-1 overflow-hidden"
+          className="flex-1 flex flex-col justify-center items-center border-r border-gray-100 dark:border-gray-800 last:border-r-0 px-1 overflow-hidden"
         >
-          <div className="text-[8.3px] leading-tight text-gray-500 dark:text-gray-400  whitespace-nowrap text-center w-full truncate">{block.label}</div>
-          <div className={`text-[11px] leading-tight  whitespace-nowrap text-center w-full truncate ${isStale ? 'text-gray-400 dark:text-gray-500' : 'text-gray-900 dark:text-gray-100'}`}>{block.value}</div>
+          <div className="text-[8px] leading-tight font-semibold text-black dark:text-white uppercase tracking-tighter whitespace-nowrap text-center w-full truncate">{block.label}</div>
+          <div className={`text-[12px] leading-tight font-sans font-semibold tracking-tighter whitespace-nowrap text-center w-full truncate ${isStale ? 'text-gray-400 dark:text-gray-500' : 'text-gray-900 dark:text-gray-100'}`}>{block.value}</div>
         </div>
       ))}
     </div>
