@@ -44,7 +44,8 @@ class ClientSDKQuery {
       docs: snapshot.docs.map(d => ({
         id: d.id,
         exists: d.exists(),
-        data: () => d.data()
+        data: () => d.data(),
+        ref: d.ref
       }))
     };
   }
@@ -109,8 +110,16 @@ class ClientSDKFirestore {
   batch() {
     const b = writeBatch(firestoreDb);
     return {
-      set: (wrapper: any, data: any, options?: any) => b.set(wrapper.ref, data, options || {}),
-      update: (wrapper: any, data: any) => b.update(wrapper.ref, data),
+      set: (wrapper: any, data: any, options?: any) => {
+        const ref = wrapper?.ref || wrapper;
+        if (!ref) throw new Error("Invalid reference passed to batch.set");
+        b.set(ref, data, options || {});
+      },
+      update: (wrapper: any, data: any) => {
+        const ref = wrapper?.ref || wrapper;
+        if (!ref) throw new Error("Invalid reference passed to batch.update");
+        b.update(ref, data);
+      },
       commit: async () => b.commit()
     };
   }
