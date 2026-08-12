@@ -51,7 +51,7 @@ export function CourierSelector({
               key={quote.courierId}
               disabled={isUnavailable}
               onClick={() => onSelect(quote)}
-              className={`relative aspect-square rounded-xl border-2 flex flex-col items-center justify-center overflow-hidden transition-all ${
+              className={`relative py-4 rounded-xl border-2 flex flex-col items-center justify-center overflow-hidden transition-all ${
                 isUnavailable ? 'opacity-40 grayscale cursor-not-allowed border-gray-100 bg-gray-50' :
                 selectedQuote?.courierId === quote.courierId ? 'border-black bg-gray-50 shadow-lg scale-[1.02]' : 'border-gray-100 bg-white hover:border-gray-300'
               }`}
@@ -60,7 +60,7 @@ export function CourierSelector({
                 <img src={quote.logoUrl} className="w-full h-full object-contain" />
               </div>
               <div className="relative z-10 flex flex-col items-center">
-                <div className="font-black text-[11px] tracking-tighter leading-none mb-0.5">
+                <div className="font-black text-[14px] tracking-tighter leading-none mb-0.5">
                   {isUnavailable ? 'OFFLINE' : `₱${(quote.totalMinor / 100).toFixed(0)}`}
                 </div>
                 {!isUnavailable && (

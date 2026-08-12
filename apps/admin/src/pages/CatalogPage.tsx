@@ -207,7 +207,7 @@ export function CatalogPage() {
                         <div className="font-black text-sm text-gray-900 leading-none mb-1 uppercase tracking-tighter">{p.name}</div>
                         <div className="text-[10px] font-bold text-gray-400 flex items-center gap-2">
                           <span className="bg-gray-100 px-1.5 py-0.5 rounded text-gray-500">{p.sku}</span>
-                          <span className="not-italic">{p.subname}</span>
+                          <span>{p.subname}</span>
                         </div>
                         <div className="mt-2 flex flex-wrap gap-1">
                           {p.badges?.map(b => <GlossyBadge key={b} type={b as any} />)}

@@ -371,6 +371,15 @@ async function startServer() {
     }
   });
 
+  app.post("/v1/orders/:id/analyze-receipt", async (req, res, next) => {
+    try {
+      const { analyzeReceiptHandler } = await import("./apps/core-service/orders.js");
+      await analyzeReceiptHandler(req, res);
+    } catch (e) {
+      next(e);
+    }
+  });
+
   app.post("/v1/orders", async (req, res, next) => {
     try {
       const { createOrderHandler } = await import("./apps/core-service/orders.js");

@@ -5,9 +5,10 @@ import { ChevronLeft, PackageCheck, Truck, CheckCircle2, Receipt, AlertCircle, P
 interface PackingSlipModalProps {
   order: any;
   onClose: () => void;
+  onUpdateStatus?: (id: string, data: any) => void;
 }
 
-function PackingSlipModal({ order, onClose }: PackingSlipModalProps) {
+function PackingSlipModal({ order, onClose, onUpdateStatus }: PackingSlipModalProps) {
   const [tenant, setTenant] = useState<any>(null);
 
   useEffect(() => {
@@ -81,6 +82,40 @@ function PackingSlipModal({ order, onClose }: PackingSlipModalProps) {
                 </div>
               </div>
             </div>
+
+            {order.receipt && (
+              <div className="p-4 bg-gray-50 rounded-xl border border-gray-100 grid grid-cols-2 gap-4">
+                 <div>
+                    <div className="text-[8px] font-black uppercase tracking-widest text-gray-400 mb-2">Customer Proof</div>
+                    <img src={order.receipt.imageUrl} className="w-full h-40 object-contain rounded-lg border border-white shadow-sm" />
+                 </div>
+                 <div className="space-y-3">
+                    <div className="text-[8px] font-black uppercase tracking-widest text-gray-400">AI Verification Analysis</div>
+                    <div className="space-y-2">
+                       <div className="flex justify-between border-b border-gray-200 pb-1">
+                          <span className="text-[9px] font-bold text-gray-400 uppercase">Ref Number</span>
+                          <span className="text-[10px] font-black">{order.receipt.analysis?.referenceNumber || 'N/A'}</span>
+                       </div>
+                       <div className="flex justify-between border-b border-gray-200 pb-1">
+                          <span className="text-[9px] font-bold text-gray-400 uppercase">Amount</span>
+                          <span className="text-[10px] font-black">₱{order.receipt.analysis?.amount || 'N/A'}</span>
+                       </div>
+                       <div className="flex justify-between border-b border-gray-200 pb-1">
+                          <span className="text-[9px] font-bold text-gray-400 uppercase">Sender</span>
+                          <span className="text-[10px] font-black">{order.receipt.analysis?.senderName || 'N/A'}</span>
+                       </div>
+                    </div>
+                    {order.payment.status === 'PENDING' && (
+                       <button 
+                         onClick={() => onUpdateStatus(order.id, { payment: { ...order.payment, status: 'PAID' } })}
+                         className="w-full py-2 bg-green-600 text-white rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-green-700 shadow-lg shadow-green-600/20"
+                       >
+                         Confirm Ledger Match
+                       </button>
+                    )}
+                 </div>
+              </div>
+            )}
 
             <div className="space-y-4">
               <div className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Manifest</div>
@@ -250,7 +285,13 @@ export function OrderFulfillmentPage() {
         </div>
       </div>
 
-      {showPrintModal && <PackingSlipModal order={order} onClose={() => setShowPrintModal(false)} />}
+      {showPrintModal && (
+        <PackingSlipModal 
+          order={order} 
+          onClose={() => setShowPrintModal(false)} 
+          onUpdateStatus={() => approvePayment()} 
+        />
+      )}
 
       <div className="p-4 max-w-6xl mx-auto w-full grid grid-cols-1 md:grid-cols-3 gap-4 pb-[100px]">
         <div className="md:col-span-2 space-y-4">

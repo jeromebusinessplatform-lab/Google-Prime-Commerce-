@@ -220,8 +220,25 @@ export function CheckoutPage() {
   const amountDueOnDelivery = paymentTiming === 'delivery' ? deliveryFee : 0;
   const totalOrderValue = subtotal + tax + deliveryFee - discount;
 
+  const [isPlacing, setIsPlacing] = useState(false);
+  const [receiptImage, setReceiptImage] = useState<string | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState<any>(null);
+
+  const handleReceiptUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setReceiptImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handlePlaceOrder = async () => {
     if (!items.length || !selectedQuote || !paymentTiming) return;
+    setIsPlacing(true);
     try {
       const res = await fetch('/v1/orders', {
         method: 'POST',
@@ -230,7 +247,7 @@ export function CheckoutPage() {
           items,
           receiverName,
           receiverPhone,
-          paymentMethod,
+          paymentMethod: paymentMethod === 'wallet' ? 'GCASH/MAYA' : 'CARD',
           paymentTiming,
           selectedQuoteId: selectedQuote.id,
           address: selectedAddress ? (selectedAddress.properties?.formatted || selectedAddress.formatted) : addressSearch,
@@ -241,10 +258,24 @@ export function CheckoutPage() {
         })
       });
       const data = await res.json();
-      navigate(`/orders/${data.data.id}`);
+      const orderId = data.data.id;
+
+      if (receiptImage && paymentTiming === 'checkout') {
+        setIsAnalyzing(true);
+        await fetch(`/v1/orders/${orderId}/analyze-receipt`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ imageBase64: receiptImage })
+        });
+        setIsAnalyzing(false);
+      }
+
+      navigate(`/orders/${orderId}`);
       window.dispatchEvent(new CustomEvent('cart-updated'));
     } catch (e) {
       console.error(e);
+    } finally {
+      setIsPlacing(false);
     }
   };
 
@@ -451,6 +482,43 @@ export function CheckoutPage() {
                </div>
              </div>
           </div>
+
+          {paymentTiming === 'checkout' && (
+            <div className="space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
+               <h3 className="text-[10px] font-black uppercase tracking-widest text-gray-400 flex items-center gap-2">
+                 <ShieldCheck size={12} /> 05. Receipt Analysis
+               </h3>
+               <div className="relative">
+                 <input 
+                   type="file" 
+                   accept="image/*" 
+                   onChange={handleReceiptUpload}
+                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                 />
+                 <div className={`border-2 border-dashed rounded-2xl p-8 transition-all flex flex-col items-center justify-center gap-3 ${receiptImage ? 'border-black bg-black/5' : 'border-gray-200 bg-gray-50 hover:bg-gray-100'}`}>
+                   {receiptImage ? (
+                     <>
+                        <img src={receiptImage} className="w-20 h-20 object-cover rounded-xl shadow-lg border-2 border-white" />
+                        <div className="text-center">
+                          <div className="text-[10px] font-black uppercase tracking-widest text-black">Receipt Captured</div>
+                          <div className="text-[8px] font-bold text-gray-400 uppercase tracking-widest mt-1">Ready for AI Validation</div>
+                        </div>
+                     </>
+                   ) : (
+                     <>
+                        <div className="p-3 bg-white rounded-full shadow-lg border border-gray-100">
+                          <Wallet className="text-gray-400" size={24} />
+                        </div>
+                        <div className="text-center">
+                           <div className="text-[10px] font-black uppercase tracking-widest text-black">Upload Proof of Payment</div>
+                           <div className="text-[8px] font-bold text-gray-400 uppercase tracking-widest mt-1">Screenshots of GCash/Bank Transfer</div>
+                        </div>
+                     </>
+                   )}
+                 </div>
+               </div>
+            </div>
+          )}
         </section>
 
       </div>
@@ -463,12 +531,12 @@ export function CheckoutPage() {
              <div className="text-xl font-black tracking-tighter">₱{totalOrderValue.toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
            </div>
            <button 
-            disabled={!selectedQuote || !paymentTiming || !receiverName || !receiverPhone}
+            disabled={!selectedQuote || !paymentTiming || !receiverName || !receiverPhone || (paymentTiming === 'checkout' && !receiptImage) || isPlacing}
             onClick={handlePlaceOrder}
             className="px-10 bg-black text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-gray-800 disabled:bg-gray-200 disabled:text-gray-400 transition-all shadow-2xl shadow-black/20"
           >
-            Authorize Payment
-          </button>
+            {isPlacing ? (isAnalyzing ? 'ANALYZING LEDGER...' : 'PLACING ORDER...') : 'Authorize Payment'}
+           </button>
         </div>
       </div>
     </div>
