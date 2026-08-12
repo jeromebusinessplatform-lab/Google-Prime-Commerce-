@@ -40,45 +40,45 @@ function PackingSlipModal({ order, onClose, onUpdateStatus }: PackingSlipModalPr
           <div className="border-4 border-black p-6 space-y-8">
             <div className="flex justify-between items-start">
               <div className="space-y-1">
-                <div className="text-2xl font-black tracking-tighter uppercase">{tenant.name}</div>
-                <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">PACKING SLIP — ORDER #{order.id}</div>
+                <div className="text-2xl tracking-tighter uppercase">{tenant.name}</div>
+                <div className="text-[10px] text-gray-400 uppercase tracking-widest">PACKING SLIP — ORDER #{order.id}</div>
               </div>
               <div className="text-right space-y-1">
-                <div className="text-[8px] font-black uppercase tracking-widest text-gray-400">Order Date</div>
-                <div className="text-sm font-black">{new Date(order.date).toLocaleDateString()}</div>
+                <div className="text-[8px] uppercase tracking-widest text-gray-400">Order Date</div>
+                <div className="text-sm">{new Date(order.date).toLocaleDateString()}</div>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-8 border-y-2 border-black py-6">
               <div className="space-y-4">
                  <div>
-                    <div className="text-[9px] font-black uppercase tracking-[0.2em] text-gray-400 mb-1">From</div>
-                    <div className="text-[11px] font-black uppercase">{tenant.name}</div>
+                    <div className="text-[9px] uppercase tracking-[0.2em] text-gray-400 mb-1">From</div>
+                    <div className="text-[11px] uppercase">{tenant.name}</div>
                     <div className="text-[10px] font-medium text-gray-600 uppercase leading-relaxed max-w-[200px]">{tenant.address}</div>
-                    <div className="text-[10px] font-bold mt-1">{tenant.contactPhone}</div>
+                    <div className="text-[10px] mt-1">{tenant.contactPhone}</div>
                  </div>
                  <div>
-                    <div className="text-[9px] font-black uppercase tracking-[0.2em] text-gray-400 mb-1">Ship To</div>
-                    <div className="text-[11px] font-black uppercase leading-tight">{order.customer.name}</div>
+                    <div className="text-[9px] uppercase tracking-[0.2em] text-gray-400 mb-1">Ship To</div>
+                    <div className="text-[11px] uppercase leading-tight">{order.customer.name}</div>
                     <div className="text-[10px] font-medium text-gray-600 uppercase leading-relaxed">{order.customer.address}</div>
-                    <div className="text-[10px] font-bold">{order.customer.phone}</div>
+                    <div className="text-[10px]">{order.customer.phone}</div>
                  </div>
               </div>
               <div className="space-y-4">
                 <div>
-                   <div className="text-[9px] font-black uppercase tracking-[0.2em] text-gray-400 mb-1">Logistics Orchestration</div>
+                   <div className="text-[9px] uppercase tracking-[0.2em] text-gray-400 mb-1">Logistics Orchestration</div>
                    <div className="flex items-center gap-2">
-                     <div className="px-3 py-1 bg-black text-white text-[9px] font-black uppercase tracking-widest">
+                     <div className="px-3 py-1 bg-black text-white text-[9px] uppercase tracking-widest">
                        {order.delivery?.courierName || 'SELF-PICKUP'}
                      </div>
                      {order.delivery?.mode && (
-                       <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">({order.delivery.mode})</span>
+                       <span className="text-[9px] text-gray-400 uppercase tracking-widest">({order.delivery.mode})</span>
                      )}
                    </div>
                 </div>
                 <div>
-                   <div className="text-[9px] font-black uppercase tracking-[0.2em] text-gray-400 mb-1">Financial State</div>
-                   <div className="text-[10px] font-black uppercase">{order.payment.method} — {order.payment.status}</div>
+                   <div className="text-[9px] uppercase tracking-[0.2em] text-gray-400 mb-1">Financial State</div>
+                   <div className="text-[10px] uppercase">{order.payment.method} — {order.payment.status}</div>
                 </div>
               </div>
             </div>
@@ -86,29 +86,29 @@ function PackingSlipModal({ order, onClose, onUpdateStatus }: PackingSlipModalPr
             {order.receipt && (
               <div className="p-4 bg-gray-50 rounded-xl border border-gray-100 grid grid-cols-2 gap-4">
                  <div>
-                    <div className="text-[8px] font-black uppercase tracking-widest text-gray-400 mb-2">Customer Proof</div>
+                    <div className="text-[8px] uppercase tracking-widest text-gray-400 mb-2">Customer Proof</div>
                     <img src={order.receipt.imageUrl} className="w-full h-40 object-contain rounded-lg border border-white shadow-sm" />
                  </div>
                  <div className="space-y-3">
-                    <div className="text-[8px] font-black uppercase tracking-widest text-gray-400">AI Verification Analysis</div>
+                    <div className="text-[8px] uppercase tracking-widest text-gray-400">AI Verification Analysis</div>
                     <div className="space-y-2">
                        <div className="flex justify-between border-b border-gray-200 pb-1">
-                          <span className="text-[9px] font-bold text-gray-400 uppercase">Ref Number</span>
-                          <span className="text-[10px] font-black">{order.receipt.analysis?.referenceNumber || 'N/A'}</span>
+                          <span className="text-[9px] text-gray-400 uppercase">Ref Number</span>
+                          <span className="text-[10px]">{order.receipt.analysis?.referenceNumber || 'N/A'}</span>
                        </div>
                        <div className="flex justify-between border-b border-gray-200 pb-1">
-                          <span className="text-[9px] font-bold text-gray-400 uppercase">Amount</span>
-                          <span className="text-[10px] font-black">₱{order.receipt.analysis?.amount || 'N/A'}</span>
+                          <span className="text-[9px] text-gray-400 uppercase">Amount</span>
+                          <span className="text-[10px]">₱{order.receipt.analysis?.amount || 'N/A'}</span>
                        </div>
                        <div className="flex justify-between border-b border-gray-200 pb-1">
-                          <span className="text-[9px] font-bold text-gray-400 uppercase">Sender</span>
-                          <span className="text-[10px] font-black">{order.receipt.analysis?.senderName || 'N/A'}</span>
+                          <span className="text-[9px] text-gray-400 uppercase">Sender</span>
+                          <span className="text-[10px]">{order.receipt.analysis?.senderName || 'N/A'}</span>
                        </div>
                     </div>
                     {order.payment.status === 'PENDING' && (
                        <button 
-                         onClick={() => onUpdateStatus(order.id, { payment: { ...order.payment, status: 'PAID' } })}
-                         className="w-full py-2 bg-green-600 text-white rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-green-700 shadow-lg shadow-green-600/20"
+                         onClick={() => onUpdateStatus?.(order.id, { payment: { ...order.payment, status: 'PAID' } })}
+                         className="w-full py-2 bg-green-600 text-white rounded-lg text-[9px] uppercase tracking-widest hover:bg-green-700 shadow-lg shadow-green-600/20"
                        >
                          Confirm Ledger Match
                        </button>
@@ -118,10 +118,10 @@ function PackingSlipModal({ order, onClose, onUpdateStatus }: PackingSlipModalPr
             )}
 
             <div className="space-y-4">
-              <div className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Manifest</div>
+              <div className="text-[10px] uppercase tracking-[0.2em] text-gray-400">Manifest</div>
               <table className="w-full">
                 <thead>
-                  <tr className="border-b-2 border-black text-left text-[10px] font-black uppercase tracking-widest">
+                  <tr className="border-b-2 border-black text-left text-[10px] uppercase tracking-widest">
                     <th className="pb-2">Description</th>
                     <th className="pb-2 text-center w-20">Qty</th>
                     <th className="pb-2 text-right w-32">Total</th>
@@ -131,18 +131,18 @@ function PackingSlipModal({ order, onClose, onUpdateStatus }: PackingSlipModalPr
                   {order.items.map((item: any) => (
                     <tr key={item.id}>
                       <td className="py-4">
-                        <div className="text-xs font-black uppercase">{item.name}</div>
-                        <div className="text-[10px] text-gray-400 font-bold uppercase">Unit Price: ₱{item.price.toLocaleString()}</div>
+                        <div className="text-xs uppercase">{item.name}</div>
+                        <div className="text-[10px] text-gray-400 uppercase">Unit Price: ₱{item.price.toLocaleString()}</div>
                       </td>
-                      <td className="py-4 text-center text-sm font-black">{item.qty}</td>
-                      <td className="py-4 text-right text-sm font-black">₱{(item.price * item.qty).toLocaleString()}</td>
+                      <td className="py-4 text-center text-sm">{item.qty}</td>
+                      <td className="py-4 text-right text-sm">₱{(item.price * item.qty).toLocaleString()}</td>
                     </tr>
                   ))}
                 </tbody>
                 <tfoot>
                   <tr className="border-t-2 border-black">
-                    <td colSpan={2} className="py-4 text-right text-[10px] font-black uppercase tracking-widest">Total Value</td>
-                    <td className="py-4 text-right text-lg font-black tracking-tighter">₱{order.total.toLocaleString()}</td>
+                    <td colSpan={2} className="py-4 text-right text-[10px] uppercase tracking-widest">Total Value</td>
+                    <td className="py-4 text-right text-lg tracking-tighter">₱{order.total.toLocaleString()}</td>
                   </tr>
                 </tfoot>
               </table>

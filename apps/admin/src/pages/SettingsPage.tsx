@@ -34,7 +34,7 @@ export function SettingsPage() {
   return (
     <div className="p-4 max-w-6xl mx-auto w-full flex flex-col md:flex-row gap-6 bg-gray-50/30 min-h-screen">
       <div className="w-full md:w-64 flex-shrink-0">
-        <h2 className="text-3xl font-black tracking-tighter text-gray-900 uppercase mb-6">Orchestration</h2>
+        <h2 className="tracking-tighter text-gray-900 uppercase mb-6">Orchestration</h2>
         <div className="flex flex-col space-y-1">
           <button 
             onClick={() => setActiveTab('identity')} 

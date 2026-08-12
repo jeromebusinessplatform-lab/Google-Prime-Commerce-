@@ -23,7 +23,7 @@ export function GlobalHeader({ title }: { title?: string }) {
           className="h-7 object-contain max-w-[120px] dark:invert" 
         />
         {(shouldShowTitle || tenant?.name) && (
-          <span className="ml-3 font-black uppercase tracking-tighter text-gray-900 dark:text-gray-100 border-l border-gray-200 dark:border-gray-800 pl-3 text-sm">
+          <span className="ml-3 uppercase tracking-tighter text-gray-900 dark:text-gray-100 border-l border-gray-200 dark:border-gray-800 pl-3">
             {title || tenant?.name}
           </span>
         )}
