@@ -139,7 +139,7 @@ export default function App() {
     <ThemeProvider>
       <BrowserRouter basename="/admin">
         <div className="min-h-screen bg-gray-50 dark:bg-gray-950 dark:text-gray-100 flex flex-col transition-colors">
-        <GlobalHeader title="Admin" />
+        <GlobalHeader />
         <QueueMonitor />
         <div className="pt-[calc(55px+35px+env(safe-area-inset-top,0px))] pb-[calc(18px+env(safe-area-inset-bottom,0px))] flex-1 flex flex-col">
           <AdminNav />
