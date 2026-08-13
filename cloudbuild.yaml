@@ -1,3 +1,6 @@
+# DEPRECATED — Google Cloud Build pipeline (legacy).
+# The stack now deploys to Cloudflare Workers + D1; see DEPLOYMENT-CLOUDFLARE.md.
+# Kept for reference/rollback only. To use: gcloud builds submit --config cloudbuild.yaml
 # Builds the Prime container and deploys it to Cloud Run.
 # Usage:
 #   gcloud builds submit --config cloudbuild.yaml

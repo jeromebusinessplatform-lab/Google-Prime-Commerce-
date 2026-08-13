@@ -1,0 +1,30 @@
+# Cloudflare Workers configuration for the PRIME commerce stack.
+#
+# Deploy (after `npm run build`):
+#   npm run deploy:cloudflare
+#
+# First-time setup (see DEPLOYMENT-CLOUDFLARE.md):
+#   npx wrangler d1 create prime-db          # prints a database_id
+#   npx wrangler d1 migrations apply prime-db --remote
+#   npx wrangler secret put SESSION_SIGNING_KEY_CURRENT
+#   ...
+
+name = "prime-commerce"
+main = "dist-worker/index.js"
+compatibility_date = "2026-08-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Cloudflare D1 database. Replace database_id with the value from
+# `npx wrangler d1 create prime-db`.
+[[d1_databases]]
+binding = "DB"
+database_name = "prime-db"
+database_id = "00000000-0000-0000-0000-000000000000"
+migrations_dir = "migrations"
+
+# Vite build output (storefront at /, admin at /admin). The Worker handles
+# SPA fallback routing itself (see worker/index.ts).
+[assets]
+directory = "./dist"
+binding = "ASSETS"
+not_found_handling = "none"

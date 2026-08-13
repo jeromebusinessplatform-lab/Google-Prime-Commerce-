@@ -1,4 +1,16 @@
-# Google Cloud Deployment — Prime
+# Deployment — Prime
+
+> **Status: migrated to Cloudflare.** The production target is now
+> Cloudflare Workers + D1 + Workers Static Assets. Follow
+> **[DEPLOYMENT-CLOUDFLARE.md](DEPLOYMENT-CLOUDFLARE.md)** instead.
+>
+> The Google Cloud Run instructions below are kept for reference only
+> (historical/rollback). Google deploy requires Google credentials that are no
+> longer part of the primary path.
+
+---
+
+# Google Cloud Deployment — Prime (legacy reference)
 
 The whole system runs in the Google ecosystem as a **single Cloud Run service**:
 
