@@ -4,7 +4,8 @@ import path from "path";
 import { initializeApp } from "firebase/app";
 import { 
   getFirestore, collection, doc, setDoc, getDoc, updateDoc, deleteDoc, 
-  getDocs, query, where, limit as fLimit, addDoc, writeBatch, orderBy
+  getDocs, query, where, limit as fLimit, addDoc, writeBatch, orderBy,
+  runTransaction as firestoreRunTransaction, increment
 } from "firebase/firestore";
 
 let databaseId = undefined;
@@ -20,7 +21,12 @@ try {
 }
 
 const app = initializeApp(firebaseConfig);
-const firestoreDb = getFirestore(app, databaseId);
+let firestoreDb: any = (global as any).__firestoreDb;
+if (!firestoreDb) {
+  firestoreDb = getFirestore(app, databaseId);
+  (global as any).__firestoreDb = firestoreDb;
+  console.log("Initialized firestoreDb", firestoreDb);
+}
 
 class ClientSDKQuery {
   constructor(private q: any) {}
@@ -107,6 +113,30 @@ class ClientSDKFirestore {
     return new ClientSDKCollection(path);
   }
 
+  async runTransaction(updateFunction: any) {
+    return await firestoreRunTransaction(firestoreDb, async (transaction) => {
+      const wrappedTransaction = {
+        get: async (ref: any) => {
+          const snap = await transaction.get(ref);
+          return {
+            exists: snap.exists(),
+            data: () => snap.data()
+          };
+        },
+        set: (ref: any, data: any, options?: any) => transaction.set(ref, data, options || {}),
+        update: (ref: any, data: any) => transaction.update(ref, data),
+        delete: (ref: any) => transaction.delete(ref)
+      };
+      return await updateFunction(wrappedTransaction);
+    });
+  }
+
+  get FieldValue() {
+    return {
+      increment
+    };
+  }
+
   batch() {
     const b = writeBatch(firestoreDb);
     return {
@@ -127,4 +157,5 @@ class ClientSDKFirestore {
 
 export const db = new ClientSDKFirestore();
 export const storage = null;
+export { firestoreDb };
 

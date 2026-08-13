@@ -1,8 +1,9 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { Product } from '../../../packages/domain/catalog';
 import { CheckCircle2, Search } from 'lucide-react';
 
 export function ShopPage() {
-  const [products, setProducts] = useState<any[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [toast, setToast] = useState<string | null>(null);
   const [search, setSearch] = useState('');
@@ -39,7 +40,7 @@ export function ShopPage() {
     return matchesSearch && matchesCategory;
   });
 
-  const handleAddToCart = async (product: any) => {
+  const handleAddToCart = async (product: Product) => {
     try {
       // First get current cart
       const cartRes = await fetch('/v1/cart');
