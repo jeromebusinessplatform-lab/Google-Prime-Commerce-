@@ -16,6 +16,6 @@ This checklist covers runtime verification and deployment readiness after the pa
 
 ## 5.3 Operational Guardrails
 
-- [ ] Keep failure modes explicit in health and readiness responses.
-- [ ] Ensure recovered state from prior phases survives a restart/reload path.
-- [ ] Keep Phase 5 work from regressing payment/review/queue persistence.
+- [x] Keep failure modes explicit in health and readiness responses.
+- [x] Ensure recovered state from prior phases survives a restart/reload path.
+- [x] Keep Phase 5 work from regressing payment/review/queue persistence.

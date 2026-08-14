@@ -45,10 +45,6 @@ export interface ApiRoute {
 // Single source of truth for the API surface. Registered on the Express app
 // by `registerApiRoutes` (server.ts) and consumed by the Cloudflare Worker
 // fetch router (worker/router.ts).
-//
-// Note: `orders.js` currently only exports `createOrderHandler`; the other
-// order routes are registered for parity with the original server but their
-// handlers are unresolved (returns 500, same as before the migration).
 export const apiRoutes: ApiRoute[] = [
   { method: "post", path: "/v1/auth/telegram/exchange", handler: telegramExchangeHandler },
   { method: "post", path: "/v1/admin/auth/login", handler: adminLoginHandler },

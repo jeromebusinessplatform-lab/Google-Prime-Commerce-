@@ -1,8 +1,11 @@
 import { validateAppEnvForRuntime } from "../../packages/config/env.js";
 
 export function getRuntimeHealth(runtime: "server" | "worker") {
-  const envHealth = validateAppEnvForRuntime(runtime);
-  const service = runtime === "worker" ? "prime-commerce-worker" : "prime-commerce-server";
+  const envHealth = validateAppEnvForRuntime(runtime, process.env as any, {
+    strict: true,
+  });
+  const service =
+    runtime === "worker" ? "prime-commerce-worker" : "prime-commerce-server";
   return {
     service,
     status: envHealth.ok ? "ready" : "config_error",
