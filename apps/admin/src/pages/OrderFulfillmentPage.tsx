@@ -517,6 +517,21 @@ export function OrderFulfillmentPage() {
               {order.customer.address}
             </div>
           </div>
+
+          <div className="bg-white dark:bg-gray-900 p-4 rounded-md border border-gray-200 dark:border-gray-800 shadow-sm transition-colors space-y-2">
+            <h3 className="text-sm text-gray-500 dark:text-gray-400">DELIVERY TIMELINE</h3>
+            {[
+              ['Queue entered', order.queueEnteredAt],
+              ['Ready', order.readyAt],
+              ['Dispatched', order.dispatchedAt],
+              ['Delivered', order.deliveredAt],
+            ].map(([label, value]) => (
+              <div key={label as string} className="flex justify-between gap-3 text-xs">
+                <span className="uppercase tracking-widest text-gray-400 dark:text-gray-500">{label}</span>
+                <span className="text-right text-gray-700 dark:text-gray-300">{value ? new Date(String(value)).toLocaleString() : '—'}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>

@@ -365,13 +365,22 @@ export const setOrderFulfillmentStatusHandler = async (req: Request, res: Respon
   if (!existing.exists) return res.status(404).json({ error: "Order not found" });
   const current = existing.data() as Record<string, any>;
   const nextStatus = req.body?.status || current.status;
+  const now = new Date().toISOString();
+  const isQueueEntry = !current.queueEnteredAt && ["ON_QUEUE", "payment_review", "PENDING", "QUEUED"].includes(String(current.queueStatus || current.status));
+  const nextQueueEnteredAt = current.queueEnteredAt || (isQueueEntry ? now : null);
+  const nextReadyAt = nextStatus === "READY" ? (current.readyAt || now) : current.readyAt || null;
+  const nextDispatchedAt = nextStatus === "DISPATCHED" ? (current.dispatchedAt || now) : current.dispatchedAt || null;
+  const nextDeliveredAt = nextStatus === "DELIVERED" ? (current.deliveredAt || now) : current.deliveredAt || null;
+  const nextQueueStatus = nextStatus === "DISPATCHED" || nextStatus === "DELIVERED" ? "COMPLETED" : (nextStatus === "READY" || nextStatus === "FOR_PICKUP" ? "READY" : current.queueStatus || "ON_QUEUE");
   await orderRef.set({
     ...current,
     status: nextStatus,
-    queueStatus: nextStatus === "DISPATCHED" || nextStatus === "DELIVERED" ? "COMPLETED" : current.queueStatus,
-    queueEnteredAt: current.queueEnteredAt || new Date().toISOString(),
-    dispatchedAt: nextStatus === "DISPATCHED" ? new Date().toISOString() : current.dispatchedAt || null,
-    updatedAt: new Date().toISOString(),
+    queueStatus: nextQueueStatus,
+    queueEnteredAt: nextQueueEnteredAt,
+    readyAt: nextReadyAt,
+    dispatchedAt: nextDispatchedAt,
+    deliveredAt: nextDeliveredAt,
+    updatedAt: now,
   });
   return res.json({ success: true, data: { orderId, status: nextStatus } });
 };

@@ -12,8 +12,12 @@ export const getOrderQueueSummaryHandler = async (req: Request, res: Response) =
   const readyCount = docs.filter((o: any) => o.status === 'READY').length;
   const dispatchedCount = docs.filter((o: any) => o.status === 'DISPATCHED').length;
   const onHoldCount = docs.filter((o: any) => o.status === 'HOLD').length;
-  const startDates = docs.map((o: any) => o.queueEnteredAt).filter(Boolean);
-  const endDates = docs.map((o: any) => o.dispatchedAt).filter(Boolean);
+  const queueEntryDates = docs.map((o: any) => o.queueEnteredAt).filter(Boolean).sort();
+  const readyDates = docs.map((o: any) => o.readyAt).filter(Boolean).sort();
+  const dispatchedDates = docs.map((o: any) => o.dispatchedAt).filter(Boolean).sort();
+  const deliveredDates = docs.map((o: any) => o.deliveredAt).filter(Boolean).sort();
+  const latestQueueEntry = queueEntryDates.at(-1) || null;
+  const latestDispatch = dispatchedDates.at(-1) || null;
 
   res.json({
     generated_at: new Date().toISOString(),
@@ -31,6 +35,10 @@ export const getOrderQueueSummaryHandler = async (req: Request, res: Response) =
     active_load: onQueueCount + processingCount,
     traffic: (onQueueCount + processingCount) > 10 ? "HEAVY" : (onQueueCount + processingCount) > 5 ? "MODERATE" : "LIGHT",
     stale_after_seconds: 45,
-    avg_queue_minutes: startDates.length && endDates.length ? Math.round((new Date(endDates[0]).getTime() - new Date(startDates[0]).getTime()) / 60000) : null,
+    avg_queue_minutes: queueEntryDates.length && dispatchedDates.length ? Math.round((new Date(latestDispatch).getTime() - new Date(latestQueueEntry).getTime()) / 60000) : null,
+    queue_entry_sample_size: queueEntryDates.length,
+    ready_sample_size: readyDates.length,
+    dispatched_sample_size: dispatchedDates.length,
+    delivered_sample_size: deliveredDates.length,
   });
 };
