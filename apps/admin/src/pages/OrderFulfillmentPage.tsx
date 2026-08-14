@@ -249,8 +249,8 @@ export function OrderFulfillmentPage() {
 
   const approvePayment = async () => {
     try {
-      await fetch(`/v1/orders/${id}`, {
-        method: 'PATCH',
+      await fetch(`/v1/orders/${id}/finalize-review`, {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: 'PROCESSING', payment: { ...order.payment, status: 'VERIFIED' } })
       });

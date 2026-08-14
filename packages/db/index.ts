@@ -21,11 +21,28 @@
 // the Cloudflare Worker bundle.
 
 import * as firestore from "./firestore.js";
-import * as d1 from "../db-d1/index.js";
 
 const useD1 =
   typeof process !== "undefined" && process.env?.DB_DRIVER === "d1";
 
-export const db = useD1 ? d1.db : firestore.db;
+const d1Promise = useD1 ? import("../db-d1/index.js") : null;
+
+async function getD1Module() {
+  if (!d1Promise) throw new Error("D1 adapter is not enabled");
+  return await d1Promise;
+}
+
+export const db: any = useD1
+  ? new Proxy({}, {
+      get(_target, prop) {
+        return async (...args: any[]) => {
+          const mod = await getD1Module();
+          const value = (mod.db as any)[prop];
+          if (typeof value === "function") return value.apply(mod.db, args);
+          return value;
+        };
+      },
+    })
+  : firestore.db;
 export const storage = null;
 export const firestoreDb = useD1 ? null : firestore.firestoreDb;

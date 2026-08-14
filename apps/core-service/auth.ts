@@ -105,7 +105,7 @@ export const adminLoginHandler = async (req: Request, res: Response) => {
     }
     
     const normalizedCode = accessCode.trim().toUpperCase().normalize('NFKC');
-    const expectedCode = env.ADMIN_BOOTSTRAP_CODE.trim().toUpperCase().normalize('NFKC');
+    const expectedCode = (env.ADMIN_ACCESS_CODE || env.ADMIN_BOOTSTRAP_CODE).trim().toUpperCase().normalize('NFKC');
 
     if (normalizedCode !== expectedCode) {
       return res.status(401).json({ error: "Invalid credentials" }); // Generic message

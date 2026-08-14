@@ -1,5 +1,11 @@
 import { describe, it, expect, beforeAll, beforeEach } from "vitest";
 
+const sqliteAvailable = await import("node:sqlite")
+  .then(() => true)
+  .catch(() => false);
+
+const suite = sqliteAvailable ? describe : describe.skip;
+
 // Force the in-memory local driver regardless of CI env.
 process.env.DB_PATH = ":memory:";
 
@@ -18,7 +24,7 @@ beforeEach(async () => {
   await wipe();
 });
 
-describe("D1/SQLite adapter (Firestore-compatible facade)", () => {
+suite("D1/SQLite adapter (Firestore-compatible facade)", () => {
   it("adds a document with an auto-generated id and reads it back", async () => {
     const ref = await db.collection("tenants/default/products").add({
       name: "Milk",

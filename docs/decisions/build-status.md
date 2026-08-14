@@ -1,27 +1,26 @@
 # Build Status
 
 ## Completed Slices
-- Phase 0: Greenfield isolation and architecture baseline (Completed)
-- Pre-Phase 1 Refactoring: Preview Mode Ephemeral Secrets & Clean Env 
-- Phase 1: Security, tenancy, and platform foundation (Completed)
-- Phase 2: Catalog, storefront, product admin, cart (Completed)
-- Phase 3: Checkout, inventory, rules, orders (Completed)
-- Phase 4: Order tracking, fulfillment, proof (Completed)
-- Final Polish & Integration Testing (Completed)
+- Cloudflare deployment baseline exists.
+- Storefront/admin/core-service split exists.
+- Core commerce flows exist: auth, catalog, cart, checkout, orders, courier, geo, and queue domain.
+- Runtime validation and health semantics now exist for Node and Worker entrypoints.
+- Recovery log added for the interrupted rebuild.
 
 ## Current Slices
-- All phases completed.
+- Runtime validation and health semantics.
+- Directive gap reconciliation.
 
 ## Current Migrations
 - None
 
 ## Validation Results
-- None yet
+- Local code inspection only.
 
 ## Known Blockers
-- None
+- No full production runtime verification yet.
 
 ## Next Work
-- Implement Phase 0 directory structure, baseline configuration.
-- Setup Profile B configuration skeleton.
-- Proceed to Phase 1 (Security, tenancy, platform foundation).
+- Work through [Phase 4 Checklist](./phase-4-checklist.md) item by item.
+- Verify the worker and API entrypoints against the current deployment path.
+- Complete the full runtime check for required production variables.

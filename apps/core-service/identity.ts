@@ -6,7 +6,12 @@ const DEFAULT_TENANT = "default";
 
 export async function enrollOrUpdateIdentity(tenantId: string, botId: string, user: any, source: string) {
   const customersRef = db.collection(`tenants/${tenantId}/customers`);
-  const customerQuery = await customersRef.where("telegramUserId", "==", user.id.toString()).limit(1).get();
+  const customerSnapshot = await customersRef.get();
+  const customerQuery = {
+    empty: false,
+    docs: customerSnapshot.docs.filter((doc: any) => (doc.data() as any).telegramUserId === user.id.toString()).slice(0, 1),
+  } as any;
+  customerQuery.empty = customerQuery.docs.length === 0;
   
   let primeMemberId;
   let customerDocId;
@@ -15,7 +20,11 @@ export async function enrollOrUpdateIdentity(tenantId: string, botId: string, us
     let unique = false;
     while (!unique) {
       primeMemberId = crypto.randomBytes(5).toString("hex").toUpperCase();
-      const checkPrimeQuery = await customersRef.where("primeMemberId", "==", primeMemberId).limit(1).get();
+      const checkPrimeQuery = {
+        empty: false,
+        docs: customerSnapshot.docs.filter((doc: any) => (doc.data() as any).primeMemberId === primeMemberId).slice(0, 1),
+      } as any;
+      checkPrimeQuery.empty = checkPrimeQuery.docs.length === 0;
       if (checkPrimeQuery.empty) {
         unique = true;
       }
@@ -85,7 +94,12 @@ export const getCustomerHandler = async (req: Request, res: Response) => {
   if (!telegramUserId) return res.status(400).json({ error: "Missing ID" });
 
   const customersRef = db.collection(`tenants/${tenantId}/customers`);
-  const query = await customersRef.where("telegramUserId", "==", telegramUserId.toString()).limit(1).get();
+  const snapshot = await customersRef.get();
+  const query = {
+    empty: false,
+    docs: snapshot.docs.filter((doc: any) => (doc.data() as any).telegramUserId === telegramUserId.toString()).slice(0, 1),
+  } as any;
+  query.empty = query.docs.length === 0;
   
   if (query.empty) return res.status(404).json({ error: "Customer not found" });
   

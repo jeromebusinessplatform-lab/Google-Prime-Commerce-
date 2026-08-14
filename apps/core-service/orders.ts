@@ -7,7 +7,7 @@ export const createOrderHandler = async (req: Request, res: Response) => {
   const tenantId = "default";
   const customerIdRaw = req.headers["x-customer-id"] || "preview-user-id";
   const customerId = Array.isArray(customerIdRaw) ? customerIdRaw[0] : customerIdRaw;
-  const { items, receiverName, receiverPhone, address, totals, delivery } = req.body;
+  const { items, receiverName, receiverPhone, address, totals, delivery, paymentMethod, receipt, payment, checkoutSessionId, paymentDraftId } = req.body;
 
   let orderId;
 
@@ -48,15 +48,37 @@ export const createOrderHandler = async (req: Request, res: Response) => {
         total: totals?.total || 0,
         delivery,
         payment: {
-          method: req.body.paymentMethod || 'COD',
-          status: 'PENDING'
+          method: paymentMethod || 'COD',
+          status: payment?.status || (receipt ? 'PENDING_REVIEW' : 'PENDING'),
+          proofUrl: receipt?.imageUrl || null,
         },
-        status: 'PENDING',
+        receipt: receipt || null,
+        checkoutSessionId: checkoutSessionId || null,
+        paymentDraftId: paymentDraftId || null,
+        status: receipt ? 'payment_review' : 'PENDING',
+        reviewStatus: receipt?.analysis?.verified ? 'VALIDATED' : receipt ? 'UNVALIDATED' : null,
+        queueStatus: receipt ? 'ON_QUEUE' : 'DRAFT',
         date: new Date().toISOString(),
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       });
       
       transaction.set(db.collection(`tenants/${tenantId}/orders`).doc(orderId), orderData);
+
+      if (paymentDraftId) {
+        transaction.set(db.collection(`tenants/${tenantId}/payment_drafts`).doc(paymentDraftId), {
+          id: paymentDraftId,
+          customerId,
+          checkoutSessionId: checkoutSessionId || null,
+          orderId,
+          provider: paymentMethod || "manual",
+          proofUrl: receipt?.imageUrl || null,
+          amount: totals?.total || 0,
+          quoteSnapshot: delivery || null,
+          status: "submitted",
+          updatedAt: new Date().toISOString(),
+          submittedAt: new Date().toISOString(),
+        });
+      }
       
       // Clear cart
       transaction.set(db.collection(`tenants/${tenantId}/carts`).doc(customerId), { items: [] });
@@ -117,6 +139,8 @@ export const updateOrderHandler = async (req: Request, res: Response) => {
     payment: patch.payment ? { ...current.payment, ...patch.payment } : current.payment,
     delivery: patch.delivery ? { ...current.delivery, ...patch.delivery } : current.delivery,
     receipt: patch.receipt ? { ...current.receipt, ...patch.receipt } : current.receipt,
+    reviewStatus: patch.reviewStatus ?? current.reviewStatus ?? null,
+    queueStatus: patch.queueStatus ?? current.queueStatus ?? null,
     updatedAt: new Date().toISOString()
   };
 
@@ -146,6 +170,7 @@ export const analyzeReceiptHandler = async (req: Request, res: Response) => {
     amount: current.total || 0,
     senderName: current.customerName || "Unknown Sender",
     verified: true,
+    verdict: "VALIDATED",
     analyzedAt: new Date().toISOString()
   };
 
@@ -161,10 +186,127 @@ export const analyzeReceiptHandler = async (req: Request, res: Response) => {
       ...current.payment,
       status: "VERIFIED"
     },
+    reviewStatus: "VALIDATED",
+    queueStatus: "ON_QUEUE",
+    status: "payment_review",
     updatedAt: new Date().toISOString()
   });
 
   return res.json({ success: true, data: { orderId, receipt } });
+};
+
+export const finalizePaymentReviewHandler = async (req: Request, res: Response) => {
+  const tenantId = "default";
+  const orderId = req.params.id;
+  const orderRef = db.collection(`tenants/${tenantId}/orders`).doc(orderId);
+  const existing = await orderRef.get();
+
+  if (!existing.exists) {
+    return res.status(404).json({ error: "Order not found" });
+  }
+
+  const current = existing.data() as Record<string, any>;
+  const reviewStatus = current.receipt?.analysis?.verified ? "VALIDATED" : "UNVALIDATED";
+  await orderRef.set({
+    ...current,
+    reviewStatus,
+    queueStatus: "ON_QUEUE",
+    status: "payment_review",
+    updatedAt: new Date().toISOString(),
+  });
+
+  return res.json({ success: true, data: { orderId, reviewStatus } });
+};
+
+export const createPaymentDraftHandler = async (req: Request, res: Response) => {
+  const tenantId = "default";
+  const customerId = (req.headers["x-customer-id"] || "preview-user-id").toString();
+  const draft = {
+    id: crypto.randomUUID(),
+    customerId,
+    checkoutSessionId: req.body?.checkoutSessionId || null,
+    orderId: req.body?.orderId || null,
+    provider: req.body?.provider || "manual",
+    status: "draft",
+    proofUrl: req.body?.proofUrl || null,
+    amount: Number(req.body?.amount || 0),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+  await db.collection(`tenants/${tenantId}/payment_drafts`).doc(draft.id).set(draft);
+  return res.json({ success: true, data: draft });
+};
+
+export const reviewReceiptHandler = async (req: Request, res: Response) => {
+  const tenantId = "default";
+  const orderId = req.params.id;
+  const orderRef = db.collection(`tenants/${tenantId}/orders`).doc(orderId);
+  const existing = await orderRef.get();
+  if (!existing.exists) return res.status(404).json({ error: "Order not found" });
+  const current = existing.data() as Record<string, any>;
+  const imageBase64 = req.body?.imageBase64;
+  if (!imageBase64) return res.status(400).json({ error: "Missing imageBase64" });
+  const analysis = {
+    referenceNumber: `PRIME-${orderId.slice(-4)}`,
+    amount: current.total || 0,
+    senderName: current.customerName || "Unknown Sender",
+    verified: Boolean(req.body?.verified ?? true),
+    verdict: req.body?.verified === false ? "UNVALIDATED" : "VALIDATED",
+    analyzedAt: new Date().toISOString(),
+  };
+  const receipt = { imageUrl: imageBase64, analysis };
+  await orderRef.set({
+    ...current,
+    receipt,
+    reviewStatus: analysis.verdict,
+    queueStatus: "ON_QUEUE",
+    status: "payment_review",
+    payment: { ...current.payment, proofUrl: imageBase64, status: analysis.verdict === "VALIDATED" ? "VERIFIED" : "PENDING_REVIEW" },
+    updatedAt: new Date().toISOString(),
+  });
+  return res.json({ success: true, data: { orderId, receipt } });
+};
+
+export const setOrderFulfillmentStatusHandler = async (req: Request, res: Response) => {
+  const tenantId = "default";
+  const orderId = req.params.id;
+  const orderRef = db.collection(`tenants/${tenantId}/orders`).doc(orderId);
+  const existing = await orderRef.get();
+  if (!existing.exists) return res.status(404).json({ error: "Order not found" });
+  const current = existing.data() as Record<string, any>;
+  const nextStatus = req.body?.status || current.status;
+  await orderRef.set({
+    ...current,
+    status: nextStatus,
+    queueStatus: nextStatus === "DISPATCHED" || nextStatus === "DELIVERED" ? "COMPLETED" : current.queueStatus,
+    queueEnteredAt: current.queueEnteredAt || new Date().toISOString(),
+    dispatchedAt: nextStatus === "DISPATCHED" ? new Date().toISOString() : current.dispatchedAt || null,
+    updatedAt: new Date().toISOString(),
+  });
+  return res.json({ success: true, data: { orderId, status: nextStatus } });
+};
+
+export const createOrderAmendmentHandler = async (req: Request, res: Response) => {
+  const tenantId = "default";
+  const orderId = req.params.id;
+  const orderRef = db.collection(`tenants/${tenantId}/orders`).doc(orderId);
+  const existing = await orderRef.get();
+  if (!existing.exists) return res.status(404).json({ error: "Order not found" });
+  const current = existing.data() as Record<string, any>;
+  const amendment = {
+    id: crypto.randomUUID(),
+    orderId,
+    patch: sanitize(req.body || {}),
+    createdAt: new Date().toISOString(),
+    status: "pending",
+  };
+  await db.collection(`tenants/${tenantId}/order_amendments`).doc(amendment.id).set(amendment);
+  await orderRef.set({
+    ...current,
+    amendmentStatus: "pending",
+    updatedAt: new Date().toISOString(),
+  });
+  return res.json({ success: true, data: amendment });
 };
 
 const sanitize = (obj: any) => {

@@ -13,6 +13,9 @@ import { PromotionsPage } from './pages/PromotionsPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { CourierPage } from './pages/CourierPage';
 import { AnalyticsPage } from './pages/AnalyticsPage';
+import { SupportPage } from './pages/SupportPage';
+import { FraudPage } from './pages/FraudPage';
+import { ReportsPage } from './pages/ReportsPage';
 import { Lock, Bell, X } from 'lucide-react';
 
 function OrderNotifier() {
@@ -68,6 +71,9 @@ function AdminNav() {
     { name: "ORDERS", path: "/orders" },
     { name: "COURIERS", path: "/couriers" },
     { name: "PROMOTIONS", path: "/promotions" },
+    { name: "SUPPORT", path: "/support" },
+    { name: "FRAUD", path: "/fraud" },
+    { name: "REPORTS", path: "/reports" },
     { name: "SETTINGS", path: "/settings" },
     { name: "POS", path: "/pos" },
   ];
@@ -183,6 +189,9 @@ export default function App() {
             <Route path="/orders/:id" element={<OrderFulfillmentPage />} />
             <Route path="/couriers" element={<CourierPage />} />
             <Route path="/promotions" element={<PromotionsPage />} />
+            <Route path="/support" element={<SupportPage />} />
+            <Route path="/fraud" element={<FraudPage />} />
+            <Route path="/reports" element={<ReportsPage />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/pos" element={<POSPage />} />
           </Routes>

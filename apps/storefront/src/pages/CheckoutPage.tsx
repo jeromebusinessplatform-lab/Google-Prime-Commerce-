@@ -37,6 +37,8 @@ export function CheckoutPage() {
   const navigate = useNavigate();
   const [cart, setCart] = useState<any>(null);
   const [session, setSession] = useState<any>(null);
+  const [paymentDraftId, setPaymentDraftId] = useState<string | null>(null);
+  const [recoveredDraft, setRecoveredDraft] = useState<any | null>(null);
   
   // Form fields
   const [addressSearch, setAddressSearch] = useState("");
@@ -91,16 +93,44 @@ export function CheckoutPage() {
   }, []);
 
   useEffect(() => {
+    fetch('/v1/checkout/drafts')
+      .then(r => r.json())
+      .then(d => {
+        const drafts = d.data || [];
+        if (drafts.length > 0) {
+          const latest = drafts[0];
+          setRecoveredDraft(latest);
+          setPaymentDraftId(latest.id);
+          if (latest.provider === 'wallet') {
+            setPaymentMethod('wallet');
+          }
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
     if (cart) {
       fetch('/v1/checkout/sessions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items: cart.items || [] })
+        body: JSON.stringify({
+          items: cart.items || [],
+          paymentDraftId,
+          paymentMethod,
+          selectedQuote,
+          selectedItemIds: (cart.items || []).map((item: any) => item.id),
+          amountDueNow: 0,
+          totals: { subtotal: 0, deliveryFee: 0, discount: 0, total: 0 }
+        })
       })
         .then(r => r.json())
-        .then(d => setSession(d.data));
+        .then(d => {
+          setSession(d.data);
+          if (d.data?.paymentDraftId) setPaymentDraftId(d.data.paymentDraftId);
+        });
     }
-  }, [cart]);
+  }, [cart, paymentDraftId, paymentMethod, selectedQuote]);
 
   // Geoapify Autocomplete via Proxy
   useEffect(() => {
@@ -271,6 +301,8 @@ export function CheckoutPage() {
           receiverPhone,
           paymentMethod: paymentMethod === 'wallet' ? 'GCASH/MAYA' : 'CARD',
           paymentTiming,
+          paymentDraftId,
+          checkoutSessionId: session.id,
           selectedQuoteId: selectedQuote.id,
           address: selectedAddress ? (selectedAddress.properties?.formatted || selectedAddress.formatted) : addressSearch,
           lat: selectedCoordinates.lat,
@@ -463,6 +495,15 @@ export function CheckoutPage() {
 
         {/* Financial Summary */}
         <section className="space-y-4">
+          {recoveredDraft && (
+            <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 p-4">
+              <div className="text-[10px] uppercase tracking-widest text-gray-400 dark:text-gray-500">Recovered Draft</div>
+              <div className="text-xs mt-1">{recoveredDraft.id}</div>
+              <div className="text-[10px] uppercase tracking-widest text-gray-400 dark:text-gray-500 mt-1">
+                Status: {recoveredDraft.status}
+              </div>
+            </div>
+          )}
           <h2 className="text-[10px]  uppercase tracking-widest text-gray-400 dark:text-gray-500 flex items-center gap-2 transition-colors">
             <CreditCard size={12} /> 04. Financial Settlement
           </h2>

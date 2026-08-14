@@ -32,12 +32,14 @@ export async function appendAuditEvent(tenantCtx: TenantContext, eventInput: Aud
   // We'll simulate it by getting the latest event in a transaction.
   
   // Simulated here for greenfield:
-  const latestQuery = await collectionRef.limit(1).get(); // Should be ordered by sequence desc
+  const latestQuery = await collectionRef.get();
   let previousHash = "GENESIS";
   let sequence = 1;
   
   if (!latestQuery.empty) {
-    const latestEvent = latestQuery.docs[0].data() as any;
+    const latestEvent = [...latestQuery.docs]
+      .map((doc: any) => doc.data() as any)
+      .sort((a: any, b: any) => Number(b.sequence || 0) - Number(a.sequence || 0))[0];
     previousHash = latestEvent.currentHash || "GENESIS";
     sequence = (latestEvent.sequence || 0) + 1;
   }
