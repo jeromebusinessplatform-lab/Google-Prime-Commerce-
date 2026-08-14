@@ -90,14 +90,28 @@ export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [accessCode, setAccessCode] = useState('');
   const [error, setError] = useState('');
+  const [tenantId, setTenantId] = useState('default');
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (accessCode === '1234') {
+    try {
+      const response = await fetch('/v1/admin/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tenantId,
+          accessCode,
+          initData: 'PREVIEW_MOCK'
+        })
+      });
+      if (!response.ok) {
+        const payload = await response.json().catch(() => null);
+        throw new Error(payload?.error || 'Invalid Access Code');
+      }
       setIsAuthenticated(true);
       setError('');
-    } else {
-      setError('Invalid Access Code');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Invalid Access Code');
     }
   };
 
@@ -106,6 +120,13 @@ export default function App() {
       <ThemeProvider>
         <div className="min-h-screen bg-gray-50 dark:bg-gray-950 dark:text-gray-100 flex flex-col items-center justify-center p-4 transition-colors">
           <div className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 max-w-sm w-full">
+            <div className="flex justify-center mb-5">
+              <img
+                src="/official.jpg"
+                alt="Prime"
+                className="h-20 w-auto object-contain select-none"
+              />
+            </div>
             <div className="flex justify-center mb-4">
               <div className="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center text-gray-800 dark:text-gray-200">
                 <Lock size={24} />
@@ -114,13 +135,23 @@ export default function App() {
             <h1 className="text-xl  text-center mb-6">Admin Access</h1>
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
-                <label className="block text-xs  text-gray-700 dark:text-gray-400 mb-1">ACCESS CODE (Hint: 1234)</label>
+                <label className="block text-xs  text-gray-700 dark:text-gray-400 mb-1">TENANT</label>
+                <input
+                  type="text"
+                  value={tenantId}
+                  onChange={(e) => setTenantId(e.target.value)}
+                  className="w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-800 rounded px-3 py-2 focus:border-black dark:focus:border-white focus:outline-none"
+                  placeholder="default"
+                />
+              </div>
+              <div>
+                <label className="block text-xs  text-gray-700 dark:text-gray-400 mb-1">ACCESS CODE</label>
                 <input 
                   type="password" 
                   value={accessCode}
                   onChange={(e) => setAccessCode(e.target.value)}
                   className="w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-800 rounded px-3 py-2 focus:border-black dark:focus:border-white focus:outline-none"
-                  placeholder="Enter 4-digit PIN"
+                  placeholder="Enter access code"
                   autoFocus
                 />
               </div>

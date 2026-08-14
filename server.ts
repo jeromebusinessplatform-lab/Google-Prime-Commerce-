@@ -5,6 +5,11 @@ import { createServer as createViteServer } from "vite";
 import { registerApiRoutes } from "./apps/core-service/routes.js";
 
 async function startServer() {
+  if (typeof process.loadEnvFile === "function") {
+    try {
+      process.loadEnvFile();
+    } catch {}
+  }
   const app = express();
   const PORT = Number(process.env.PORT) || 3000;
 

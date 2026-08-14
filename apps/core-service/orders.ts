@@ -72,6 +72,101 @@ export const createOrderHandler = async (req: Request, res: Response) => {
   res.json({ success: true, data: { id: orderId } });
 };
 
+export const getOrdersHandler = async (req: Request, res: Response) => {
+  const tenantId = "default";
+  const snapshot = await db.collection(`tenants/${tenantId}/orders`).get();
+  const orders = snapshot.docs
+    .map((doc: any) => doc.data())
+    .filter(Boolean)
+    .sort((left: any, right: any) => {
+      const leftDate = new Date(left.date || 0).getTime();
+      const rightDate = new Date(right.date || 0).getTime();
+      return rightDate - leftDate;
+    });
+
+  return res.json({ data: orders });
+};
+
+export const getOrderHandler = async (req: Request, res: Response) => {
+  const tenantId = "default";
+  const orderId = req.params.id;
+  const snapshot = await db.collection(`tenants/${tenantId}/orders`).doc(orderId).get();
+
+  if (!snapshot.exists) {
+    return res.status(404).json({ error: "Order not found" });
+  }
+
+  return res.json({ data: snapshot.data() });
+};
+
+export const updateOrderHandler = async (req: Request, res: Response) => {
+  const tenantId = "default";
+  const orderId = req.params.id;
+  const orderRef = db.collection(`tenants/${tenantId}/orders`).doc(orderId);
+  const existing = await orderRef.get();
+
+  if (!existing.exists) {
+    return res.status(404).json({ error: "Order not found" });
+  }
+
+  const current = existing.data() as Record<string, any>;
+  const patch = sanitize(req.body || {});
+  const nextOrder = {
+    ...current,
+    ...patch,
+    payment: patch.payment ? { ...current.payment, ...patch.payment } : current.payment,
+    delivery: patch.delivery ? { ...current.delivery, ...patch.delivery } : current.delivery,
+    receipt: patch.receipt ? { ...current.receipt, ...patch.receipt } : current.receipt,
+    updatedAt: new Date().toISOString()
+  };
+
+  await orderRef.set(nextOrder);
+  return res.json({ success: true, data: nextOrder });
+};
+
+export const analyzeReceiptHandler = async (req: Request, res: Response) => {
+  const tenantId = "default";
+  const orderId = req.params.id;
+  const { imageBase64 } = req.body || {};
+
+  if (!imageBase64) {
+    return res.status(400).json({ error: "Missing imageBase64" });
+  }
+
+  const orderRef = db.collection(`tenants/${tenantId}/orders`).doc(orderId);
+  const existing = await orderRef.get();
+
+  if (!existing.exists) {
+    return res.status(404).json({ error: "Order not found" });
+  }
+
+  const current = existing.data() as Record<string, any>;
+  const analysis = {
+    referenceNumber: `PRIME-${orderId.slice(-4)}`,
+    amount: current.total || 0,
+    senderName: current.customerName || "Unknown Sender",
+    verified: true,
+    analyzedAt: new Date().toISOString()
+  };
+
+  const receipt = {
+    imageUrl: imageBase64,
+    analysis
+  };
+
+  await orderRef.set({
+    ...current,
+    receipt,
+    payment: {
+      ...current.payment,
+      status: "VERIFIED"
+    },
+    updatedAt: new Date().toISOString()
+  });
+
+  return res.json({ success: true, data: { orderId, receipt } });
+};
+
 const sanitize = (obj: any) => {
   const result: any = {};
   Object.keys(obj).forEach(key => {

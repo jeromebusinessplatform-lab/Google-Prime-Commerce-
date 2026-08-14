@@ -64,18 +64,18 @@ export function CheckoutPage() {
   // Define payment options UI before proof upload
   const PaymentOptions = () => (
     <div className="space-y-2">
-      <h3 className="text-[10px] uppercase tracking-widest text-gray-400">Payment Method</h3>
+      <h3 className="text-[10px] uppercase tracking-widest text-gray-400 dark:text-gray-500 transition-colors">Payment Method</h3>
       <div className="grid grid-cols-2 gap-2">
         <button 
           onClick={() => setPaymentMethod('card')}
-          className={`p-3 border rounded-lg text-center transition-all ${paymentMethod === 'card' ? 'border-black bg-gray-50' : 'border-gray-200 hover:border-gray-300'}`}
+          className={`p-3 border rounded-lg text-center transition-all ${paymentMethod === 'card' ? 'border-black bg-gray-50 dark:bg-gray-800' : 'border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700'}`}
         >
           <CreditCard className="mx-auto mb-1" size={16} />
           <span className="text-[9px] uppercase tracking-widest block">Card</span>
         </button>
         <button 
           onClick={() => setPaymentMethod('wallet')}
-          className={`p-3 border rounded-lg text-center transition-all ${paymentMethod === 'wallet' ? 'border-black bg-gray-50' : 'border-gray-200 hover:border-gray-300'}`}
+          className={`p-3 border rounded-lg text-center transition-all ${paymentMethod === 'wallet' ? 'border-black bg-gray-50 dark:bg-gray-800' : 'border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700'}`}
         >
           <Wallet className="mx-auto mb-1" size={16} />
           <span className="text-[9px] uppercase tracking-widest block">Wallet</span>
@@ -302,14 +302,14 @@ export function CheckoutPage() {
   };
 
   return (
-    <div className="bg-white min-h-screen pb-40">
+    <div className="bg-white dark:bg-gray-950 min-h-screen pb-40 transition-colors">
       {/* Checkout Header */}
-      <div className="fixed top-0 left-0 right-0 h-[64px] bg-white border-b border-gray-100 z-[100] flex items-center px-4 pt-[env(safe-area-inset-top,0px)]">
-        <button onClick={() => navigate('/cart')} className="p-2 -ml-2 text-gray-900 hover:bg-gray-50 rounded-full transition-all">
+      <div className="fixed top-0 left-0 right-0 h-[64px] bg-white dark:bg-gray-950 border-b border-gray-100 dark:border-gray-800 z-[100] flex items-center px-4 pt-[env(safe-area-inset-top,0px)] transition-colors">
+        <button onClick={() => navigate('/cart')} className="p-2 -ml-2 text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-full transition-all">
           <ChevronLeft size={24} />
         </button>
         <div className=" text-xs flex-1 text-center mr-6 flex items-center justify-center gap-2 uppercase tracking-tighter">
-          <ShieldCheck size={18} className="text-black" />
+          <ShieldCheck size={18} className="text-black dark:text-white transition-colors" />
           Secure Checkout
         </div>
       </div>
@@ -318,7 +318,7 @@ export function CheckoutPage() {
         
         {/* Destination Section */}
         <section className="space-y-4">
-          <h2 className="text-[10px]  uppercase tracking-widest text-gray-400 flex items-center gap-2">
+          <h2 className="text-[10px]  uppercase tracking-widest text-gray-400 dark:text-gray-500 flex items-center gap-2 transition-colors">
             <MapPin size={12} /> 01. Destination
           </h2>
           
@@ -328,25 +328,25 @@ export function CheckoutPage() {
               placeholder="Search street, building, or village..." 
               value={addressSearch}
               onChange={e => setAddressSearch(e.target.value)}
-              className="w-full border-2 border-gray-100 rounded-xl p-4 pr-12 text-sm  bg-gray-50 focus:bg-white focus:border-black outline-none transition-all shadow-inner"
+              className="w-full border-2 border-gray-100 dark:border-gray-800 rounded-xl p-4 pr-12 text-sm  bg-gray-50 dark:bg-gray-800 focus:bg-white dark:focus:bg-gray-900 focus:border-black dark:focus:border-white outline-none transition-all shadow-inner"
             />
             {addressSearch && (
               <button
                 onClick={() => { setAddressSearch(""); setSelectedAddress(null); setIsDroppingPin(false); }}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300 hover:text-black"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-600 hover:text-black dark:hover:text-white transition-colors"
               >
                 <X size={18} />
               </button>
             )}
             {addressSuggestions.length > 0 && (
-              <div className="absolute top-full left-0 right-0 bg-white border-2 border-gray-100 mt-2 rounded-xl shadow-2xl z-[110] max-h-60 overflow-y-auto divide-y divide-gray-50">
+              <div className="absolute top-full left-0 right-0 bg-white dark:bg-gray-900 border-2 border-gray-100 dark:border-gray-800 mt-2 rounded-xl shadow-2xl z-[110] max-h-60 overflow-y-auto divide-y divide-gray-50 dark:divide-gray-900 transition-colors">
                 {addressSuggestions.map((s, i) => (
                   <div 
                     key={i} 
-                    className="p-4 text-xs  hover:bg-gray-50 cursor-pointer flex items-center gap-3"
+                    className="p-4 text-xs  hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer flex items-center gap-3 transition-colors"
                     onClick={() => selectAddress(s)}
                   >
-                    <MapPin size={14} className="text-gray-300" />
+                    <MapPin size={14} className="text-gray-300 dark:text-gray-600" />
                     {s.properties?.formatted || s.formatted}
                   </div>
                 ))}
@@ -419,7 +419,7 @@ export function CheckoutPage() {
                 placeholder="Floor / Unit No. / Gate Instructions..." 
                 value={unitInstructions}
                 onChange={e => setUnitInstructions(e.target.value)}
-                className="w-full border-2 border-gray-100 rounded-xl p-4 text-sm  bg-gray-50 focus:bg-white focus:border-black outline-none transition-all shadow-inner resize-none"
+                className="w-full border-2 border-gray-100 dark:border-gray-800 rounded-xl p-4 text-sm  bg-gray-50 dark:bg-gray-800 focus:bg-white dark:focus:bg-gray-900 focus:border-black dark:focus:border-white outline-none transition-all shadow-inner resize-none"
               />
             </div>
           )}
@@ -440,7 +440,7 @@ export function CheckoutPage() {
 
         {/* Contact Section */}
         <section className="space-y-4">
-          <h2 className="text-[10px]  uppercase tracking-widest text-gray-400 flex items-center gap-2">
+          <h2 className="text-[10px]  uppercase tracking-widest text-gray-400 dark:text-gray-500 flex items-center gap-2 transition-colors">
             <User size={12} /> 03. Receiver
           </h2>
           <div className="grid grid-cols-2 gap-4">
@@ -449,35 +449,35 @@ export function CheckoutPage() {
               placeholder="Legal Name" 
               value={receiverName}
               onChange={e => setReceiverName(e.target.value)}
-              className="w-full border-2 border-gray-100 rounded-xl p-4 text-sm  bg-gray-50 focus:bg-white focus:border-black outline-none transition-all shadow-inner"
+              className="w-full border-2 border-gray-100 dark:border-gray-800 rounded-xl p-4 text-sm  bg-gray-50 dark:bg-gray-800 focus:bg-white dark:focus:bg-gray-900 focus:border-black dark:focus:border-white outline-none transition-all shadow-inner"
             />
             <input 
               type="tel" 
               placeholder="Phone (09xx)" 
               value={receiverPhone}
               onChange={e => setReceiverPhone(e.target.value)}
-              className="w-full border-2 border-gray-100 rounded-xl p-4 text-sm  bg-gray-50 focus:bg-white focus:border-black outline-none transition-all shadow-inner"
+              className="w-full border-2 border-gray-100 dark:border-gray-800 rounded-xl p-4 text-sm  bg-gray-50 dark:bg-gray-800 focus:bg-white dark:focus:bg-gray-900 focus:border-black dark:focus:border-white outline-none transition-all shadow-inner"
             />
           </div>
         </section>
 
         {/* Financial Summary */}
         <section className="space-y-4">
-          <h2 className="text-[10px]  uppercase tracking-widest text-gray-400 flex items-center gap-2">
+          <h2 className="text-[10px]  uppercase tracking-widest text-gray-400 dark:text-gray-500 flex items-center gap-2 transition-colors">
             <CreditCard size={12} /> 04. Financial Settlement
           </h2>
 
-          <div className="bg-gray-50 border-2 border-gray-100 rounded-2xl p-6 space-y-4">
-             <div className="space-y-2 pb-4 border-b border-gray-200">
-               <div className="flex justify-between items-center text-xs  text-gray-500">
+          <div className="bg-gray-50 dark:bg-gray-800 border-2 border-gray-100 dark:border-gray-800 rounded-2xl p-6 space-y-4 transition-colors">
+             <div className="space-y-2 pb-4 border-b border-gray-200 dark:border-gray-800 transition-colors">
+               <div className="flex justify-between items-center text-xs  text-gray-500 dark:text-gray-400 transition-colors">
                   <span>Merchandise Subtotal</span>
                   <span>₱{subtotal.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
                </div>
-               <div className="flex justify-between items-center text-xs  text-gray-500">
+               <div className="flex justify-between items-center text-xs  text-gray-500 dark:text-gray-400 transition-colors">
                   <span>VAT (12% Included)</span>
                   <span>₱{tax.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
                </div>
-               <div className="flex justify-between items-center text-xs  text-gray-500">
+               <div className="flex justify-between items-center text-xs  text-gray-500 dark:text-gray-400 transition-colors">
                   <span>Road Delivery Fee</span>
                   <span>₱{deliveryFee.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
                </div>
@@ -492,13 +492,13 @@ export function CheckoutPage() {
              <div className="space-y-3">
                <div className="flex justify-between items-center">
                   <div>
-                    <div className="text-[8px]  uppercase tracking-widest text-gray-400">Due at Checkout</div>
-                    <div className="text-lg  uppercase tracking-tighter text-black">₱{amountDueNow.toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
+                    <div className="text-[8px]  uppercase tracking-widest text-gray-400 dark:text-gray-500 transition-colors">Due at Checkout</div>
+                    <div className="text-lg  uppercase tracking-tighter text-black dark:text-white transition-colors">₱{amountDueNow.toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
                   </div>
                   {amountDueOnDelivery > 0 && (
                     <div className="text-right">
-                      <div className="text-[8px]  uppercase tracking-widest text-gray-400">Due at Doorstep</div>
-                      <div className="text-lg  uppercase tracking-tighter text-gray-400">₱{amountDueOnDelivery.toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
+                      <div className="text-[8px]  uppercase tracking-widest text-gray-400 dark:text-gray-500 transition-colors">Due at Doorstep</div>
+                      <div className="text-lg  uppercase tracking-tighter text-gray-400 dark:text-gray-500 transition-colors">₱{amountDueOnDelivery.toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
                     </div>
                   )}
                </div>
@@ -507,7 +507,7 @@ export function CheckoutPage() {
 
           {paymentTiming === 'checkout' && (
             <div className="space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
-               <h3 className="text-[10px]  uppercase tracking-widest text-gray-400 flex items-center gap-2">
+               <h3 className="text-[10px]  uppercase tracking-widest text-gray-400 dark:text-gray-500 flex items-center gap-2 transition-colors">
                  <ShieldCheck size={12} /> 05. Receipt Analysis
                </h3>
                <div className="relative">
@@ -517,23 +517,23 @@ export function CheckoutPage() {
                    onChange={handleReceiptUpload}
                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                  />
-                 <div className={`border-2 border-dashed rounded-2xl p-8 transition-all flex flex-col items-center justify-center gap-3 ${receiptImage ? 'border-black bg-black/5' : 'border-gray-200 bg-gray-50 hover:bg-gray-100'}`}>
+                 <div className={`border-2 border-dashed rounded-2xl p-8 transition-all flex flex-col items-center justify-center gap-3 ${receiptImage ? 'border-black bg-black/5' : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
                    {receiptImage ? (
                      <>
-                        <img src={receiptImage} className="w-20 h-20 object-cover rounded-xl shadow-lg border-2 border-white" />
+                        <img src={receiptImage} className="w-20 h-20 object-cover rounded-xl shadow-lg border-2 border-white dark:border-gray-900 transition-colors" />
                         <div className="text-center">
-                          <div className="text-[10px]  uppercase tracking-widest text-black">Receipt Captured</div>
-                          <div className="text-[8px]  text-gray-400 uppercase tracking-widest mt-1">Ready for AI Validation</div>
+                          <div className="text-[10px]  uppercase tracking-widest text-black dark:text-white transition-colors">Receipt Captured</div>
+                          <div className="text-[8px]  text-gray-400 dark:text-gray-500 uppercase tracking-widest mt-1 transition-colors">Ready for AI Validation</div>
                         </div>
                      </>
                    ) : (
                      <>
-                        <div className="p-3 bg-white rounded-full shadow-lg border border-gray-100">
-                          <Wallet className="text-gray-400" size={24} />
+                        <div className="p-3 bg-white dark:bg-gray-900 rounded-full shadow-lg border border-gray-100 dark:border-gray-800 transition-colors">
+                          <Wallet className="text-gray-400 dark:text-gray-500" size={24} />
                         </div>
                         <div className="text-center">
-                           <div className="text-[10px]  uppercase tracking-widest text-black">Upload Proof of Payment</div>
-                           <div className="text-[8px]  text-gray-400 uppercase tracking-widest mt-1">Screenshots of GCash/Bank Transfer</div>
+                           <div className="text-[10px]  uppercase tracking-widest text-black dark:text-white transition-colors">Upload Proof of Payment</div>
+                           <div className="text-[8px]  text-gray-400 dark:text-gray-500 uppercase tracking-widest mt-1 transition-colors">Screenshots of GCash/Bank Transfer</div>
                         </div>
                      </>
                    )}
@@ -546,10 +546,10 @@ export function CheckoutPage() {
       </div>
 
       {/* Floating Action Button */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/80 backdrop-blur-xl border-t border-gray-100 z-[100] pb-[calc(16px+env(safe-area-inset-bottom,0px))]">
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/80 dark:bg-gray-950/80 backdrop-blur-xl border-t border-gray-100 dark:border-gray-800 z-[100] pb-[calc(16px+env(safe-area-inset-bottom,0px))] transition-colors">
         <div className="max-w-lg mx-auto flex gap-3">
            <div className="flex-1">
-             <div className="text-[8px]  text-gray-400 uppercase tracking-widest mb-0.5">Grand Total</div>
+             <div className="text-[8px]  text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-0.5 transition-colors">Grand Total</div>
              <div className="text-xl  tracking-tighter">₱{totalOrderValue.toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
            </div>
            <button 

@@ -132,6 +132,12 @@ service code (`env.ts`, `telegram.ts`, `geoapify.ts`) works unchanged.
 
 ## 4. Build and deploy
 
+### Preview / staging
+
+Use the worker preview URL only for short-lived QA. After the worker is deployed
+with `workers_dev = false` and `preview_urls = false`, the public workers.dev
+and preview URL paths are no longer published by default.
+
 ```bash
 npm run deploy:cloudflare
 ```
@@ -150,6 +156,18 @@ Dry-run to validate config without deploying:
 ```bash
 npx wrangler deploy --dry-run
 ```
+
+### Production rollout
+
+Before a live promotion, confirm:
+
+1. `wrangler.toml` still points at the correct remote D1 database ID.
+2. `workers_dev = false` and `preview_urls = false` remain set.
+3. The required production secrets are present in Cloudflare.
+4. The final deploy is triggered from the production branch/build artifact.
+
+If you later add a custom domain or route, add it explicitly in the Wrangler
+environment block for production instead of re-enabling workers.dev.
 
 ## 5. Local development
 

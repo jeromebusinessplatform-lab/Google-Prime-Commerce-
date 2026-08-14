@@ -12,10 +12,10 @@ export function AccountPage() {
     deliveryNotes: ''
   });
 
-  // Mock Telegram User ID for now - in real app, get from window.Telegram.WebApp.initDataUnsafe.user.id
-  const tgUserId = "123456789";
+  const tgUserId = (window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id?.toString();
 
   useEffect(() => {
+    if (!tgUserId) return;
     fetch(`/v1/customer?telegramUserId=${tgUserId}`)
       .then(r => r.json())
       .then(d => {
@@ -46,6 +46,7 @@ export function AccountPage() {
     }
   };
 
+  if (!tgUserId) return <div className="p-8 text-center animate-pulse text-gray-400  uppercase tracking-widest">Open inside Telegram...</div>;
   if (!customer) return <div className="p-8 text-center animate-pulse text-gray-400  uppercase tracking-widest">Identifying Prime Member...</div>;
 
   return (

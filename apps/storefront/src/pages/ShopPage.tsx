@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Product } from '../../../packages/domain/catalog';
+import { Product } from '../../../../packages/domain/catalog';
 import { CheckCircle2, Search } from 'lucide-react';
 
 export function ShopPage() {

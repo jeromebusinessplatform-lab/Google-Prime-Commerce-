@@ -13,13 +13,15 @@ name = "prime-commerce"
 main = "dist-worker/index.js"
 compatibility_date = "2026-08-01"
 compatibility_flags = ["nodejs_compat"]
+workers_dev = false
+preview_urls = false
 
 # Cloudflare D1 database. Replace database_id with the value from
 # `npx wrangler d1 create prime-db`.
 [[d1_databases]]
 binding = "DB"
 database_name = "prime-db"
-database_id = "00000000-0000-0000-0000-000000000000"
+database_id = "482cd1f2-9570-42e6-bc19-2c49a6c4071a"
 migrations_dir = "migrations"
 
 # Vite build output (storefront at /, admin at /admin). The Worker handles
@@ -28,3 +30,7 @@ migrations_dir = "migrations"
 directory = "./dist"
 binding = "ASSETS"
 not_found_handling = "none"
+
+[vars]
+NODE_ENV = "production"
+APP_ENV = "production"

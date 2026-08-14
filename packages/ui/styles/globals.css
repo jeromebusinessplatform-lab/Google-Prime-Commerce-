@@ -61,11 +61,3 @@ body {
     display: none !important;
   }
 }
-
-input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not([type="reset"]) {
-  height: var(--queue-monitor-height) !important;
-  max-height: var(--queue-monitor-height) !important;
-  min-height: var(--queue-monitor-height) !important;
-  padding-top: 0 !important;
-  padding-bottom: 0 !important;
-}

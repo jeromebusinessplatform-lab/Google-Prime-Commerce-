@@ -28,12 +28,12 @@ export function OrdersPage() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h2 className="text-xl tracking-tighter uppercase">Orders Management</h2>
-          <p className="text-[10px] text-gray-400 uppercase tracking-widest mt-0.5">Orchestration & Fulfillment Logistics</p>
+          <p className="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-widest mt-0.5">Orchestration & Fulfillment Logistics</p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <div className="flex items-center bg-white border border-gray-200 rounded-lg px-2 py-1 shadow-sm">
-            <span className="text-[10px] text-gray-400 uppercase tracking-widest mr-2">Status</span>
+          <div className="flex items-center bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-2 py-1 shadow-sm">
+            <span className="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-widest mr-2">Status</span>
             <select 
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
@@ -52,8 +52,8 @@ export function OrdersPage() {
             </select>
           </div>
 
-          <div className="flex items-center bg-white border border-gray-200 rounded-lg px-2 py-1 shadow-sm">
-            <span className="text-[10px] text-gray-400 uppercase tracking-widest mr-2">From</span>
+          <div className="flex items-center bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-2 py-1 shadow-sm">
+            <span className="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-widest mr-2">From</span>
             <input 
               type="date" 
               value={startDate}
@@ -62,8 +62,8 @@ export function OrdersPage() {
             />
           </div>
 
-          <div className="flex items-center bg-white border border-gray-200 rounded-lg px-2 py-1 shadow-sm">
-            <span className="text-[10px] text-gray-400 uppercase tracking-widest mr-2">To</span>
+          <div className="flex items-center bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-2 py-1 shadow-sm">
+            <span className="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-widest mr-2">To</span>
             <input 
               type="date" 
               value={endDate}
@@ -74,11 +74,11 @@ export function OrdersPage() {
         </div>
       </div>
 
-      <div className="bg-white border border-gray-100 rounded-xl shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl shadow-sm overflow-hidden transition-colors">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-gray-50/50 border-b border-gray-100 text-[10px] uppercase text-gray-400  tracking-widest">
+              <tr className="bg-gray-50/50 dark:bg-gray-800/50 border-b border-gray-100 dark:border-gray-800 text-[10px] uppercase text-gray-400 dark:text-gray-500  tracking-widest">
                 <th className="p-4">Order ID</th>
                 <th className="p-4">Timestamp</th>
                 <th className="p-4">Customer Intelligence</th>
@@ -89,39 +89,39 @@ export function OrdersPage() {
             </thead>
             <tbody>
               {filteredOrders.map(o => (
-                <tr key={o.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                <tr key={o.id} className="border-b border-gray-50 dark:border-gray-800/50 hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors">
                   <td className="p-4 text-xs tracking-tighter uppercase">{o.id}</td>
-                  <td className="p-4 text-[11px] text-gray-500">{new Date(o.date).toLocaleString()}</td>
+                  <td className="p-4 text-[11px] text-gray-500 dark:text-gray-400">{new Date(o.date).toLocaleString()}</td>
                   <td className="p-4">
                     <div className="text-xs uppercase">{o.customerName}</div>
-                    <div className="text-[10px] text-gray-400 tracking-widest mt-0.5">{o.customerPhone}</div>
+                    <div className="text-[10px] text-gray-400 dark:text-gray-500 tracking-widest mt-0.5">{o.customerPhone}</div>
                   </td>
                   <td className="p-4 text-xs text-right tracking-tighter">₱{o.total.toLocaleString()}</td>
                   <td className="p-4 text-center">
                     <span className={`inline-block px-2 py-0.5 rounded-[4px] text-[9px] font-medium uppercase tracking-widest ${
-                      o.status === 'PENDING' ? 'bg-amber-100 text-amber-700' :
-                      o.status === 'CONFIRMED' ? 'bg-blue-100 text-blue-700' :
-                      o.status === 'PREPARING' ? 'bg-indigo-100 text-indigo-700' :
-                      o.status === 'READY' ? 'bg-purple-100 text-purple-700' :
+                      o.status === 'PENDING' ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400' :
+                      o.status === 'CONFIRMED' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400' :
+                      o.status === 'PREPARING' ? 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400' :
+                      o.status === 'READY' ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400' :
                       o.status === 'DISPATCHED' ? 'bg-black text-white' :
-                      o.status === 'DELIVERED' ? 'bg-emerald-100 text-emerald-700' :
-                      o.status === 'HOLD' ? 'bg-red-100 text-red-700' :
-                      'bg-gray-100 text-gray-600'
+                      o.status === 'DELIVERED' ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400' :
+                      o.status === 'HOLD' ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400' :
+                      'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
                     }`}>
                       {o.status.replace('_', ' ')}
                     </span>
                   </td>
                   <td className="p-4 text-right">
                     <div className="flex justify-end gap-1">
-                      <button onClick={() => navigate(`/orders/${o.id}`)} className="p-2 text-gray-400 hover:text-black hover:bg-gray-100 rounded-lg transition-all" title="Manage Fulfillment"><FileText size={16} /></button>
-                      <button onClick={() => navigate(`/orders/${o.id}?print=true`)} className="p-2 text-gray-400 hover:text-black hover:bg-gray-100 rounded-lg transition-all" title="Print Packing Slip"><Printer size={16} /></button>
+                      <button onClick={() => navigate(`/orders/${o.id}`)} className="p-2 text-gray-400 dark:text-gray-500 hover:text-black dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-all" title="Manage Fulfillment"><FileText size={16} /></button>
+                      <button onClick={() => navigate(`/orders/${o.id}?print=true`)} className="p-2 text-gray-400 dark:text-gray-500 hover:text-black dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-all" title="Print Packing Slip"><Printer size={16} /></button>
                     </div>
                   </td>
                 </tr>
               ))}
               {filteredOrders.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="p-8 text-center text-xs text-gray-400">
+                  <td colSpan={6} className="p-8 text-center text-xs text-gray-400 dark:text-gray-500">
                     No orders found
                   </td>
                 </tr>

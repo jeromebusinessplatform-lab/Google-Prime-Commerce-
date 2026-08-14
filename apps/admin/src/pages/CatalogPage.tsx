@@ -140,18 +140,18 @@ export function CatalogPage() {
   });
 
   return (
-    <div className="p-4 md:p-8 max-w-7xl mx-auto w-full min-h-screen bg-gray-50/50">
+    <div className="p-4 md:p-8 max-w-7xl mx-auto w-full min-h-screen bg-gray-50/50 dark:bg-gray-950 transition-colors">
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
         <div>
-          <h1 className="text-3xl  tracking-tighter text-gray-900 uppercase">Catalog Ledger</h1>
-          <p className="text-xs  text-gray-400 mt-1 uppercase tracking-widest">Inventory Control & Product Orchestration</p>
+          <h1 className="text-3xl  tracking-tighter text-gray-900 dark:text-gray-100 uppercase">Catalog Ledger</h1>
+          <p className="text-xs  text-gray-400 dark:text-gray-500 mt-1 uppercase tracking-widest">Inventory Control & Product Orchestration</p>
         </div>
         <div className="flex gap-2">
-          <button onClick={handleExport} className="p-2 border border-gray-300 rounded hover:bg-white transition-colors" title="Export CSV">
+          <button onClick={handleExport} className="p-2 border border-gray-300 dark:border-gray-700 rounded hover:bg-white dark:hover:bg-gray-800 transition-colors" title="Export CSV">
             <Download size={18} />
           </button>
-          <button onClick={() => setIsCategoryModalOpen(true)} className="px-4 py-2 border border-gray-300 rounded-md  text-xs uppercase tracking-widest hover:bg-white transition-colors flex items-center gap-2">
+          <button onClick={() => setIsCategoryModalOpen(true)} className="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md  text-xs uppercase tracking-widest hover:bg-white dark:hover:bg-gray-800 transition-colors flex items-center gap-2">
             <Layers size={16} /> Categories
           </button>
           <button onClick={handleOpenAdd} className="bg-black text-white px-6 py-2 rounded-md  text-xs uppercase tracking-widest flex items-center gap-2 hover:bg-gray-800 shadow-lg shadow-black/20 transition-all active:scale-95">
@@ -161,20 +161,20 @@ export function CatalogPage() {
       </div>
 
       {/* Filters & Bulk Actions */}
-      <div className="bg-white border border-gray-200 rounded-xl shadow-sm mb-6 p-4 flex flex-col md:flex-row gap-4 items-center">
+      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl shadow-sm mb-6 p-4 flex flex-col md:flex-row gap-4 items-center transition-colors">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" size={16} />
           <input 
             type="text" 
             placeholder="Search by Name or SKU..." 
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:border-black outline-none bg-gray-50 transition-all focus:bg-white" 
+            className="w-full pl-10 pr-4 py-2 border border-gray-200 dark:border-gray-800 rounded-lg text-sm focus:border-black dark:focus:border-white outline-none bg-gray-50 dark:bg-gray-800 transition-all focus:bg-white dark:focus:bg-gray-900" 
           />
         </div>
         <div className="flex items-center gap-4 w-full md:w-auto">
           <div className="flex items-center gap-2">
-            <Filter size={14} className="text-gray-400" />
+            <Filter size={14} className="text-gray-400 dark:text-gray-500" />
             <select 
               value={categoryFilter} 
               onChange={e => setCategoryFilter(e.target.value)}
@@ -186,22 +186,22 @@ export function CatalogPage() {
           </div>
           
           {selectedIds.length > 0 && (
-            <div className="flex items-center gap-2 pl-4 border-l border-gray-200 animate-in fade-in slide-in-from-right-4">
-              <span className="text-[10px]  text-gray-400 uppercase">{selectedIds.length} Selected</span>
-              <button onClick={() => setIsBulkStockModalOpen(true)} className="text-[10px]  text-black uppercase hover:underline">Adjust Stock</button>
-              <button onClick={() => setIsBulkPriceModalOpen(true)} className="text-[10px]  text-black uppercase hover:underline ml-2">Update Price</button>
-              <button onClick={() => setSelectedIds([])} className="text-[10px]  text-gray-400 uppercase hover:underline">Clear</button>
+            <div className="flex items-center gap-2 pl-4 border-l border-gray-200 dark:border-gray-800 animate-in fade-in slide-in-from-right-4">
+              <span className="text-[10px]  text-gray-400 dark:text-gray-500 uppercase">{selectedIds.length} Selected</span>
+              <button onClick={() => setIsBulkStockModalOpen(true)} className="text-[10px]  text-black dark:text-white uppercase hover:underline">Adjust Stock</button>
+              <button onClick={() => setIsBulkPriceModalOpen(true)} className="text-[10px]  text-black dark:text-white uppercase hover:underline ml-2">Update Price</button>
+              <button onClick={() => setSelectedIds([])} className="text-[10px]  text-gray-400 dark:text-gray-500 uppercase hover:underline">Clear</button>
             </div>
           )}
         </div>
       </div>
 
       {/* Table */}
-      <div className="bg-white border border-gray-200 rounded-xl shadow-md overflow-hidden">
+      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl shadow-md overflow-hidden transition-colors">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-gray-50/50 border-b border-gray-200 text-[10px] uppercase text-gray-400  tracking-[0.2em]">
+              <tr className="bg-gray-50/50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-800 text-[10px] uppercase text-gray-400 dark:text-gray-500  tracking-[0.2em]">
                 <th className="p-4 w-10">
                   <input type="checkbox" checked={selectedIds.length === filteredProducts.length && filteredProducts.length > 0} onChange={toggleSelectAll} className="accent-black" />
                 </th>
@@ -214,20 +214,20 @@ export function CatalogPage() {
             </thead>
             <tbody>
               {filteredProducts.map(p => (
-                <tr key={p.id} className={`border-b border-gray-50 hover:bg-gray-50/50 transition-colors ${selectedIds.includes(p.id) ? 'bg-gray-50' : ''}`}>
+                <tr key={p.id} className={`border-b border-gray-50 dark:border-gray-800/50 hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors ${selectedIds.includes(p.id) ? 'bg-gray-50 dark:bg-gray-800' : ''}`}>
                   <td className="p-4">
                     <input type="checkbox" checked={selectedIds.includes(p.id)} onChange={() => toggleSelect(p.id)} className="accent-black" />
                   </td>
                   <td className="p-4">
                     <div className="flex items-center gap-4">
                       <div className="relative group">
-                        <img src={p.media?.[0]?.url || 'https://placehold.co/400x500'} alt={p.name} className="w-12 h-16 object-cover rounded shadow-sm border border-gray-100" />
+                        <img src={p.media?.[0]?.url || 'https://placehold.co/400x500'} alt={p.name} className="w-12 h-16 object-cover rounded shadow-sm border border-gray-100 dark:border-gray-800" />
                         {p.isFeatured && <div className="absolute -top-1 -left-1 bg-yellow-400 w-3 h-3 rounded-full border-2 border-white shadow-sm" title="Featured Product" />}
                       </div>
                       <div>
-                        <div className=" text-sm text-gray-900 leading-none mb-1 uppercase tracking-tighter">{p.name}</div>
-                        <div className="text-[10px]  text-gray-400 flex items-center gap-2">
-                          <span className="bg-gray-100 px-1.5 py-0.5 rounded text-gray-500">{p.sku}</span>
+                        <div className=" text-sm text-gray-900 dark:text-gray-100 leading-none mb-1 uppercase tracking-tighter">{p.name}</div>
+                        <div className="text-[10px]  text-gray-400 dark:text-gray-500 flex items-center gap-2">
+                          <span className="bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded text-gray-500 dark:text-gray-400">{p.sku}</span>
                           <span>{p.subname}</span>
                         </div>
                         <div className="mt-2 flex flex-wrap gap-1">
@@ -238,12 +238,12 @@ export function CatalogPage() {
                   </td>
                   <td className="p-4">
                     <div className="space-y-1">
-                      <div className="text-[10px]  text-gray-500 uppercase tracking-widest">{categories.find(c => p.categories.includes(c.id))?.name || 'Uncategorized'}</div>
+                      <div className="text-[10px]  text-gray-500 dark:text-gray-400 uppercase tracking-widest">{categories.find(c => p.categories.includes(c.id))?.name || 'Uncategorized'}</div>
                       <div className="flex items-center gap-2">
-                         <span className={`text-[10px]  ${p.stockQuantity <= 5 ? 'text-red-500' : 'text-gray-900'}`}>
+                         <span className={`text-[10px]  ${p.stockQuantity <= 5 ? 'text-red-500' : 'text-gray-900 dark:text-gray-100'}`}>
                            {p.stockQuantity} UNIT{p.stockQuantity !== 1 ? 'S' : ''}
                          </span>
-                         <span className="text-[8px]  px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 uppercase">{p.stockPolicy.replace('_', ' ')}</span>
+                         <span className="text-[8px]  px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 uppercase">{p.stockPolicy.replace('_', ' ')}</span>
                       </div>
                       {(() => {
                         const velocity = calculateVelocity(p.id);
@@ -252,7 +252,7 @@ export function CatalogPage() {
                           return (
                             <div className="flex items-center gap-1 mt-1">
                                <div className={`w-1 h-1 rounded-full ${daysRemaining < 7 ? 'bg-red-500' : 'bg-green-500'}`} />
-                               <span className="text-[8px] text-gray-400 uppercase tracking-widest">
+                               <span className="text-[8px] text-gray-400 dark:text-gray-500 uppercase tracking-widest">
                                  {daysRemaining < 7 ? `Stockout in ${daysRemaining}d` : `${velocity.toFixed(1)} sold/day`}
                                </span>
                             </div>
@@ -263,24 +263,24 @@ export function CatalogPage() {
                     </div>
                   </td>
                   <td className="p-4">
-                    <div className=" text-sm text-gray-900">₱{p.price.toLocaleString()}</div>
+                    <div className=" text-sm text-gray-900 dark:text-gray-100">₱{p.price.toLocaleString()}</div>
                     {p.compareAtPrice && (
                       <div className="text-[10px] text-red-400  line-through">₱{p.compareAtPrice.toLocaleString()}</div>
                     )}
-                    {p.cost && <div className="text-[8px] text-gray-400 mt-1 uppercase  tracking-widest">Cost: ₱{p.cost}</div>}
+                    {p.cost && <div className="text-[8px] text-gray-400 dark:text-gray-500 mt-1 uppercase  tracking-widest">Cost: ₱{p.cost}</div>}
                   </td>
                   <td className="p-4">
                     <GlossyBadge type={p.status.toUpperCase() as any} />
                     <div className="mt-1 flex items-center gap-1 opacity-50">
-                      {p.channels.includes('telegram') && <span className="text-[8px]  bg-blue-100 text-blue-600 px-1 rounded uppercase">TG</span>}
-                      {p.channels.includes('web') && <span className="text-[8px]  bg-purple-100 text-purple-600 px-1 rounded uppercase">WEB</span>}
+                      {p.channels.includes('telegram') && <span className="text-[8px]  bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-1 rounded uppercase">TG</span>}
+                      {p.channels.includes('web') && <span className="text-[8px]  bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 px-1 rounded uppercase">WEB</span>}
                     </div>
                   </td>
                   <td className="p-4 text-right">
                     <div className="flex justify-end gap-1">
-                      <button onClick={() => handleDuplicate(p.id)} className="p-2 text-gray-300 hover:text-black hover:bg-white rounded transition-all" title="Duplicate Record"><Copy size={16} /></button>
-                      <button onClick={() => handleOpenEdit(p)} className="p-2 text-gray-300 hover:text-black hover:bg-white rounded transition-all" title="Edit Metadata"><Edit2 size={16} /></button>
-                      <button onClick={() => handleDelete(p.id)} className="p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded transition-all" title="Archive Entry"><Archive size={16} /></button>
+                      <button onClick={() => handleDuplicate(p.id)} className="p-2 text-gray-300 dark:text-gray-500 hover:text-black dark:hover:text-white hover:bg-white dark:hover:bg-gray-800 rounded transition-all" title="Duplicate Record"><Copy size={16} /></button>
+                      <button onClick={() => handleOpenEdit(p)} className="p-2 text-gray-300 dark:text-gray-500 hover:text-black dark:hover:text-white hover:bg-white dark:hover:bg-gray-800 rounded transition-all" title="Edit Metadata"><Edit2 size={16} /></button>
+                      <button onClick={() => handleDelete(p.id)} className="p-2 text-gray-300 dark:text-gray-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-all" title="Archive Entry"><Archive size={16} /></button>
                     </div>
                   </td>
                 </tr>
@@ -289,12 +289,12 @@ export function CatalogPage() {
           </table>
           {filteredProducts.length === 0 && (
             <div className="p-20 text-center flex flex-col items-center justify-center space-y-4">
-               <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center text-gray-300">
+               <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center text-gray-300 dark:text-gray-600">
                   <Search size={32} />
                </div>
                <div>
-                  <p className="text-sm  uppercase text-gray-300">No matching records found in the ledger</p>
-                  <button onClick={() => {setSearchQuery(''); setCategoryFilter('all');}} className="text-[10px]  text-black uppercase hover:underline mt-2">Clear all filters</button>
+                  <p className="text-sm  uppercase text-gray-300 dark:text-gray-500">No matching records found in the ledger</p>
+                  <button onClick={() => {setSearchQuery(''); setCategoryFilter('all');}} className="text-[10px]  text-black dark:text-white uppercase hover:underline mt-2">Clear all filters</button>
                </div>
             </div>
           )}
@@ -326,19 +326,19 @@ export function CatalogPage() {
 
       {isBulkStockModalOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 animate-in zoom-in-95 duration-200">
+          <div className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl w-full max-w-lg p-6 animate-in zoom-in-95 duration-200">
             <div className="flex justify-between items-center mb-6">
                <h3 className=" text-xs uppercase tracking-widest">Bulk Stock Adjustment</h3>
-               <button onClick={() => setIsBulkStockModalOpen(false)} className="p-2 hover:bg-gray-100 rounded-full"><X size={20}/></button>
+               <button onClick={() => setIsBulkStockModalOpen(false)} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full"><X size={20}/></button>
             </div>
             <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
                {products.filter(p => selectedIds.includes(p.id)).map(p => (
-                 <div key={p.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100">
+                 <div key={p.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700">
                     <div className="flex items-center gap-3">
                        <img src={p.media?.[0]?.url || 'https://placehold.co/100x100'} className="w-8 h-10 object-cover rounded border" />
                        <div>
                           <div className="text-[10px]  uppercase tracking-tighter">{p.name}</div>
-                          <div className="text-[8px]  text-gray-400">CURRENT: {p.stockQuantity}</div>
+                          <div className="text-[8px]  text-gray-400 dark:text-gray-500">CURRENT: {p.stockQuantity}</div>
                        </div>
                     </div>
                     <div className="flex items-center gap-2">
@@ -347,18 +347,18 @@ export function CatalogPage() {
                             const newQty = Math.max(0, p.stockQuantity - 1);
                             handleProductSubmit({ stockQuantity: newQty }, p.id);
                          }}
-                         className="w-6 h-6 flex items-center justify-center bg-white border border-gray-200 rounded  text-xs hover:bg-gray-50">-</button>
+                         className="w-6 h-6 flex items-center justify-center bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded  text-xs hover:bg-gray-50 dark:hover:bg-gray-700">-</button>
                        <input 
                          type="number" 
                          value={p.stockQuantity}
                          onChange={(e) => handleProductSubmit({ stockQuantity: parseInt(e.target.value) || 0 }, p.id)}
-                         className="w-12 text-center text-xs  bg-white border border-gray-200 rounded py-1" />
+                         className="w-12 text-center text-xs  bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded py-1" />
                        <button 
                          onClick={() => {
                             const newQty = p.stockQuantity + 1;
                             handleProductSubmit({ stockQuantity: newQty }, p.id);
                          }}
-                         className="w-6 h-6 flex items-center justify-center bg-white border border-gray-200 rounded  text-xs hover:bg-gray-50">+</button>
+                         className="w-6 h-6 flex items-center justify-center bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded  text-xs hover:bg-gray-50 dark:hover:bg-gray-700">+</button>
                     </div>
                  </div>
                ))}
@@ -371,19 +371,19 @@ export function CatalogPage() {
       )}
       {isBulkPriceModalOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 animate-in zoom-in-95 duration-200">
+          <div className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl w-full max-w-lg p-6 animate-in zoom-in-95 duration-200">
             <div className="flex justify-between items-center mb-6">
                <h3 className=" text-xs uppercase tracking-widest">Bulk Price Adjustment</h3>
-               <button onClick={() => setIsBulkPriceModalOpen(false)} className="p-2 hover:bg-gray-100 rounded-full"><X size={20}/></button>
+               <button onClick={() => setIsBulkPriceModalOpen(false)} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full"><X size={20}/></button>
             </div>
             <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
                {products.filter(p => selectedIds.includes(p.id)).map(p => (
-                 <div key={p.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100">
+                 <div key={p.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700">
                     <div className="flex items-center gap-3">
                        <img src={p.media?.[0]?.url || 'https://placehold.co/100x100'} className="w-8 h-10 object-cover rounded border" />
                        <div>
                           <div className="text-[10px]  uppercase tracking-tighter">{p.name}</div>
-                          <div className="text-[8px]  text-gray-400">COST: ₱{p.cost || 0}</div>
+                          <div className="text-[8px]  text-gray-400 dark:text-gray-500">COST: ₱{p.cost || 0}</div>
                        </div>
                     </div>
                     <div className="flex items-center gap-2">
@@ -392,7 +392,7 @@ export function CatalogPage() {
                          type="number" 
                          value={p.price}
                          onChange={(e) => handleProductSubmit({ price: parseFloat(e.target.value) || 0 }, p.id)}
-                         className="w-20 text-right text-xs  bg-white border border-gray-200 rounded py-1 px-2" />
+                         className="w-20 text-right text-xs  bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded py-1 px-2" />
                     </div>
                  </div>
                ))}

@@ -1,10 +1,8 @@
 import { z } from "zod";
-import dotenv from "dotenv";
 import crypto from "crypto";
 
-dotenv.config();
-
 const isDev = process.env.NODE_ENV !== "production" && process.env.APP_ENV !== "production";
+const isWorkerRuntime = typeof (globalThis as any).WebSocketPair !== "undefined";
 
 const envSchema = z.object({
   APP_ENV: z.string().default("development"),
@@ -42,11 +40,11 @@ const envSchema = z.object({
 const parsed = envSchema.parse(process.env);
 
 // Fallbacks for dev mode (Preview Mode)
-if (isDev) {
+if (isDev && !isWorkerRuntime) {
   parsed.SESSION_SIGNING_KEY_CURRENT = parsed.SESSION_SIGNING_KEY_CURRENT || crypto.randomBytes(32).toString("hex");
   parsed.FIELD_ENCRYPTION_KEY_CURRENT = parsed.FIELD_ENCRYPTION_KEY_CURRENT || crypto.randomBytes(32).toString("hex");
   parsed.ADMIN_CODE_PEPPER = parsed.ADMIN_CODE_PEPPER || crypto.randomBytes(32).toString("hex");
-} else {
+} else if (!isWorkerRuntime) {
   // Enforce required values in production
   if (!parsed.SESSION_SIGNING_KEY_CURRENT) throw new Error("SESSION_SIGNING_KEY_CURRENT is required in production");
   if (!parsed.FIELD_ENCRYPTION_KEY_CURRENT) throw new Error("FIELD_ENCRYPTION_KEY_CURRENT is required in production");

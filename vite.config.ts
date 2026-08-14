@@ -16,7 +16,31 @@ export default defineConfig(() => {
         input: {
           storefront: path.resolve(__dirname, 'apps/storefront/src/index.html'),
           admin: path.resolve(__dirname, 'apps/admin/src/index.html'),
-        }
+        },
+        output: {
+          manualChunks(id) {
+            if (!id.includes('node_modules')) return undefined;
+
+            const nodeModulesIndex = id.lastIndexOf('node_modules/');
+            const packageSegment = id.slice(nodeModulesIndex + 'node_modules/'.length);
+            const packageName = packageSegment.startsWith('@')
+              ? packageSegment.split('/').slice(0, 2).join('/')
+              : packageSegment.split('/')[0];
+
+            if (packageName === 'react' || packageName === 'react-dom' || packageName === 'react-router-dom') {
+              return 'vendor-react';
+            }
+            if (packageName.startsWith('@tanstack')) return 'vendor-tanstack';
+            if (packageName === 'lucide-react') return 'vendor-icons';
+            if (packageName === 'recharts') return 'vendor-charts';
+            if (packageName === 'firebase' || packageName === 'firebase-admin') return 'vendor-firebase';
+            if (packageName === 'leaflet' || packageName === 'react-leaflet' || packageName === '@vis.gl/react-google-maps') return 'vendor-maps';
+            if (packageName === 'motion') return 'vendor-motion';
+            if (packageName === '@google/generative-ai' || packageName === '@google/genai') return 'vendor-google-ai';
+            if (packageName === 'axios' || packageName === 'zod' || packageName === 'react-hook-form') return 'vendor-core';
+            return undefined;
+          },
+        },
       }
     },
     define: {

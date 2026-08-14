@@ -25,13 +25,13 @@ function PackingSlipModal({ order, onClose, onUpdateStatus }: PackingSlipModalPr
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
-      <div className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden animate-in zoom-in-95 duration-300">
-        <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+      <div className="bg-white dark:bg-gray-900 w-full max-w-2xl rounded-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden animate-in zoom-in-95 duration-300">
+        <div className="p-4 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center bg-gray-50/50 dark:bg-gray-800/50">
           <div className="flex items-center gap-2">
-            <Printer size={18} className="text-gray-400" />
-            <h3 className=" text-[10px] uppercase tracking-widest text-gray-500">Packing Slip Preview</h3>
+            <Printer size={18} className="text-gray-400 dark:text-gray-500" />
+            <h3 className=" text-[10px] uppercase tracking-widest text-gray-500 dark:text-gray-400">Packing Slip Preview</h3>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+          <button onClick={onClose} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors">
             <X size={20} />
           </button>
         </div>
@@ -84,24 +84,24 @@ function PackingSlipModal({ order, onClose, onUpdateStatus }: PackingSlipModalPr
             </div>
 
             {order.receipt && (
-              <div className="p-4 bg-gray-50 rounded-xl border border-gray-100 grid grid-cols-2 gap-4">
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 grid grid-cols-2 gap-4">
                  <div>
-                    <div className="text-[8px] uppercase tracking-widest text-gray-400 mb-2">Customer Proof</div>
+                    <div className="text-[8px] uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-2">Customer Proof</div>
                     <img src={order.receipt.imageUrl} className="w-full h-40 object-contain rounded-lg border border-white shadow-sm" />
                  </div>
                  <div className="space-y-3">
-                    <div className="text-[8px] uppercase tracking-widest text-gray-400">AI Verification Analysis</div>
+                    <div className="text-[8px] uppercase tracking-widest text-gray-400 dark:text-gray-500">AI Verification Analysis</div>
                     <div className="space-y-2">
-                       <div className="flex justify-between border-b border-gray-200 pb-1">
-                          <span className="text-[9px] text-gray-400 uppercase">Ref Number</span>
+                       <div className="flex justify-between border-b border-gray-200 dark:border-gray-700 pb-1">
+                          <span className="text-[9px] text-gray-400 dark:text-gray-500 uppercase">Ref Number</span>
                           <span className="text-[10px]">{order.receipt.analysis?.referenceNumber || 'N/A'}</span>
                        </div>
-                       <div className="flex justify-between border-b border-gray-200 pb-1">
-                          <span className="text-[9px] text-gray-400 uppercase">Amount</span>
+                       <div className="flex justify-between border-b border-gray-200 dark:border-gray-700 pb-1">
+                          <span className="text-[9px] text-gray-400 dark:text-gray-500 uppercase">Amount</span>
                           <span className="text-[10px]">₱{order.receipt.analysis?.amount || 'N/A'}</span>
                        </div>
-                       <div className="flex justify-between border-b border-gray-200 pb-1">
-                          <span className="text-[9px] text-gray-400 uppercase">Sender</span>
+                       <div className="flex justify-between border-b border-gray-200 dark:border-gray-700 pb-1">
+                          <span className="text-[9px] text-gray-400 dark:text-gray-500 uppercase">Sender</span>
                           <span className="text-[10px]">{order.receipt.analysis?.senderName || 'N/A'}</span>
                        </div>
                     </div>
@@ -118,7 +118,7 @@ function PackingSlipModal({ order, onClose, onUpdateStatus }: PackingSlipModalPr
             )}
 
             <div className="space-y-4">
-              <div className="text-[10px] uppercase tracking-[0.2em] text-gray-400">Manifest</div>
+              <div className="text-[10px] uppercase tracking-[0.2em] text-gray-400 dark:text-gray-500">Manifest</div>
               <table className="w-full">
                 <thead>
                   <tr className="border-b-2 border-black text-left text-[10px] uppercase tracking-widest">
@@ -127,12 +127,12 @@ function PackingSlipModal({ order, onClose, onUpdateStatus }: PackingSlipModalPr
                     <th className="pb-2 text-right w-32">Total</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100">
+                <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                   {order.items.map((item: any) => (
                     <tr key={item.id}>
                       <td className="py-4">
                         <div className="text-xs uppercase">{item.name}</div>
-                        <div className="text-[10px] text-gray-400 uppercase">Unit Price: ₱{item.price.toLocaleString()}</div>
+                        <div className="text-[10px] text-gray-400 dark:text-gray-500 uppercase">Unit Price: ₱{item.price.toLocaleString()}</div>
                       </td>
                       <td className="py-4 text-center text-sm">{item.qty}</td>
                       <td className="py-4 text-right text-sm">₱{(item.price * item.qty).toLocaleString()}</td>
@@ -156,8 +156,8 @@ function PackingSlipModal({ order, onClose, onUpdateStatus }: PackingSlipModalPr
           </div>
         </div>
 
-        <div className="p-6 border-t border-gray-100 bg-gray-50 flex justify-end gap-3">
-          <button onClick={onClose} className="px-6 py-2.5 bg-white border-2 border-gray-200 rounded-xl text-[10px]  uppercase tracking-widest hover:bg-gray-50 transition-all">
+        <div className="p-6 border-t border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 flex justify-end gap-3">
+          <button onClick={onClose} className="px-6 py-2.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-[10px]  uppercase tracking-widest hover:bg-gray-50 dark:hover:bg-gray-700 transition-all">
             Cancel
           </button>
           <button onClick={handlePrint} className="px-8 py-2.5 bg-black text-white rounded-xl text-[10px]  uppercase tracking-widest hover:bg-gray-800 transition-all shadow-xl shadow-black/20 flex items-center gap-2">
@@ -267,33 +267,33 @@ export function OrderFulfillmentPage() {
   if (!order) return <div className="p-4 text-center mt-10">Loading...</div>;
 
   return (
-    <div className="bg-gray-50 flex-1 flex flex-col">
-      <div className="bg-white border-b border-gray-200 p-4 sticky top-0 z-20 flex items-center justify-between">
+    <div className="bg-gray-50 dark:bg-gray-950 flex-1 flex flex-col transition-colors">
+      <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 p-4 sticky top-0 z-20 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <button onClick={() => navigate('/orders')} className="p-2 -ml-2 text-gray-500 hover:text-black">
+          <button onClick={() => navigate('/orders')} className="p-2 -ml-2 text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white">
             <ChevronLeft size={24} />
           </button>
           <div>
             <h2 className="text-lg tracking-tighter uppercase font-bold">Order {order.id}</h2>
-            <div className="text-[10px] text-gray-400 uppercase tracking-widest">{new Date(order.date).toLocaleString()}</div>
+            <div className="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-widest">{new Date(order.date).toLocaleString()}</div>
           </div>
         </div>
         <div className="flex items-center gap-2">
           <button 
             onClick={() => setShowPrintModal(true)}
-            className="flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-[10px] uppercase tracking-widest hover:bg-gray-50 transition-colors"
+            className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-[10px] uppercase tracking-widest hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
           >
             <Printer size={14} /> Print Slip
           </button>
           <span className={`inline-flex items-center px-3 py-1 rounded-[4px] text-[10px] font-bold uppercase tracking-widest ${
-            order.status === 'PENDING' ? 'bg-amber-100 text-amber-700' :
-            order.status === 'CONFIRMED' ? 'bg-blue-100 text-blue-700' :
-            order.status === 'PREPARING' ? 'bg-indigo-100 text-indigo-700' :
-            order.status === 'READY' ? 'bg-purple-100 text-purple-700' :
+            order.status === 'PENDING' ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400' :
+            order.status === 'CONFIRMED' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400' :
+            order.status === 'PREPARING' ? 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400' :
+            order.status === 'READY' ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400' :
             order.status === 'DISPATCHED' ? 'bg-black text-white' :
-            order.status === 'DELIVERED' ? 'bg-emerald-100 text-emerald-700' :
-            order.status.startsWith('HOLD') ? 'bg-red-100 text-red-700' :
-            'bg-gray-100 text-gray-600'
+            order.status === 'DELIVERED' ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400' :
+            order.status.startsWith('HOLD') ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400' :
+            'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
           }`}>
             {order.status.replace('_', ' ')}
           </span>
@@ -301,7 +301,7 @@ export function OrderFulfillmentPage() {
       </div>
 
       {/* Visual Progress Tracker */}
-      <div className="bg-white border-b border-gray-100 px-4 py-6 overflow-x-auto">
+      <div className="bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 px-4 py-6 overflow-x-auto">
         <div className="max-w-4xl mx-auto flex items-center justify-between min-w-[600px]">
           {['PENDING', 'CONFIRMED', 'PREPARING', 'READY', 'FOR_PICKUP', 'DISPATCHED', 'DELIVERED'].map((s, idx, arr) => {
             const isCurrent = order.status === s;
@@ -312,16 +312,16 @@ export function OrderFulfillmentPage() {
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-500 border-2 ${
                     isCurrent ? 'bg-black border-black text-white' :
                     isPast ? 'bg-black border-black text-white' :
-                    'bg-white border-gray-200 text-gray-300'
+                    'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-300 dark:text-gray-500'
                   }`}>
                     {isPast ? <CheckCircle2 size={16} /> : <span className="text-[10px] font-bold">{idx + 1}</span>}
                   </div>
-                  <span className={`text-[9px] uppercase tracking-widest font-black ${isCurrent ? 'text-black' : 'text-gray-400'}`}>
+                  <span className={`text-[9px] uppercase tracking-widest font-black ${isCurrent ? 'text-black dark:text-white' : 'text-gray-400 dark:text-gray-500'}`}>
                     {s.replace('_', ' ')}
                   </span>
                 </div>
                 {idx < arr.length - 1 && (
-                  <div className={`flex-1 h-[2px] mx-2 -mt-6 transition-all duration-500 ${isPast ? 'bg-black' : 'bg-gray-100'}`} />
+                  <div className={`flex-1 h-[2px] mx-2 -mt-6 transition-all duration-500 ${isPast ? 'bg-black' : 'bg-gray-100 dark:bg-gray-800'}`} />
                 )}
               </React.Fragment>
             );
@@ -341,9 +341,9 @@ export function OrderFulfillmentPage() {
         <div className="md:col-span-2 space-y-4">
           
           {/* Dynamic Order Management Actions */}
-          <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm space-y-6">
+          <div className="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm space-y-6 transition-colors">
             <div className="space-y-4">
-              <h3 className="text-[10px] font-black uppercase tracking-widest text-gray-400">Logistics Execution</h3>
+              <h3 className="text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">Logistics Execution</h3>
               <div className="flex flex-col sm:flex-row gap-3">
                 {nextStatus ? (
                   <button 
@@ -353,22 +353,22 @@ export function OrderFulfillmentPage() {
                     Validate: Next Stage → {nextStatus.replace('_', ' ')}
                   </button>
                 ) : order.status === 'DELIVERED' ? (
-                  <div className="flex-1 py-4 px-6 bg-emerald-50 text-emerald-700 text-[11px] font-black uppercase tracking-[0.2em] rounded-xl border border-emerald-100 flex items-center justify-center gap-2">
+                  <div className="flex-1 py-4 px-6 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 text-[11px] font-black uppercase tracking-[0.2em] rounded-xl border border-emerald-100 dark:border-emerald-900/30 flex items-center justify-center gap-2">
                     <CheckCircle2 size={18} /> Cycle Completed
                   </div>
                 ) : null}
                 
                 <button 
                   onClick={() => updateStatus('CANCELLED')}
-                  className="px-6 py-4 bg-white border-2 border-red-100 text-red-600 text-[11px] font-black uppercase tracking-[0.2em] rounded-xl hover:bg-red-50 transition-all flex items-center justify-center gap-2"
+                  className="px-6 py-4 bg-white dark:bg-gray-900 border-2 border-red-100 dark:border-red-900/30 text-red-600 dark:text-red-400 text-[11px] font-black uppercase tracking-[0.2em] rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 transition-all flex items-center justify-center gap-2"
                 >
                   <X size={18} /> Cancel
                 </button>
               </div>
             </div>
 
-            <div className="pt-6 border-t border-gray-50 space-y-4">
-              <h3 className="text-[10px] font-black uppercase tracking-widest text-gray-400">Exception Handling (HOLD)</h3>
+            <div className="pt-6 border-t border-gray-50 dark:border-gray-800/50 space-y-4">
+              <h3 className="text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">Exception Handling (HOLD)</h3>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                 {[
                   { label: 'Resubmit', val: 'HOLD_RESUBMIT' },
@@ -379,7 +379,7 @@ export function OrderFulfillmentPage() {
                     key={h.val}
                     onClick={() => updateStatus(h.val)}
                     className={`py-3 px-2 border-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${
-                      order.status === h.val ? 'bg-red-600 border-red-600 text-white shadow-lg shadow-red-600/20' : 'bg-white border-gray-100 text-gray-400 hover:border-red-200 hover:text-red-500'
+                      order.status === h.val ? 'bg-red-600 border-red-600 text-white shadow-lg shadow-red-600/20' : 'bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 text-gray-400 dark:text-gray-500 hover:border-red-200 dark:hover:border-red-800/50 hover:text-red-500 dark:hover:text-red-400'
                     }`}
                   >
                     {h.label}
@@ -389,12 +389,12 @@ export function OrderFulfillmentPage() {
             </div>
           </div>
 
-          <div className="bg-white p-4 rounded-md border border-gray-200 shadow-sm">
+          <div className="bg-white dark:bg-gray-900 p-4 rounded-md border border-gray-200 dark:border-gray-800 shadow-sm transition-colors">
             <h3 className=" text-sm mb-3">ORDER ITEMS</h3>
             <div className="overflow-x-auto">
               <table className="w-full text-left">
                 <thead>
-                  <tr className="border-b border-gray-200 text-xs text-gray-500 uppercase">
+                  <tr className="border-b border-gray-200 dark:border-gray-700 text-xs text-gray-500 dark:text-gray-400 uppercase">
                     <th className="pb-2">Item</th>
                     <th className="pb-2">Qty</th>
                     <th className="pb-2 text-right">Total</th>
@@ -402,7 +402,7 @@ export function OrderFulfillmentPage() {
                 </thead>
                 <tbody>
                   {order.items.map(item => (
-                    <tr key={item.id} className="border-b border-gray-100 last:border-0">
+                    <tr key={item.id} className="border-b border-gray-100 dark:border-gray-800 last:border-0">
                       <td className="py-2 text-sm ">{item.name}</td>
                       <td className="py-2 text-sm">{item.qty}</td>
                       <td className="py-2 text-sm text-right ">₱{(item.price * item.qty).toLocaleString()}</td>
@@ -415,14 +415,14 @@ export function OrderFulfillmentPage() {
         </div>
 
         <div className="space-y-4">
-          <div className="bg-white p-4 rounded-md border border-gray-200 shadow-sm">
+          <div className="bg-white dark:bg-gray-900 p-4 rounded-md border border-gray-200 dark:border-gray-800 shadow-sm transition-colors">
             <h3 className=" text-sm mb-3 flex items-center gap-2"><Receipt size={16} /> PAYMENT PROOF</h3>
             {order.payment.status === 'VERIFICATION_PENDING' ? (
-              <div className="bg-yellow-50 p-3 rounded mb-3 border border-yellow-200">
-                <div className="flex gap-2 text-yellow-800 text-sm  mb-2">
+              <div className="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded mb-3 border border-yellow-200 dark:border-yellow-800/30">
+                <div className="flex gap-2 text-yellow-800 dark:text-yellow-400 text-sm  mb-2">
                   <AlertCircle size={18} /> NEEDS VERIFICATION
                 </div>
-                <img src={order.payment.proofUrl} alt="Proof" className="w-full h-auto rounded border border-gray-200 mb-2 cursor-pointer hover:opacity-90" />
+                <img src={order.payment.proofUrl} alt="Proof" className="w-full h-auto rounded border border-gray-200 dark:border-gray-700 mb-2 cursor-pointer hover:opacity-90" />
                 <button 
                   onClick={approvePayment}
                   className="w-full bg-green-600 text-white  py-2 rounded hover:bg-green-700"
@@ -431,23 +431,23 @@ export function OrderFulfillmentPage() {
                 </button>
               </div>
             ) : (
-              <div className="bg-green-50 p-3 rounded mb-3 border border-green-200 text-green-800 text-sm  flex items-center gap-2">
+              <div className="bg-green-50 dark:bg-green-900/20 p-3 rounded mb-3 border border-green-200 dark:border-green-800/30 text-green-800 dark:text-green-400 text-sm  flex items-center gap-2">
                 <CheckCircle2 size={18} /> PAYMENT VERIFIED
               </div>
             )}
             <div className="text-sm">
-              <span className="text-gray-500">Method:</span> <span className="">{order.payment.method}</span>
+              <span className="text-gray-500 dark:text-gray-400">Method:</span> <span className="">{order.payment.method}</span>
             </div>
             <div className="text-sm mt-1">
-              <span className="text-gray-500">Amount:</span> <span className=" text-lg">₱{order.total.toLocaleString()}</span>
+              <span className="text-gray-500 dark:text-gray-400">Amount:</span> <span className=" text-lg">₱{order.total.toLocaleString()}</span>
             </div>
           </div>
 
-          <div className="bg-white p-4 rounded-md border border-gray-200 shadow-sm">
-            <h3 className=" text-sm mb-3 text-gray-500">CUSTOMER DETAILS</h3>
+          <div className="bg-white dark:bg-gray-900 p-4 rounded-md border border-gray-200 dark:border-gray-800 shadow-sm transition-colors">
+            <h3 className=" text-sm mb-3 text-gray-500 dark:text-gray-400">CUSTOMER DETAILS</h3>
             <div className="text-sm ">{order.customer.name}</div>
-            <div className="text-sm text-gray-600 mt-1">{order.customer.phone}</div>
-            <div className="text-sm text-gray-600 mt-2 p-2 bg-gray-50 rounded border border-gray-100">
+            <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">{order.customer.phone}</div>
+            <div className="text-sm text-gray-600 dark:text-gray-400 mt-2 p-2 bg-gray-50 dark:bg-gray-800 rounded border border-gray-100 dark:border-gray-700">
               {order.customer.address}
             </div>
           </div>
