@@ -19,61 +19,87 @@ if (typeof globalThis.require !== "function") {
   globalThis.require = createRequire(import.meta.url);
 }
 
-// --- In-memory SQLite driver implementing the D1 binding surface -----------
-const { DatabaseSync } = await import("node:sqlite");
-const sqlite = new DatabaseSync(":memory:");
-sqlite.exec(`
-  CREATE TABLE IF NOT EXISTS documents (
-    path TEXT NOT NULL,
-    id TEXT NOT NULL,
-    data TEXT NOT NULL,
-    createdAt INTEGER NOT NULL,
-    updatedAt INTEGER NOT NULL,
-    PRIMARY KEY (path, id)
-  );
-  CREATE INDEX IF NOT EXISTS idx_documents_path ON documents(path);
-`);
-const cache = new Map();
-const stmt = (sql) => {
-  let s = cache.get(sql);
-  if (!s) {
-    s = sqlite.prepare(sql);
-    cache.set(sql, s);
-  }
-  return s;
-};
-
-const fakeD1 = {
-  prepare(sql) {
-    return {
-      bind(...params) {
-        return {
-          __sql: sql,
-          __params: params,
-          async all() {
-            return { results: stmt(sql).all(...params) };
-          },
-          async first() {
-            return stmt(sql).get(...params);
-          },
-          async run() {
-            return stmt(sql).run(...params);
-          },
-        };
-      },
-    };
-  },
-  async batch(statements) {
-    sqlite.exec("BEGIN IMMEDIATE");
-    try {
-      for (const s of statements) stmt(s.__sql).run(...(s.__params || []));
-      sqlite.exec("COMMIT");
-    } catch (e) {
-      sqlite.exec("ROLLBACK");
-      throw e;
+// --- In-memory D1 binding shim --------------------------------------------
+// The smoke harness only needs to satisfy the adapter surface well enough for
+// the worker bundle to boot and serve health/static routes. A lightweight
+// JavaScript store keeps the script compatible with Node versions that do not
+// expose `node:sqlite`.
+const fakeD1 = (() => {
+  const store = new Map();
+  const collKeyFromPath = (path) => path;
+  const readDoc = (path, id) => store.get(collKeyFromPath(path))?.get(id);
+  const listDocs = (path) => [...(store.get(collKeyFromPath(path))?.entries() || [])].map(([id, data]) => ({ id, data }));
+  const writeDoc = (path, id, data) => {
+    const key = collKeyFromPath(path);
+    if (!store.has(key)) store.set(key, new Map());
+    store.get(key).set(id, JSON.parse(JSON.stringify(data)));
+  };
+  const normalizeParams = (params) => (Array.isArray(params) ? params : Object.values(params || {}));
+  const matchQuery = (sql, params) => {
+    const values = normalizeParams(params);
+    const normalized = String(sql).toLowerCase();
+    if (normalized.includes("from documents where path = ? and id = ?")) {
+      const [path, id] = values;
+      const row = readDoc(String(path), String(id));
+      return row ? [{ id: String(id), data: JSON.stringify(row), createdAt: Date.now(), updatedAt: Date.now() }] : [];
     }
-  },
-};
+    if (normalized.includes("from documents where path = ?")) {
+      const [path] = values;
+      let docs = listDocs(String(path));
+      if (normalized.includes("json_extract(data, '$.deletedAt') is null")) {
+        docs = docs.filter((doc) => doc.data?.deletedAt == null);
+      }
+      return docs.map((doc) => ({ id: doc.id, data: JSON.stringify(doc.data), createdAt: Date.now(), updatedAt: Date.now() }));
+    }
+    return [];
+  };
+
+  return {
+    prepare(sql) {
+      return {
+        bind(...params) {
+          return {
+            async all() {
+              return { results: matchQuery(sql, params) };
+            },
+            async first() {
+              return matchQuery(sql, params)[0];
+            },
+            async run() {
+              const normalized = String(sql).toLowerCase();
+              if (normalized.includes("insert into documents") || normalized.includes("on conflict(path, id) do update")) {
+                const [path, id, data] = normalizeParams(params);
+                writeDoc(String(path), String(id), JSON.parse(String(data)));
+              }
+              if (normalized.includes("delete from documents")) {
+                const [path, id] = normalizeParams(params);
+                store.get(String(path))?.delete(String(id));
+              }
+              return { success: true };
+            },
+          };
+        },
+      };
+    },
+    async batch(statements) {
+      for (const statement of statements) {
+        const sql = String(statement.__sql || "").toLowerCase();
+        const params = statement.__params || [];
+        if (sql.includes("insert into documents") || sql.includes("on conflict(path, id) do update")) {
+          const [path, id, data] = normalizeParams(params);
+          writeDoc(String(path), String(id), JSON.parse(String(data)));
+        }
+        if (sql.includes("delete from documents")) {
+          const [path, id] = normalizeParams(params);
+          store.get(String(path))?.delete(String(id));
+        }
+      }
+    },
+    __store: store,
+    __readDoc: readDoc,
+    __writeDoc: writeDoc,
+  };
+})();
 
 // --- Fake ASSETS binding serving the Vite build output ---------------------
 const distDir = path.resolve(root, "dist");

@@ -10,9 +10,9 @@ This checklist covers runtime verification and deployment readiness after the pa
 
 ## 5.2 Deployment Readiness
 
-- [ ] Run the worker smoke path against the current route table.
-- [ ] Verify build output is consistent for storefront, admin, server, and worker bundles.
-- [ ] Confirm the deployment scripts still align with the current runtime layout.
+- [x] Run the worker smoke path against the current route table.
+- [x] Verify build output is consistent for storefront, admin, server, and worker bundles.
+- [x] Confirm the deployment scripts still align with the current runtime layout.
 
 ## 5.3 Operational Guardrails
 
