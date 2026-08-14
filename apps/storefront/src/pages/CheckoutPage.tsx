@@ -292,6 +292,18 @@ export function CheckoutPage() {
     if (!items.length || !selectedQuote || !paymentTiming) return;
     setIsPlacing(true);
     try {
+      let proofRecord: any = null;
+      if (receiptImage && paymentTiming === 'checkout') {
+        setIsAnalyzing(true);
+        const proofRes = await fetch(`/v1/checkout/drafts/${paymentDraftId}/proofs`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ imageBase64: receiptImage, source: 'customer' })
+        });
+        proofRecord = await proofRes.json();
+        setIsAnalyzing(false);
+      }
+
       const res = await fetch('/v1/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -303,6 +315,7 @@ export function CheckoutPage() {
           paymentTiming,
           paymentDraftId,
           checkoutSessionId: session.id,
+          proofId: proofRecord?.data?.id || null,
           selectedQuoteId: selectedQuote.id,
           address: selectedAddress ? (selectedAddress.properties?.formatted || selectedAddress.formatted) : addressSearch,
           lat: selectedCoordinates.lat,
@@ -315,13 +328,11 @@ export function CheckoutPage() {
       const orderId = data.data.id;
 
       if (receiptImage && paymentTiming === 'checkout') {
-        setIsAnalyzing(true);
-        await fetch(`/v1/orders/${orderId}/analyze-receipt`, {
+        await fetch(`/v1/orders/${orderId}/review-receipt`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ imageBase64: receiptImage })
+          body: JSON.stringify({ imageBase64: receiptImage, verified: true })
         });
-        setIsAnalyzing(false);
       }
 
       navigate(`/orders/${orderId}`);

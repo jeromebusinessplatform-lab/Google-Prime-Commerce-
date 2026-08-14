@@ -30,7 +30,7 @@ import { getCartHandler, updateCartItemHandler, clearCartHandler } from "./cart.
 import * as orders from "./orders.js";
 import { getPromotionsHandler, createPromotionHandler, validatePromotionHandler } from "./promotions.js";
 import { autocompleteHandler as locationAutocomplete, geocodeHandler as locationGeocode, reverseGeocodeHandler as locationReverse, routeHandler } from "./location.js";
-import { createCheckoutSessionHandler, updateCheckoutSessionHandler, listCheckoutDraftsHandler } from "./checkout.js";
+import { createCheckoutSessionHandler, updateCheckoutSessionHandler, listCheckoutDraftsHandler, uploadDraftProofHandler } from "./checkout.js";
 import { getOperationalReportHandler, createSupportTicketHandler, createFraudCaseHandler, listSupportTicketsHandler, updateSupportTicketHandler, listFraudCasesHandler, updateFraudCaseHandler } from "./reports.js";
 import { finalizePaymentReviewHandler } from "./orders.js";
 
@@ -98,6 +98,7 @@ export const apiRoutes: ApiRoute[] = [
   { method: "post", path: "/v1/orders/:id/analyze-receipt", handler: (orders as any).analyzeReceiptHandler },
   { method: "post", path: "/v1/orders/:id/finalize-review", handler: finalizePaymentReviewHandler },
   { method: "post", path: "/v1/orders/:id/review-receipt", handler: (orders as any).reviewReceiptHandler },
+  { method: "post", path: "/v1/orders/:id/proofs", handler: (orders as any).uploadProofHandler },
   { method: "post", path: "/v1/orders/:id/status", handler: (orders as any).setOrderFulfillmentStatusHandler },
   { method: "post", path: "/v1/orders/:id/amendments", handler: (orders as any).createOrderAmendmentHandler },
   { method: "post", path: "/v1/orders", handler: orders.createOrderHandler },
@@ -114,6 +115,7 @@ export const apiRoutes: ApiRoute[] = [
   { method: "post", path: "/v1/checkout/sessions", handler: createCheckoutSessionHandler },
   { method: "patch", path: "/v1/checkout/sessions/:id", handler: updateCheckoutSessionHandler },
   { method: "get", path: "/v1/checkout/drafts", handler: listCheckoutDraftsHandler },
+  { method: "post", path: "/v1/checkout/drafts/:id/proofs", handler: uploadDraftProofHandler },
   { method: "post", path: "/v1/payments/drafts", handler: (orders as any).createPaymentDraftHandler },
 
   { method: "get", path: "/v1/reports/operational", handler: getOperationalReportHandler },

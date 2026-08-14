@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { Request, Response } from "express";
-import { createCheckoutSessionHandler } from "./checkout.js";
+import { createCheckoutSessionHandler, uploadDraftProofHandler } from "./checkout.js";
 import { createOrderHandler } from "./orders.js";
 import { db } from "../../packages/db/index.js";
 
@@ -144,6 +144,47 @@ describe("checkout draft flow", () => {
       status: "submitted",
       orderId: expect.any(String),
       checkoutSessionId: checkoutPayload.data.id,
+    });
+  });
+
+  it("stores proof uploads against the draft before the order exists", async () => {
+    const checkoutRes = makeRes();
+    await createCheckoutSessionHandler(
+      {
+        headers: { "x-customer-id": "customer-1" },
+        body: {
+          items: [{ id: "item-1", productId: "product-1", name: "Test Product", qty: 1, price: 100 }],
+          paymentMethod: "card",
+          amountDueNow: 123,
+        },
+      } as unknown as Request,
+      checkoutRes
+    );
+
+    const checkoutPayload = (checkoutRes.json as any).mock.calls[0][0];
+    const draftId = checkoutPayload.data.paymentDraftId;
+
+    const proofRes = makeRes();
+    await uploadDraftProofHandler(
+      {
+        params: { id: draftId },
+        body: { imageBase64: "data:image/png;base64,proof-1", source: "customer" },
+      } as unknown as Request,
+      proofRes
+    );
+
+    const proofPayload = (proofRes.json as any).mock.calls[0][0];
+    expect(proofPayload.data).toMatchObject({
+      draftId,
+      version: 1,
+      imageUrl: "data:image/png;base64,proof-1",
+    });
+
+    const draft = await db.collection("tenants/default/payment_drafts").doc(draftId).get();
+    expect(draft.data()).toMatchObject({
+      proofId: proofPayload.data.id,
+      proofVersion: 1,
+      proofUrl: "data:image/png;base64,proof-1",
     });
   });
 });

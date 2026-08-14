@@ -7,7 +7,7 @@ export const createOrderHandler = async (req: Request, res: Response) => {
   const tenantId = "default";
   const customerIdRaw = req.headers["x-customer-id"] || "preview-user-id";
   const customerId = Array.isArray(customerIdRaw) ? customerIdRaw[0] : customerIdRaw;
-  const { items, receiverName, receiverPhone, address, totals, delivery, paymentMethod, receipt, payment, checkoutSessionId, paymentDraftId } = req.body;
+  const { items, receiverName, receiverPhone, address, totals, delivery, paymentMethod, receipt, payment, checkoutSessionId, paymentDraftId, proofId } = req.body;
 
   let orderId;
 
@@ -38,6 +38,9 @@ export const createOrderHandler = async (req: Request, res: Response) => {
 
       // 3. Create Order
       orderId = 'ORD-' + Math.floor(1000 + Math.random() * 9000);
+      const proofDoc = proofId ? await transaction.get(db.collection(`tenants/${tenantId}/payment_draft_proofs`).doc(String(proofId))) : null;
+      const proofData = proofDoc?.exists ? (proofDoc.data() as Record<string, any>) : null;
+      const receiptImageUrl = receipt?.imageUrl || proofData?.imageUrl || null;
       const orderData = sanitize({
         id: orderId,
         customerId,
@@ -49,15 +52,15 @@ export const createOrderHandler = async (req: Request, res: Response) => {
         delivery,
         payment: {
           method: paymentMethod || 'COD',
-          status: payment?.status || (receipt ? 'PENDING_REVIEW' : 'PENDING'),
-          proofUrl: receipt?.imageUrl || null,
+          status: payment?.status || (receiptImageUrl ? 'PENDING_REVIEW' : 'PENDING'),
+          proofUrl: receiptImageUrl,
         },
-        receipt: receipt || null,
+        receipt: receipt || (receiptImageUrl ? { imageUrl: receiptImageUrl, proofId: proofId || proofData?.id || null } : null),
         checkoutSessionId: checkoutSessionId || null,
         paymentDraftId: paymentDraftId || null,
-        status: receipt ? 'payment_review' : 'PENDING',
-        reviewStatus: receipt?.analysis?.verified ? 'VALIDATED' : receipt ? 'UNVALIDATED' : null,
-        queueStatus: receipt ? 'ON_QUEUE' : 'DRAFT',
+        status: receiptImageUrl ? 'payment_review' : 'PENDING',
+        reviewStatus: receipt?.analysis?.verified ? 'VALIDATED' : receiptImageUrl ? 'UNVALIDATED' : null,
+        queueStatus: receiptImageUrl ? 'ON_QUEUE' : 'DRAFT',
         date: new Date().toISOString(),
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       });
@@ -71,7 +74,7 @@ export const createOrderHandler = async (req: Request, res: Response) => {
           checkoutSessionId: checkoutSessionId || null,
           orderId,
           provider: paymentMethod || "manual",
-          proofUrl: receipt?.imageUrl || null,
+          proofUrl: receiptImageUrl,
           amount: totals?.total || 0,
           quoteSnapshot: delivery || null,
           status: "submitted",
@@ -235,6 +238,50 @@ export const createPaymentDraftHandler = async (req: Request, res: Response) => 
   };
   await db.collection(`tenants/${tenantId}/payment_drafts`).doc(draft.id).set(draft);
   return res.json({ success: true, data: draft });
+};
+
+export const uploadProofHandler = async (req: Request, res: Response) => {
+  const tenantId = "default";
+  const orderId = req.params.id;
+  const orderRef = db.collection(`tenants/${tenantId}/orders`).doc(orderId);
+  const existing = await orderRef.get();
+  if (!existing.exists) return res.status(404).json({ error: "Order not found" });
+
+  const current = existing.data() as Record<string, any>;
+  const imageBase64 = req.body?.imageBase64;
+  if (!imageBase64) return res.status(400).json({ error: "Missing imageBase64" });
+
+  const proofVersion = Number(current.proofVersion || 0) + 1;
+  const proof = {
+    id: crypto.randomUUID(),
+    orderId,
+    paymentDraftId: current.paymentDraftId || null,
+    version: proofVersion,
+    imageUrl: imageBase64,
+    source: req.body?.source || "customer",
+    createdAt: new Date().toISOString(),
+    uploadedAt: new Date().toISOString(),
+  };
+
+  await db.collection(`tenants/${tenantId}/order_proofs`).doc(proof.id).set(proof);
+  await orderRef.set({
+    ...current,
+    proofVersion,
+    proofId: proof.id,
+    receipt: {
+      ...(current.receipt || {}),
+      imageUrl: imageBase64,
+      proofId: proof.id,
+      version: proofVersion,
+    },
+    payment: {
+      ...current.payment,
+      proofUrl: imageBase64,
+    },
+    updatedAt: new Date().toISOString(),
+  });
+
+  return res.json({ success: true, data: proof });
 };
 
 export const reviewReceiptHandler = async (req: Request, res: Response) => {

@@ -100,3 +100,45 @@ export const listCheckoutDraftsHandler = async (req: Request, res: Response) => 
     .filter((draft: any) => draft.customerId === customerId);
   res.json({ data: drafts });
 };
+
+export const uploadDraftProofHandler = async (req: Request, res: Response) => {
+  const tenantId = "default";
+  const draftId = req.params.id;
+  const draftRef = db.collection(`tenants/${tenantId}/payment_drafts`).doc(draftId);
+  const existing = await draftRef.get();
+
+  if (!existing.exists) {
+    return res.status(404).json({ error: "Payment draft not found" });
+  }
+
+  const current = existing.data() as Record<string, any>;
+  const imageBase64 = req.body?.imageBase64;
+
+  if (!imageBase64) {
+    return res.status(400).json({ error: "Missing imageBase64" });
+  }
+
+  const proofVersion = Number(current.proofVersion || 0) + 1;
+  const proof = {
+    id: crypto.randomUUID(),
+    draftId,
+    checkoutSessionId: current.checkoutSessionId || null,
+    orderId: current.orderId || null,
+    version: proofVersion,
+    imageUrl: imageBase64,
+    source: req.body?.source || "customer",
+    createdAt: new Date().toISOString(),
+    uploadedAt: new Date().toISOString(),
+  };
+
+  await db.collection(`tenants/${tenantId}/payment_draft_proofs`).doc(proof.id).set(proof);
+  await draftRef.set({
+    ...current,
+    proofId: proof.id,
+    proofVersion,
+    proofUrl: imageBase64,
+    updatedAt: new Date().toISOString(),
+  });
+
+  return res.json({ success: true, data: proof });
+};
