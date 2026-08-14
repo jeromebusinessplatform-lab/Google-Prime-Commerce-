@@ -150,6 +150,42 @@ describe('orders API handlers', () => {
     );
   });
 
+  it('creates a time-zone based order number and confirmation snapshot', async () => {
+    await db.collection('tenants').doc('default').set({
+      timezone: 'Asia/Manila',
+    });
+
+    const res = makeRes();
+    await createOrderHandler(
+      {
+        headers: { 'x-customer-id': 'customer-1' },
+        body: {
+          items: [{ productId: 'product-1', name: 'Test Product', qty: 1, price: 100 }],
+          receiverName: 'Test Customer',
+          receiverPhone: '09170000000',
+          address: 'Test Address',
+          totals: { total: 100 },
+          paymentMethod: 'COD',
+          checkoutSessionId: 'session-1',
+          paymentDraftId: 'draft-1',
+        },
+      } as unknown as Request,
+      res
+    );
+
+    const payload = (res.json as any).mock.calls[0][0];
+    const order = await db.collection(orderPath).doc(payload.data.id).get();
+    expect(order.data()).toMatchObject({
+      orderNumber: expect.stringMatching(/^\d{12}(?:-\d+)?$/),
+      confirmationSnapshot: expect.objectContaining({
+        timeZone: 'Asia/Manila',
+        checkoutSessionId: 'session-1',
+        paymentDraftId: 'draft-1',
+        totalsSnapshot: { total: 100 },
+      }),
+    });
+  });
+
   it('updates order status and nested fields', async () => {
     const res = makeRes();
     await updateOrderHandler(

@@ -16,6 +16,7 @@ export const getTenantHandler = async (req: Request, res: Response) => {
       contactEmail: "support@prime.store",
       contactPhone: "+63 912 345 6789",
       address: "Manila, Philippines",
+      timezone: "Asia/Manila",
       currency: "PHP",
       updatedAt: new Date().toISOString()
     };

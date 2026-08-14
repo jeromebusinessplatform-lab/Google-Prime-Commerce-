@@ -3,6 +3,23 @@ import { db } from "../../packages/db/index.js";
 import crypto from "crypto";
 import { sendTelegramMessage } from "./telegram.js";
 
+const formatOrderNumber = (date: Date, timeZone: string, sequence = 0) => {
+  const formatter = new Intl.DateTimeFormat("en-GB", {
+    timeZone,
+    day: "2-digit",
+    month: "2-digit",
+    year: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  });
+  const parts = formatter.formatToParts(date);
+  const value = (type: string) => parts.find((part) => part.type === type)?.value || "";
+  const base = `${value("day")}${value("month")}${value("year")}${value("hour")}${value("minute")}${value("second")}`;
+  return sequence > 0 ? `${base}-${sequence + 1}` : base;
+};
+
 const buildReceiptReview = (orderId: string, current: Record<string, any>, imageBase64: string, verified?: boolean) => {
   const analysis = {
     referenceNumber: `PRIME-${orderId.slice(-4)}`,
@@ -26,6 +43,28 @@ export const createOrderHandler = async (req: Request, res: Response) => {
   const { items, receiverName, receiverPhone, address, totals, delivery, paymentMethod, receipt, payment, checkoutSessionId, paymentDraftId, proofId } = req.body;
 
   let orderId;
+  const confirmationAt = new Date();
+  const tenantSnapshot = await db.collection("tenants").doc(tenantId).get();
+  const tenantData = tenantSnapshot.exists ? (tenantSnapshot.data() as Record<string, any>) : {};
+  const timeZone = String(tenantData?.timezone || "Asia/Manila");
+  const orderBase = formatOrderNumber(confirmationAt, timeZone);
+  const existingOrders = await db.collection(`tenants/${tenantId}/orders`).get();
+  const collisionCount = existingOrders.docs.filter((doc: any) => {
+    const data = doc.data();
+    return String(data?.orderNumber || "").startsWith(orderBase);
+  }).length;
+  const orderNumber = formatOrderNumber(confirmationAt, timeZone, collisionCount);
+  const confirmationSnapshot = {
+    orderNumber,
+    orderBase,
+    timeZone,
+    confirmedAt: confirmationAt.toISOString(),
+    paymentDraftId: paymentDraftId || null,
+    checkoutSessionId: checkoutSessionId || null,
+    paymentMethod: paymentMethod || null,
+    quoteSnapshot: delivery || null,
+    totalsSnapshot: totals || null,
+  };
 
   try {
     await db.runTransaction(async (transaction) => {
@@ -59,6 +98,7 @@ export const createOrderHandler = async (req: Request, res: Response) => {
       const receiptImageUrl = receipt?.imageUrl || proofData?.imageUrl || null;
       const orderData = sanitize({
         id: orderId,
+        orderNumber,
         customerId,
         customerName: receiverName,
         customerPhone: receiverPhone,
@@ -74,6 +114,7 @@ export const createOrderHandler = async (req: Request, res: Response) => {
         receipt: receipt || (receiptImageUrl ? { imageUrl: receiptImageUrl, proofId: proofId || proofData?.id || null } : null),
         checkoutSessionId: checkoutSessionId || null,
         paymentDraftId: paymentDraftId || null,
+        confirmationSnapshot,
         status: receiptImageUrl ? 'payment_review' : 'PENDING',
         reviewStatus: receipt?.analysis?.verified ? 'VALIDATED' : receiptImageUrl ? 'UNVALIDATED' : null,
         queueStatus: receiptImageUrl ? 'ON_QUEUE' : 'DRAFT',
@@ -94,6 +135,7 @@ export const createOrderHandler = async (req: Request, res: Response) => {
           amount: totals?.total || 0,
           quoteSnapshot: delivery || null,
           status: "submitted",
+          confirmationSnapshot,
           updatedAt: new Date().toISOString(),
           submittedAt: new Date().toISOString(),
         });
