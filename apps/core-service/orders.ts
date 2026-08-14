@@ -225,6 +225,53 @@ export const finalizePaymentReviewHandler = async (req: Request, res: Response) 
   return res.json({ success: true, data: { orderId, reviewStatus } });
 };
 
+export const reviewQueueActionHandler = async (req: Request, res: Response) => {
+  const tenantId = "default";
+  const orderId = req.params.id;
+  const orderRef = db.collection(`tenants/${tenantId}/orders`).doc(orderId);
+  const existing = await orderRef.get();
+
+  if (!existing.exists) {
+    return res.status(404).json({ error: "Order not found" });
+  }
+
+  const current = existing.data() as Record<string, any>;
+  const action = String(req.body?.action || "").toLowerCase();
+  const reason = req.body?.reason || null;
+  const reviewerId = (req.headers["x-admin-id"] || req.headers["x-user-id"] || "system").toString();
+
+  if (!["approve", "reject", "needs-review"].includes(action)) {
+    return res.status(400).json({ error: "Invalid review action" });
+  }
+
+  const reviewStatus = action === "approve" ? "VALIDATED" : action === "reject" ? "UNVALIDATED" : "NEEDS_REVIEW";
+  const queueStatus = action === "approve" ? "COMPLETED" : "ON_QUEUE";
+  const reviewEvent = {
+    action,
+    reason,
+    reviewerId,
+    reviewedAt: new Date().toISOString(),
+    previousReviewStatus: current.reviewStatus || null,
+  };
+
+  const next = {
+    ...current,
+    reviewStatus,
+    queueStatus,
+    payment: {
+      ...current.payment,
+      status: action === "approve" ? "VERIFIED" : action === "reject" ? "PENDING_REVIEW" : current.payment?.status || "PENDING_REVIEW",
+    },
+    reviewHistory: [...(current.reviewHistory || []), reviewEvent],
+    reviewedBy: reviewerId,
+    reviewedAt: reviewEvent.reviewedAt,
+    updatedAt: reviewEvent.reviewedAt,
+  };
+
+  await orderRef.set(next);
+  return res.json({ success: true, data: { orderId, reviewStatus, queueStatus, reviewEvent } });
+};
+
 export const createPaymentDraftHandler = async (req: Request, res: Response) => {
   const tenantId = "default";
   const customerId = (req.headers["x-customer-id"] || "preview-user-id").toString();

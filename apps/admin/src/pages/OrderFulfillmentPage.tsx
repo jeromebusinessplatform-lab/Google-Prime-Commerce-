@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { ChevronLeft, PackageCheck, Truck, CheckCircle2, Receipt, AlertCircle, Printer, X } from 'lucide-react';
+import { ChevronLeft, PackageCheck, Truck, CheckCircle2, Receipt, AlertCircle, Printer, X, ShieldAlert, ShieldCheck, ShieldQuestion } from 'lucide-react';
 
 interface PackingSlipModalProps {
   order: any;
@@ -192,6 +192,7 @@ export function OrderFulfillmentPage() {
   const location = useLocation();
   const [order, setOrder] = useState<any>(null);
   const [showPrintModal, setShowPrintModal] = useState(false);
+  const [reviewReason, setReviewReason] = useState('');
 
   useEffect(() => {
     if (location.search.includes('print=true')) {
@@ -249,18 +250,52 @@ export function OrderFulfillmentPage() {
 
   const approvePayment = async () => {
     try {
-      await fetch(`/v1/orders/${id}/finalize-review`, {
+      await fetch(`/v1/orders/${id}/review-actions`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: 'PROCESSING', payment: { ...order.payment, status: 'VERIFIED' } })
+        body: JSON.stringify({ action: 'approve', reason: reviewReason || 'Admin approved payment review' })
       });
       setOrder((prev: any) => ({ 
         ...prev, 
         status: 'PROCESSING',
-        payment: { ...prev.payment, status: 'VERIFIED' } 
+        payment: { ...prev.payment, status: 'VERIFIED' },
+        reviewStatus: 'VALIDATED'
       }));
     } catch (e) {
       console.error("Failed to approve payment", e);
+    }
+  };
+
+  const rejectPayment = async () => {
+    try {
+      await fetch(`/v1/orders/${id}/review-actions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'reject', reason: reviewReason || 'Admin rejected payment review' })
+      });
+      setOrder((prev: any) => ({
+        ...prev,
+        reviewStatus: 'UNVALIDATED',
+        payment: { ...prev.payment, status: 'PENDING_REVIEW' }
+      }));
+    } catch (e) {
+      console.error("Failed to reject payment", e);
+    }
+  };
+
+  const markNeedsReview = async () => {
+    try {
+      await fetch(`/v1/orders/${id}/review-actions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'needs-review', reason: reviewReason || 'Needs more evidence' })
+      });
+      setOrder((prev: any) => ({
+        ...prev,
+        reviewStatus: 'NEEDS_REVIEW'
+      }));
+    } catch (e) {
+      console.error("Failed to mark needs review", e);
     }
   };
 
@@ -415,7 +450,7 @@ export function OrderFulfillmentPage() {
         </div>
 
         <div className="space-y-4">
-          <div className="bg-white dark:bg-gray-900 p-4 rounded-md border border-gray-200 dark:border-gray-800 shadow-sm transition-colors">
+          <div className="bg-white dark:bg-gray-900 p-4 rounded-md border border-gray-200 dark:border-gray-800 shadow-sm transition-colors space-y-3">
             <h3 className=" text-sm mb-3 flex items-center gap-2"><Receipt size={16} /> PAYMENT PROOF</h3>
             {order.payment.status === 'VERIFICATION_PENDING' ? (
               <div className="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded mb-3 border border-yellow-200 dark:border-yellow-800/30">
@@ -441,6 +476,37 @@ export function OrderFulfillmentPage() {
             <div className="text-sm mt-1">
               <span className="text-gray-500 dark:text-gray-400">Amount:</span> <span className=" text-lg">₱{order.total.toLocaleString()}</span>
             </div>
+          </div>
+
+          <div className="bg-white dark:bg-gray-900 p-4 rounded-md border border-gray-200 dark:border-gray-800 shadow-sm transition-colors space-y-3">
+            <h3 className="text-sm flex items-center gap-2"><ShieldCheck size={16} /> REVIEW QUEUE</h3>
+            <input
+              value={reviewReason}
+              onChange={(e) => setReviewReason(e.target.value)}
+              placeholder="Reason or note"
+              className="w-full border border-gray-200 dark:border-gray-700 rounded px-3 py-2 text-sm bg-transparent"
+            />
+            <div className="grid grid-cols-3 gap-2">
+              <button onClick={approvePayment} className="flex items-center justify-center gap-2 py-2 rounded bg-green-600 text-white text-[10px] uppercase tracking-widest">
+                <ShieldCheck size={14} /> Approve
+              </button>
+              <button onClick={rejectPayment} className="flex items-center justify-center gap-2 py-2 rounded bg-red-600 text-white text-[10px] uppercase tracking-widest">
+                <ShieldAlert size={14} /> Reject
+              </button>
+              <button onClick={markNeedsReview} className="flex items-center justify-center gap-2 py-2 rounded bg-amber-500 text-white text-[10px] uppercase tracking-widest">
+                <ShieldQuestion size={14} /> Needs Review
+              </button>
+            </div>
+            {order.reviewHistory?.length > 0 && (
+              <div className="text-[10px] uppercase tracking-widest text-gray-400 dark:text-gray-500 space-y-1">
+                <div>History</div>
+                {order.reviewHistory.slice(-3).map((entry: any, index: number) => (
+                  <div key={index} className="rounded bg-gray-50 dark:bg-gray-800 p-2">
+                    {entry.action} by {entry.reviewerId} at {new Date(entry.reviewedAt).toLocaleString()}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="bg-white dark:bg-gray-900 p-4 rounded-md border border-gray-200 dark:border-gray-800 shadow-sm transition-colors">

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Request, Response } from 'express';
-import { createOrderHandler, getOrdersHandler, getOrderHandler, updateOrderHandler, analyzeReceiptHandler, reviewReceiptHandler } from './orders';
+import { createOrderHandler, getOrdersHandler, getOrderHandler, updateOrderHandler, analyzeReceiptHandler, reviewReceiptHandler, reviewQueueActionHandler } from './orders';
 import { db } from '../../packages/db/index';
 
 vi.mock('../../packages/db/index', () => {
@@ -213,6 +213,31 @@ describe('orders API handlers', () => {
       }),
       reviewStatus: 'UNVALIDATED',
       payment: { method: 'COD', status: 'PENDING_REVIEW' },
+    });
+  });
+
+  it('persists review queue actions with reviewer metadata', async () => {
+    const res = makeRes();
+    await reviewQueueActionHandler(
+      {
+        params: { id: orderId },
+        headers: { 'x-admin-id': 'admin-1' },
+        body: { action: 'approve', reason: 'Valid proof' },
+      } as unknown as Request,
+      res
+    );
+
+    const updated = await db.collection(orderPath).doc(orderId).get();
+    expect(updated.data()).toMatchObject({
+      reviewStatus: 'VALIDATED',
+      reviewedBy: 'admin-1',
+      reviewHistory: expect.arrayContaining([
+        expect.objectContaining({
+          action: 'approve',
+          reason: 'Valid proof',
+          reviewerId: 'admin-1',
+        }),
+      ]),
     });
   });
 });

@@ -99,6 +99,7 @@ export const apiRoutes: ApiRoute[] = [
   { method: "post", path: "/v1/orders/:id/finalize-review", handler: finalizePaymentReviewHandler },
   { method: "post", path: "/v1/orders/:id/review-receipt", handler: (orders as any).reviewReceiptHandler },
   { method: "post", path: "/v1/orders/:id/proofs", handler: (orders as any).uploadProofHandler },
+  { method: "post", path: "/v1/orders/:id/review-actions", handler: (orders as any).reviewQueueActionHandler },
   { method: "post", path: "/v1/orders/:id/status", handler: (orders as any).setOrderFulfillmentStatusHandler },
   { method: "post", path: "/v1/orders/:id/amendments", handler: (orders as any).createOrderAmendmentHandler },
   { method: "post", path: "/v1/orders", handler: orders.createOrderHandler },
