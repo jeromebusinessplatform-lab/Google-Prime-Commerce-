@@ -26,6 +26,7 @@ const envSchema = z.object({
   
   RECEIPT_ANALYZER_PROVIDER: z.string().optional(),
   RECEIPT_ANALYZER_API_KEY: z.string().optional(),
+  RECEIPT_OCR_API: z.string().optional(),
   RECEIPT_SCREENING_MAX_WAIT_SECONDS: z.coerce.number().default(30),
   
   GEOAPIFY_API_KEY: z.string().optional(),

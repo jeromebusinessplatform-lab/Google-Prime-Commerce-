@@ -233,6 +233,7 @@ export function CheckoutPage() {
   const [receiptImage, setReceiptImage] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<any>(null);
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
 
   if (!session || !session.id) return <div className="p-8 text-center mt-10  uppercase tracking-tighter animate-pulse">Initializing Prime Checkout...</div>;
 
@@ -283,8 +284,59 @@ export function CheckoutPage() {
       const reader = new FileReader();
       reader.onloadend = () => {
         setReceiptImage(reader.result as string);
+        setAnalysisResult(null);
+        setAnalysisError(null);
       };
       reader.readAsDataURL(file);
+    }
+  };
+
+  const runReceiptAnalysis = async (imageBase64: string) => {
+    const ocrKey = process.env.RECEIPT_OCR_API || '';
+    setIsAnalyzing(true);
+    setAnalysisError(null);
+    try {
+      if (!ocrKey) {
+        throw new Error('OCR token is not configured');
+      }
+
+      const formData = new FormData();
+      formData.append('apikey', ocrKey);
+      formData.append('language', 'eng');
+      formData.append('isOverlayRequired', 'false');
+      formData.append('base64Image', imageBase64);
+
+      const response = await fetch('https://api.ocr.space/parse/image', {
+        method: 'POST',
+        body: formData,
+      });
+      const payload = await response.json();
+      const parsedText = payload?.ParsedResults?.[0]?.ParsedText || '';
+      const responseError = payload?.ErrorMessage || payload?.ErrorDetails || null;
+      const analysis = {
+        provider: 'ocr.space',
+        parsedText,
+        confidence: payload?.ParsedResults?.[0]?.TextOverlay?.Lines?.length ? 'processed' : 'unknown',
+        verified: Boolean(parsedText.trim()),
+        raw: payload,
+        analyzedAt: new Date().toISOString(),
+      };
+      setAnalysisResult(analysis);
+      setAnalysisError(responseError || null);
+      return analysis;
+    } catch (error: any) {
+      const message = error?.message || 'Receipt analysis failed';
+      setAnalysisError(message);
+      const fallback = {
+        provider: 'ocr.space',
+        verified: false,
+        error: message,
+        analyzedAt: new Date().toISOString(),
+      };
+      setAnalysisResult(fallback);
+      return fallback;
+    } finally {
+      setIsAnalyzing(false);
     }
   };
 
@@ -292,16 +344,16 @@ export function CheckoutPage() {
     if (!items.length || !selectedQuote || !paymentTiming) return;
     setIsPlacing(true);
     try {
+      let proofAnalysis = analysisResult;
       let proofRecord: any = null;
       if (receiptImage && paymentTiming === 'checkout') {
-        setIsAnalyzing(true);
+        if (!proofAnalysis && !analysisError) return;
         const proofRes = await fetch(`/v1/checkout/drafts/${paymentDraftId}/proofs`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ imageBase64: receiptImage, source: 'customer' })
+          body: JSON.stringify({ imageBase64: receiptImage, source: 'customer', analysis: proofAnalysis })
         });
         proofRecord = await proofRes.json();
-        setIsAnalyzing(false);
       }
 
       const res = await fetch('/v1/orders', {
@@ -316,6 +368,7 @@ export function CheckoutPage() {
           paymentDraftId,
           checkoutSessionId: session.id,
           proofId: proofRecord?.data?.id || null,
+          receipt: receiptImage ? { imageUrl: receiptImage, analysis: proofAnalysis || analysisResult } : null,
           selectedQuoteId: selectedQuote.id,
           address: selectedAddress ? (selectedAddress.properties?.formatted || selectedAddress.formatted) : addressSearch,
           lat: selectedCoordinates.lat,
@@ -326,14 +379,6 @@ export function CheckoutPage() {
       });
       const data = await res.json();
       const orderId = data.data.id;
-
-      if (receiptImage && paymentTiming === 'checkout') {
-        await fetch(`/v1/orders/${orderId}/review-receipt`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ imageBase64: receiptImage, verified: true })
-        });
-      }
 
       navigate(`/orders/${orderId}`);
       window.dispatchEvent(new CustomEvent('cart-updated'));
@@ -591,6 +636,25 @@ export function CheckoutPage() {
                    )}
                  </div>
                </div>
+               {receiptImage && (
+                 <div className="space-y-2">
+                   <button
+                     type="button"
+                     onClick={() => runReceiptAnalysis(receiptImage)}
+                     disabled={isAnalyzing}
+                     className="w-full rounded-xl border border-black bg-black text-white py-3 text-[10px] uppercase tracking-widest disabled:opacity-50"
+                   >
+                     {isAnalyzing ? 'ANALYZING RECEIPT...' : 'Analyze Receipt'}
+                   </button>
+                   <div className="text-[8px] uppercase tracking-widest text-gray-400 dark:text-gray-500">
+                     {analysisResult?.verified === true
+                       ? 'OCR completed. Submission can proceed.'
+                       : analysisError
+                         ? `OCR attempted. ${analysisError}`
+                         : 'Run receipt analysis before submitting.'}
+                   </div>
+                 </div>
+               )}
             </div>
           )}
         </section>
@@ -605,12 +669,12 @@ export function CheckoutPage() {
              <div className="text-xl  tracking-tighter">₱{totalOrderValue.toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
            </div>
            <button 
-            disabled={!selectedQuote || !paymentTiming || !receiverName || !receiverPhone || (paymentTiming === 'checkout' && !receiptImage) || isPlacing}
+           disabled={!selectedQuote || !paymentTiming || !receiverName || !receiverPhone || (paymentTiming === 'checkout' && !receiptImage) || isPlacing || (paymentTiming === 'checkout' && receiptImage && !analysisResult && !analysisError)}
             onClick={handlePlaceOrder}
             className="px-10 bg-black text-white rounded-xl text-[10px]  uppercase tracking-widest hover:bg-gray-800 disabled:bg-gray-200 disabled:text-gray-400 transition-all shadow-2xl shadow-black/20"
           >
-            {isPlacing ? (isAnalyzing ? 'ANALYZING LEDGER...' : 'PLACING ORDER...') : 'Authorize Payment'}
-           </button>
+            {isPlacing ? 'PLACING ORDER...' : (isAnalyzing ? 'ANALYZING RECEIPT...' : 'Authorize Payment')}
+          </button>
         </div>
       </div>
     </div>
