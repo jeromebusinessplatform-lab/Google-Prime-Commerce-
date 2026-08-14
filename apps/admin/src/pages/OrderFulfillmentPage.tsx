@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { ChevronLeft, PackageCheck, Truck, CheckCircle2, Receipt, AlertCircle, Printer, X, ShieldAlert, ShieldCheck, ShieldQuestion } from 'lucide-react';
+import { ChevronLeft, PackageCheck, Truck, CheckCircle2, Receipt, AlertCircle, Printer, X, ShieldAlert, ShieldCheck, ShieldQuestion, ZoomIn, ZoomOut, RotateCw, Maximize2, Move } from 'lucide-react';
 
 interface PackingSlipModalProps {
   order: any;
@@ -186,12 +186,151 @@ function PackingSlipModal({ order, onClose, onUpdateStatus }: PackingSlipModalPr
   );
 }
 
+function EvidenceViewerModal({
+  open,
+  onClose,
+  imageUrl,
+  title,
+  summary,
+}: {
+  open: boolean;
+  onClose: () => void;
+  imageUrl: string | null;
+  title: string;
+  summary: Array<{ label: string; value: string }>;
+}) {
+  const [zoom, setZoom] = useState(1);
+  const [rotation, setRotation] = useState(0);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [dragging, setDragging] = useState(false);
+  const dragOrigin = React.useRef<{ x: number; y: number } | null>(null);
+  const panOrigin = React.useRef<{ x: number; y: number } | null>(null);
+
+  useEffect(() => {
+    if (open) {
+      setZoom(1);
+      setRotation(0);
+      setPan({ x: 0, y: 0 });
+      setDragging(false);
+    }
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose();
+      if (event.key === '+' || event.key === '=') setZoom((value) => Math.min(4, Number((value + 0.2).toFixed(2))));
+      if (event.key === '-') setZoom((value) => Math.max(0.5, Number((value - 0.2).toFixed(2))));
+      if (event.key === 'r') setRotation((value) => (value + 90) % 360);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [open, onClose]);
+
+  const beginDrag = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (!imageUrl) return;
+    setDragging(true);
+    dragOrigin.current = { x: event.clientX, y: event.clientY };
+    panOrigin.current = { ...pan };
+    (event.currentTarget as HTMLDivElement).setPointerCapture(event.pointerId);
+  };
+
+  const updateDrag = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (!dragging || !dragOrigin.current || !panOrigin.current) return;
+    const dx = event.clientX - dragOrigin.current.x;
+    const dy = event.clientY - dragOrigin.current.y;
+    setPan({ x: panOrigin.current.x + dx, y: panOrigin.current.y + dy });
+  };
+
+  const endDrag = () => {
+    setDragging(false);
+    dragOrigin.current = null;
+    panOrigin.current = null;
+  };
+
+  if (!open) return null;
+
+  return (
+    <div className="fixed inset-0 z-[120] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="w-full max-w-6xl bg-white dark:bg-gray-950 rounded-2xl shadow-2xl overflow-hidden border border-white/10">
+        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-800">
+          <div>
+            <div className="text-[10px] uppercase tracking-widest text-gray-500 dark:text-gray-400">Evidence Viewer</div>
+            <div className="text-sm font-medium">{title}</div>
+          </div>
+          <div className="flex items-center gap-2">
+            <button onClick={() => setZoom((v) => Math.min(4, Number((v + 0.2).toFixed(2))))} className="px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-[10px] uppercase tracking-widest flex items-center gap-2"><ZoomIn size={14} /> Zoom</button>
+            <button onClick={() => setZoom((v) => Math.max(0.5, Number((v - 0.2).toFixed(2))))} className="px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-[10px] uppercase tracking-widest flex items-center gap-2"><ZoomOut size={14} /> Out</button>
+            <button onClick={() => setRotation((v) => (v + 90) % 360)} className="px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-[10px] uppercase tracking-widest flex items-center gap-2"><RotateCw size={14} /> Rotate</button>
+            <button onClick={() => document.documentElement.requestFullscreen?.()} className="px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-[10px] uppercase tracking-widest flex items-center gap-2"><Maximize2 size={14} /> Fullscreen</button>
+            <button onClick={onClose} className="p-2 rounded-lg border border-gray-200 dark:border-gray-700"><X size={18} /></button>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.7fr)_minmax(280px,0.8fr)] min-h-[70vh]">
+          <div className="bg-gray-950 flex items-center justify-center p-4 overflow-hidden">
+            {imageUrl ? (
+              <div
+                className="relative w-full h-full min-h-[60vh] flex items-center justify-center cursor-grab active:cursor-grabbing"
+                onPointerDown={beginDrag}
+                onPointerMove={updateDrag}
+                onPointerUp={endDrag}
+                onPointerLeave={endDrag}
+                onPointerCancel={endDrag}
+              >
+                <img
+                  src={imageUrl}
+                  alt={title}
+                  className="max-w-full max-h-full select-none shadow-2xl rounded-xl border border-white/10"
+                  style={{
+                    transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom}) rotate(${rotation}deg)`,
+                    transformOrigin: 'center center',
+                  }}
+                  draggable={false}
+                />
+                <div className="absolute bottom-4 left-4 flex items-center gap-2 bg-black/60 text-white text-[10px] uppercase tracking-widest px-3 py-2 rounded-full">
+                  <Move size={14} /> Drag to pan
+                </div>
+              </div>
+            ) : (
+              <div className="text-gray-300 text-sm">No evidence image available.</div>
+            )}
+          </div>
+          <div className="p-5 space-y-5 bg-white dark:bg-gray-950 border-t lg:border-t-0 lg:border-l border-gray-200 dark:border-gray-800">
+            <div>
+              <div className="text-[10px] uppercase tracking-widest text-gray-500 dark:text-gray-400">State Summary</div>
+              <div className="mt-2 space-y-2">
+                {summary.map((row) => (
+                  <div key={row.label} className="flex justify-between gap-3 text-xs">
+                    <span className="uppercase tracking-widest text-gray-400 dark:text-gray-500">{row.label}</span>
+                    <span className="text-right text-gray-700 dark:text-gray-300">{row.value}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="rounded-xl border border-gray-200 dark:border-gray-800 p-3">
+                <div className="text-[10px] uppercase tracking-widest text-gray-500 dark:text-gray-400">Proof</div>
+                <div className="text-sm mt-1">{imageUrl ? 'Present' : 'Missing'}</div>
+              </div>
+              <div className="rounded-xl border border-gray-200 dark:border-gray-800 p-3">
+                <div className="text-[10px] uppercase tracking-widest text-gray-500 dark:text-gray-400">Settlement</div>
+                <div className="text-sm mt-1">{summary.find((row) => row.label === 'Settlement')?.value || 'Unknown'}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function OrderFulfillmentPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
   const [order, setOrder] = useState<any>(null);
   const [showPrintModal, setShowPrintModal] = useState(false);
+  const [evidenceOpen, setEvidenceOpen] = useState(false);
   const [reviewReason, setReviewReason] = useState('');
 
   useEffect(() => {
@@ -247,6 +386,9 @@ export function OrderFulfillmentPage() {
   };
 
   const nextStatus = order ? getNextStatus(order.status) : null;
+  const proofImageUrl = order?.receipt?.imageUrl || order?.payment?.proofUrl || null;
+  const reviewValue = order?.reviewStatus || order?.receipt?.analysis?.verdict || 'UNSET';
+  const settlementValue = order?.payment?.status || 'UNKNOWN';
 
   const approvePayment = async () => {
     try {
@@ -372,6 +514,20 @@ export function OrderFulfillmentPage() {
         />
       )}
 
+      <EvidenceViewerModal
+        open={evidenceOpen}
+        onClose={() => setEvidenceOpen(false)}
+        imageUrl={proofImageUrl}
+        title={`Evidence for Order ${order?.id || ''}`}
+        summary={[
+          { label: 'Review', value: String(reviewValue) },
+          { label: 'Settlement', value: String(settlementValue) },
+          { label: 'Proof', value: proofImageUrl ? 'Available' : 'Missing' },
+          { label: 'Queue', value: String(order?.queueStatus || 'UNKNOWN') },
+          { label: 'Status', value: String(order?.status || 'UNKNOWN') },
+        ]}
+      />
+
       <div className="p-4 max-w-6xl mx-auto w-full grid grid-cols-1 md:grid-cols-3 gap-4 pb-[100px]">
         <div className="md:col-span-2 space-y-4">
           
@@ -452,12 +608,18 @@ export function OrderFulfillmentPage() {
         <div className="space-y-4">
           <div className="bg-white dark:bg-gray-900 p-4 rounded-md border border-gray-200 dark:border-gray-800 shadow-sm transition-colors space-y-3">
             <h3 className=" text-sm mb-3 flex items-center gap-2"><Receipt size={16} /> PAYMENT PROOF</h3>
+            <button
+              onClick={() => setEvidenceOpen(true)}
+              className="w-full mb-3 py-2.5 rounded-lg border border-gray-200 dark:border-gray-700 text-[10px] uppercase tracking-widest hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+            >
+              Open Evidence Viewer
+            </button>
             {order.payment.status === 'VERIFICATION_PENDING' ? (
               <div className="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded mb-3 border border-yellow-200 dark:border-yellow-800/30">
                 <div className="flex gap-2 text-yellow-800 dark:text-yellow-400 text-sm  mb-2">
                   <AlertCircle size={18} /> NEEDS VERIFICATION
                 </div>
-                <img src={order.payment.proofUrl} alt="Proof" className="w-full h-auto rounded border border-gray-200 dark:border-gray-700 mb-2 cursor-pointer hover:opacity-90" />
+                <img src={proofImageUrl} alt="Proof" className="w-full h-auto rounded border border-gray-200 dark:border-gray-700 mb-2 cursor-pointer hover:opacity-90" onClick={() => setEvidenceOpen(true)} />
                 <button 
                   onClick={approvePayment}
                   className="w-full bg-green-600 text-white  py-2 rounded hover:bg-green-700"
@@ -475,6 +637,16 @@ export function OrderFulfillmentPage() {
             </div>
             <div className="text-sm mt-1">
               <span className="text-gray-500 dark:text-gray-400">Amount:</span> <span className=" text-lg">₱{order.total.toLocaleString()}</span>
+            </div>
+            <div className="grid grid-cols-2 gap-2 text-[10px] uppercase tracking-widest">
+              <div className="rounded-lg bg-gray-50 dark:bg-gray-800 p-2">
+                <div className="text-gray-400 dark:text-gray-500">Review</div>
+                <div className="text-gray-800 dark:text-gray-200 mt-1">{reviewValue}</div>
+              </div>
+              <div className="rounded-lg bg-gray-50 dark:bg-gray-800 p-2">
+                <div className="text-gray-400 dark:text-gray-500">Settlement</div>
+                <div className="text-gray-800 dark:text-gray-200 mt-1">{settlementValue}</div>
+              </div>
             </div>
           </div>
 
