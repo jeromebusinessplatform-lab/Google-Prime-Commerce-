@@ -5,7 +5,7 @@
 // from `apps/core-service/routes.ts` work unmodified on Workers.
 
 import { apiRoutes } from "../apps/core-service/routes.js";
-import { validateAppEnvForRuntime } from "../packages/config/env.js";
+import { getDependencyHealth, getRuntimeHealth } from "../apps/core-service/health.js";
 
 interface CompiledRoute {
   method: string;
@@ -114,40 +114,13 @@ function json(data: any, status = 200): Response {
   });
 }
 
-function getRuntimeHealth() {
-  const envHealth = validateAppEnvForRuntime("worker");
-  return {
-    service: "prime-commerce-worker",
-    status: envHealth.ok ? "ready" : "config_error",
-    ok: envHealth.ok,
-    missing: envHealth.missing,
-    live: true,
-    dependencies: {
-      db: Boolean((globalThis as any).__PRIME_D1_BINDING__),
-      env: envHealth.ok,
-    },
-  };
-}
-
-function getDependencyHealth() {
-  const health = getRuntimeHealth();
-  const ready = health.dependencies.db && health.dependencies.env;
-  return {
-    service: health.service,
-    status: ready ? "ready" : "dependency_error",
-    ok: ready,
-    dependencies: health.dependencies,
-    missing: health.missing,
-  };
-}
-
 export async function handleApiRequest(request: Request): Promise<Response> {
   const url = new URL(request.url);
   const method = request.method.toLowerCase();
   const pathname = url.pathname;
 
   if (method === "get" && pathname === "/api/health") {
-    const health = getRuntimeHealth();
+    const health = getRuntimeHealth("worker");
     return json(health, health.ok ? 200 : 503);
   }
 
@@ -156,28 +129,16 @@ export async function handleApiRequest(request: Request): Promise<Response> {
   }
 
   if (method === "get" && pathname === "/api/health/ready") {
-    const health = getRuntimeHealth();
+    const health = getRuntimeHealth("worker");
     return json(
-      {
-        ok: health.ok,
-        status: health.status,
-        missing: health.missing,
-        dependencies: health.dependencies,
-      },
+      health,
       health.ok ? 200 : 503
     );
   }
 
   if (method === "get" && pathname === "/api/health/dependencies") {
-    const health = getDependencyHealth();
-    return json(
-      {
-        ok: health.ok,
-        dependencies: health.dependencies,
-        missing: health.missing,
-      },
-      health.ok ? 200 : 503
-    );
+    const health = getDependencyHealth("worker");
+    return json(health, health.ok ? 200 : 503);
   }
 
   for (const route of compiled) {

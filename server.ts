@@ -3,7 +3,8 @@ import path from "path";
 import fs from "fs/promises";
 import { createServer as createViteServer } from "vite";
 import { registerApiRoutes } from "./apps/core-service/routes.js";
-import { validateAppEnvOrThrow, validateAppEnvForRuntime } from "./packages/config/env.js";
+import { validateAppEnvOrThrow } from "./packages/config/env.js";
+import { getDependencyHealth, getRuntimeHealth } from "./apps/core-service/health.js";
 
 async function startServer() {
   if (typeof process.loadEnvFile === "function") {
@@ -13,7 +14,6 @@ async function startServer() {
   }
   const app = express();
   const PORT = Number(process.env.PORT) || 3000;
-  const runtimeHealth = validateAppEnvForRuntime("server");
   if (process.env.NODE_ENV === "production") validateAppEnvOrThrow("server");
 
   // Add JSON parsing middleware
@@ -22,11 +22,9 @@ async function startServer() {
 
   // API Routes
   app.get("/api/health", (req, res) => {
+    const runtimeHealth = getRuntimeHealth("server");
     res.status(runtimeHealth.ok ? 200 : 503).json({
-      service: "prime-commerce-server",
-      status: runtimeHealth.ok ? "ready" : "config_error",
-      ok: runtimeHealth.ok,
-      missing: runtimeHealth.missing,
+      ...runtimeHealth,
     });
   });
 
@@ -35,24 +33,15 @@ async function startServer() {
   });
 
   app.get("/api/health/ready", (req, res) => {
+    const runtimeHealth = getRuntimeHealth("server");
     res.status(runtimeHealth.ok ? 200 : 503).json({
-      service: "prime-commerce-server",
-      status: runtimeHealth.ok ? "ready" : "config_error",
-      ok: runtimeHealth.ok,
-      missing: runtimeHealth.missing,
+      ...runtimeHealth,
     });
   });
 
   app.get("/api/health/dependencies", (req, res) => {
-    res.status(runtimeHealth.ok ? 200 : 503).json({
-      service: "prime-commerce-server",
-      status: runtimeHealth.ok ? "ready" : "config_error",
-      ok: runtimeHealth.ok,
-      dependencies: {
-        api: true,
-      },
-      missing: runtimeHealth.missing,
-    });
+    const dependencyHealth = getDependencyHealth("server");
+    res.status(dependencyHealth.ok ? 200 : 503).json(dependencyHealth);
   });
 
   // All /v1/* endpoints come from the shared route table

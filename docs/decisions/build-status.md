@@ -21,6 +21,6 @@
 - No full production runtime verification yet.
 
 ## Next Work
-- Work through [Phase 4 Checklist](./phase-4-checklist.md) item by item.
+- Work through [Phase 5 Checklist](./phase-5-checklist.md) item by item.
 - Verify the worker and API entrypoints against the current deployment path.
 - Complete the full runtime check for required production variables.
