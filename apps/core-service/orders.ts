@@ -3,6 +3,22 @@ import { db } from "../../packages/db/index.js";
 import crypto from "crypto";
 import { sendTelegramMessage } from "./telegram.js";
 
+const buildReceiptReview = (orderId: string, current: Record<string, any>, imageBase64: string, verified?: boolean) => {
+  const analysis = {
+    referenceNumber: `PRIME-${orderId.slice(-4)}`,
+    amount: current.total || 0,
+    senderName: current.customerName || "Unknown Sender",
+    verified: Boolean(verified ?? true),
+    verdict: verified === false ? "UNVALIDATED" : "VALIDATED",
+    analyzedAt: new Date().toISOString(),
+  };
+
+  return {
+    receipt: { imageUrl: imageBase64, analysis },
+    analysis,
+  };
+};
+
 export const createOrderHandler = async (req: Request, res: Response) => {
   const tenantId = "default";
   const customerIdRaw = req.headers["x-customer-id"] || "preview-user-id";
@@ -168,19 +184,7 @@ export const analyzeReceiptHandler = async (req: Request, res: Response) => {
   }
 
   const current = existing.data() as Record<string, any>;
-  const analysis = {
-    referenceNumber: `PRIME-${orderId.slice(-4)}`,
-    amount: current.total || 0,
-    senderName: current.customerName || "Unknown Sender",
-    verified: true,
-    verdict: "VALIDATED",
-    analyzedAt: new Date().toISOString()
-  };
-
-  const receipt = {
-    imageUrl: imageBase64,
-    analysis
-  };
+  const { receipt, analysis } = buildReceiptReview(orderId, current, imageBase64, true);
 
   await orderRef.set({
     ...current,
@@ -293,15 +297,7 @@ export const reviewReceiptHandler = async (req: Request, res: Response) => {
   const current = existing.data() as Record<string, any>;
   const imageBase64 = req.body?.imageBase64;
   if (!imageBase64) return res.status(400).json({ error: "Missing imageBase64" });
-  const analysis = {
-    referenceNumber: `PRIME-${orderId.slice(-4)}`,
-    amount: current.total || 0,
-    senderName: current.customerName || "Unknown Sender",
-    verified: Boolean(req.body?.verified ?? true),
-    verdict: req.body?.verified === false ? "UNVALIDATED" : "VALIDATED",
-    analyzedAt: new Date().toISOString(),
-  };
-  const receipt = { imageUrl: imageBase64, analysis };
+  const { receipt, analysis } = buildReceiptReview(orderId, current, imageBase64, req.body?.verified);
   await orderRef.set({
     ...current,
     receipt,

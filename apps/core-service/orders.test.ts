@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Request, Response } from 'express';
-import { createOrderHandler, getOrdersHandler, getOrderHandler, updateOrderHandler, analyzeReceiptHandler } from './orders';
+import { createOrderHandler, getOrdersHandler, getOrderHandler, updateOrderHandler, analyzeReceiptHandler, reviewReceiptHandler } from './orders';
 import { db } from '../../packages/db/index';
 
 vi.mock('../../packages/db/index', () => {
@@ -190,6 +190,29 @@ describe('orders API handlers', () => {
         }),
       }),
       payment: { method: 'COD', status: 'VERIFIED' },
+    });
+  });
+
+  it('preserves an unvalidated verdict when review is manually rejected', async () => {
+    const res = makeRes();
+    await reviewReceiptHandler(
+      {
+        params: { id: orderId },
+        body: { imageBase64: 'data:image/png;base64,BBB', verified: false },
+      } as unknown as Request,
+      res
+    );
+
+    const updated = await db.collection(orderPath).doc(orderId).get();
+    expect(updated.data()).toMatchObject({
+      receipt: expect.objectContaining({
+        analysis: expect.objectContaining({
+          verified: false,
+          verdict: 'UNVALIDATED',
+        }),
+      }),
+      reviewStatus: 'UNVALIDATED',
+      payment: { method: 'COD', status: 'PENDING_REVIEW' },
     });
   });
 });

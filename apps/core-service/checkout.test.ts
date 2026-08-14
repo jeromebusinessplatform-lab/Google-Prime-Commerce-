@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { Request, Response } from "express";
-import { createCheckoutSessionHandler, uploadDraftProofHandler } from "./checkout.js";
+import { createCheckoutSessionHandler, uploadDraftProofHandler, analyzeDraftProofHandler } from "./checkout.js";
 import { createOrderHandler } from "./orders.js";
 import { db } from "../../packages/db/index.js";
 
@@ -186,5 +186,41 @@ describe("checkout draft flow", () => {
       proofVersion: 1,
       proofUrl: "data:image/png;base64,proof-1",
     });
+  });
+
+  it("proxies receipt OCR through the server and returns a deterministic verdict", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      json: async () => ({
+        ParsedResults: [{ ParsedText: "GCash receipt" }],
+      }),
+    });
+    vi.stubGlobal("fetch", fetchMock as any);
+    process.env.RECEIPT_OCR_API = "test-ocr-key";
+
+    const res = makeRes();
+    await analyzeDraftProofHandler(
+      {
+        body: { imageBase64: "data:image/png;base64,proof-ocr" },
+      } as unknown as Request,
+      res
+    );
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://api.ocr.space/parse/image",
+      expect.objectContaining({
+        method: "POST",
+      })
+    );
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: true,
+        data: expect.objectContaining({
+          verified: true,
+          verdict: "VALIDATED",
+          parsedText: "GCash receipt",
+        }),
+      })
+    );
+    vi.unstubAllGlobals();
   });
 });

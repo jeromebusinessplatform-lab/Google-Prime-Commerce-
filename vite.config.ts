@@ -45,8 +45,7 @@ export default defineConfig(() => {
     },
     define: {
       'process.env.GOOGLE_MAPS_PLATFORM_KEY': JSON.stringify(process.env.GOOGLE_MAPS_PLATFORM_KEY || ''),
-      'process.env.GEOAPIFY_API_KEY': JSON.stringify(process.env.GEOAPIFY_API_KEY || ''),
-      'process.env.RECEIPT_OCR_API': JSON.stringify(process.env.RECEIPT_OCR_API || process.env.RECEIPT_ANALYZER_API_KEY || '')
+      'process.env.GEOAPIFY_API_KEY': JSON.stringify(process.env.GEOAPIFY_API_KEY || '')
     },
     server: {
       hmr: process.env.DISABLE_HMR !== 'true',

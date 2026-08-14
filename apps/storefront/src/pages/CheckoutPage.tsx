@@ -292,44 +292,28 @@ export function CheckoutPage() {
   };
 
   const runReceiptAnalysis = async (imageBase64: string) => {
-    const ocrKey = process.env.RECEIPT_OCR_API || '';
     setIsAnalyzing(true);
     setAnalysisError(null);
     try {
-      if (!ocrKey) {
-        throw new Error('OCR token is not configured');
-      }
-
-      const formData = new FormData();
-      formData.append('apikey', ocrKey);
-      formData.append('language', 'eng');
-      formData.append('isOverlayRequired', 'false');
-      formData.append('base64Image', imageBase64);
-
-      const response = await fetch('https://api.ocr.space/parse/image', {
+      const response = await fetch('/v1/checkout/drafts/analyze', {
         method: 'POST',
-        body: formData,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ imageBase64 }),
       });
       const payload = await response.json();
-      const parsedText = payload?.ParsedResults?.[0]?.ParsedText || '';
-      const responseError = payload?.ErrorMessage || payload?.ErrorDetails || null;
-      const analysis = {
-        provider: 'ocr.space',
-        parsedText,
-        confidence: payload?.ParsedResults?.[0]?.TextOverlay?.Lines?.length ? 'processed' : 'unknown',
-        verified: Boolean(parsedText.trim()),
-        raw: payload,
-        analyzedAt: new Date().toISOString(),
-      };
-      setAnalysisResult(analysis);
-      setAnalysisError(responseError || null);
-      return analysis;
+      if (!response.ok || !payload?.data) {
+        throw new Error(payload?.error || 'Receipt analysis failed');
+      }
+      setAnalysisResult(payload.data);
+      setAnalysisError(payload.data?.error || null);
+      return payload.data;
     } catch (error: any) {
       const message = error?.message || 'Receipt analysis failed';
       setAnalysisError(message);
       const fallback = {
-        provider: 'ocr.space',
+        provider: 'server-proxy',
         verified: false,
+        verdict: 'UNVALIDATED',
         error: message,
         analyzedAt: new Date().toISOString(),
       };
@@ -347,7 +331,7 @@ export function CheckoutPage() {
       let proofAnalysis = analysisResult;
       let proofRecord: any = null;
       if (receiptImage && paymentTiming === 'checkout') {
-        if (!proofAnalysis && !analysisError) return;
+        if (!proofAnalysis) proofAnalysis = await runReceiptAnalysis(receiptImage);
         const proofRes = await fetch(`/v1/checkout/drafts/${paymentDraftId}/proofs`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

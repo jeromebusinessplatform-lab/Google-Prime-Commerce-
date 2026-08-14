@@ -142,3 +142,53 @@ export const uploadDraftProofHandler = async (req: Request, res: Response) => {
 
   return res.json({ success: true, data: proof });
 };
+
+export const analyzeDraftProofHandler = async (req: Request, res: Response) => {
+  const imageBase64 = req.body?.imageBase64;
+  if (!imageBase64) {
+    return res.status(400).json({ error: "Missing imageBase64" });
+  }
+
+  const apiKey = process.env.RECEIPT_OCR_API || process.env.RECEIPT_ANALYZER_API_KEY || "";
+  if (!apiKey) {
+    return res.status(503).json({ error: "Receipt OCR is not configured" });
+  }
+
+  try {
+    const formData = new FormData();
+    formData.append("apikey", apiKey);
+    formData.append("language", "eng");
+    formData.append("isOverlayRequired", "false");
+    formData.append("base64Image", imageBase64);
+
+    const response = await fetch("https://api.ocr.space/parse/image", {
+      method: "POST",
+      body: formData,
+    });
+
+    const payload = await response.json();
+    const parsedText = payload?.ParsedResults?.[0]?.ParsedText || "";
+    const analysis = {
+      provider: "ocr.space",
+      parsedText,
+      verified: Boolean(parsedText.trim()),
+      verdict: parsedText.trim() ? "VALIDATED" : "UNVALIDATED",
+      confidence: payload?.ParsedResults?.[0]?.TextOverlay?.Lines?.length ? "processed" : "unknown",
+      raw: payload,
+      analyzedAt: new Date().toISOString(),
+    };
+
+    return res.json({ success: true, data: analysis });
+  } catch (error: any) {
+    return res.status(200).json({
+      success: true,
+      data: {
+        provider: "ocr.space",
+        verified: false,
+        verdict: "UNVALIDATED",
+        error: error?.message || "Receipt analysis failed",
+        analyzedAt: new Date().toISOString(),
+      },
+    });
+  }
+};
