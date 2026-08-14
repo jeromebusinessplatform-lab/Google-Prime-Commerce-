@@ -276,4 +276,65 @@ describe('orders API handlers', () => {
       ]),
     });
   });
+
+  it('persists the end-to-end payment review state for reload recovery', async () => {
+    await db.collection('tenants').doc('default').set({
+      timezone: 'Asia/Manila',
+    });
+
+    const createRes = makeRes();
+    await createOrderHandler(
+      {
+        headers: { 'x-customer-id': 'customer-1' },
+        body: {
+          items: [{ productId: 'product-1', name: 'Test Product', qty: 1, price: 100 }],
+          receiverName: 'Test Customer',
+          receiverPhone: '09170000000',
+          address: 'Test Address',
+          totals: { total: 100 },
+          paymentMethod: 'COD',
+          checkoutSessionId: 'session-reload',
+          paymentDraftId: 'draft-reload',
+          receipt: { imageUrl: 'data:image/png;base64,proof-reload', analysis: { verified: false, verdict: 'UNVALIDATED' } },
+        },
+      } as unknown as Request,
+      createRes
+    );
+
+    const orderId = (createRes.json as any).mock.calls[0][0].data.id;
+
+    await reviewQueueActionHandler(
+      {
+        params: { id: orderId },
+        headers: { 'x-admin-id': 'admin-reload' },
+        body: { action: 'needs-review', reason: 'Need more proof' },
+      } as unknown as Request,
+      makeRes()
+    );
+
+    await setTimeoutPromise(10);
+
+    const reloadedOrder = await db.collection(orderPath).doc(orderId).get();
+    expect(reloadedOrder.data()).toMatchObject({
+      paymentDraftId: 'draft-reload',
+      receipt: expect.objectContaining({
+        imageUrl: 'data:image/png;base64,proof-reload',
+      }),
+      reviewStatus: 'NEEDS_REVIEW',
+      queueStatus: 'ON_QUEUE',
+      reviewHistory: expect.arrayContaining([
+        expect.objectContaining({
+          action: 'needs-review',
+          reviewerId: 'admin-reload',
+          reason: 'Need more proof',
+        }),
+      ]),
+      confirmationSnapshot: expect.objectContaining({
+        paymentDraftId: 'draft-reload',
+        checkoutSessionId: 'session-reload',
+      }),
+    });
+  });
 });
+
+const setTimeoutPromise = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));

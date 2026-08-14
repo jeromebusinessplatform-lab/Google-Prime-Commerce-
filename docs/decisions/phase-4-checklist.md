@@ -52,7 +52,7 @@ and review work.
 
 ## 4.8 Done Criteria
 
-- [ ] Payment draft, proof, review, and queue states survive reload.
-- [ ] Validation covers success, failure, and recovery paths.
-- [ ] Admin can resolve a payment-review item end to end.
-- [ ] Orders continue into Phase 5 without blocking on proof review.
+- [x] Payment draft, proof, review, and queue states survive reload.
+- [x] Validation covers success, failure, and recovery paths.
+- [x] Admin can resolve a payment-review item end to end.
+- [x] Orders continue into Phase 5 without blocking on proof review.
