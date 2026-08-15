@@ -72,11 +72,11 @@ export const createOrderHandler = async (req: Request, res: Response) => {
       for (const item of items) {
         const productRef = db.collection(`tenants/${tenantId}/products`).doc(item.productId);
         const productDoc = await transaction.get(productRef);
-        
+
         if (!productDoc.exists) {
           throw new Error(`Product ${item.name} not found`);
         }
-        
+
         const productData = productDoc.data();
         if (productData!.stock < item.qty) {
           throw new Error(`Insufficient stock for ${item.name}`);
@@ -121,7 +121,7 @@ export const createOrderHandler = async (req: Request, res: Response) => {
         date: new Date().toISOString(),
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       });
-      
+
       transaction.set(db.collection(`tenants/${tenantId}/orders`).doc(orderId), orderData);
 
       if (paymentDraftId) {
@@ -140,7 +140,7 @@ export const createOrderHandler = async (req: Request, res: Response) => {
           submittedAt: new Date().toISOString(),
         });
       }
-      
+
       // Clear cart
       transaction.set(db.collection(`tenants/${tenantId}/carts`).doc(customerId), { items: [] });
     });
@@ -151,7 +151,7 @@ export const createOrderHandler = async (req: Request, res: Response) => {
 
   // Telegram Notification
   await sendTelegramMessage(customerId, `Order ${orderId} created successfully!`);
-  
+
   res.json({ success: true, data: { id: orderId } });
 };
 
@@ -405,8 +405,27 @@ export const setOrderFulfillmentStatusHandler = async (req: Request, res: Respon
   const orderRef = db.collection(`tenants/${tenantId}/orders`).doc(orderId);
   const existing = await orderRef.get();
   if (!existing.exists) return res.status(404).json({ error: "Order not found" });
+
   const current = existing.data() as Record<string, any>;
-  const nextStatus = req.body?.status || current.status;
+  const nextStatus = req.body?.status;
+
+  if (!nextStatus) return res.status(400).json({ error: "Missing status" });
+
+  // State machine enforcement
+  const sequence = ['PENDING', 'CONFIRMED', 'PREPARING', 'READY', 'FOR_PICKUP', 'DISPATCHED', 'DELIVERED'];
+  const currentIndex = sequence.indexOf(current.status);
+  const nextIndex = sequence.indexOf(nextStatus);
+
+  // Allow transitions if:
+  // 1. It is the next sequential status
+  // 2. It is a transition to a "HOLD" or "CANCELLED" status
+  const isSequential = currentIndex !== -1 && nextIndex === currentIndex + 1;
+  const isException = nextStatus.startsWith('HOLD_') || nextStatus === 'CANCELLED';
+
+  if (!isSequential && !isException) {
+      return res.status(400).json({ error: `Invalid status transition from ${current.status} to ${nextStatus}` });
+  }
+
   const now = new Date().toISOString();
   const isQueueEntry = !current.queueEnteredAt && ["ON_QUEUE", "payment_review", "PENDING", "QUEUED"].includes(String(current.queueStatus || current.status));
   const nextQueueEnteredAt = current.queueEnteredAt || (isQueueEntry ? now : null);
@@ -414,6 +433,7 @@ export const setOrderFulfillmentStatusHandler = async (req: Request, res: Respon
   const nextDispatchedAt = nextStatus === "DISPATCHED" ? (current.dispatchedAt || now) : current.dispatchedAt || null;
   const nextDeliveredAt = nextStatus === "DELIVERED" ? (current.deliveredAt || now) : current.deliveredAt || null;
   const nextQueueStatus = nextStatus === "DISPATCHED" || nextStatus === "DELIVERED" ? "COMPLETED" : (nextStatus === "READY" || nextStatus === "FOR_PICKUP" ? "READY" : current.queueStatus || "ON_QUEUE");
+
   await orderRef.set({
     ...current,
     status: nextStatus,
@@ -424,6 +444,16 @@ export const setOrderFulfillmentStatusHandler = async (req: Request, res: Respon
     deliveredAt: nextDeliveredAt,
     updatedAt: now,
   });
+
+  // Audit
+  await db.collection(`tenants/${tenantId}/audit_events`).add({
+    type: 'order_status_change',
+    orderId,
+    previousStatus: current.status,
+    newStatus: nextStatus,
+    timestamp: now
+  });
+
   return res.json({ success: true, data: { orderId, status: nextStatus } });
 };
 

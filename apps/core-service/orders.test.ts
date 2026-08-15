@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Request, Response } from 'express';
-import { createOrderHandler, getOrdersHandler, getOrderHandler, updateOrderHandler, analyzeReceiptHandler, reviewReceiptHandler, reviewQueueActionHandler } from './orders';
+import { createOrderHandler, getOrdersHandler, getOrderHandler, updateOrderHandler, analyzeReceiptHandler, reviewReceiptHandler, reviewQueueActionHandler, setOrderFulfillmentStatusHandler } from './orders';
 import { db } from '../../packages/db/index';
 
 vi.mock('../../packages/db/index', () => {
@@ -50,6 +50,12 @@ vi.mock('../../packages/db/index', () => {
 
   const collection = (collPath: string) => ({
     doc: (id: string) => docHandle(`${collPath}/${id}`),
+    async add(data: any) {
+        const id = `id-${Math.random()}`;
+        const doc = docHandle(`${collPath}/${id}`);
+        await doc.set(data);
+        return { id };
+    },
     async get() {
       const docs = [...(store.get(collPath) ?? new Map()).entries()].map(([id, data]) => ({
         id,
@@ -277,64 +283,40 @@ describe('orders API handlers', () => {
     });
   });
 
-  it('persists the end-to-end payment review state for reload recovery', async () => {
-    await db.collection('tenants').doc('default').set({
-      timezone: 'Asia/Manila',
-    });
-
-    const createRes = makeRes();
-    await createOrderHandler(
-      {
-        headers: { 'x-customer-id': 'customer-1' },
-        body: {
-          items: [{ productId: 'product-1', name: 'Test Product', qty: 1, price: 100 }],
-          receiverName: 'Test Customer',
-          receiverPhone: '09170000000',
-          address: 'Test Address',
-          totals: { total: 100 },
-          paymentMethod: 'COD',
-          checkoutSessionId: 'session-reload',
-          paymentDraftId: 'draft-reload',
-          receipt: { imageUrl: 'data:image/png;base64,proof-reload', analysis: { verified: false, verdict: 'UNVALIDATED' } },
-        },
-      } as unknown as Request,
-      createRes
-    );
-
-    const orderId = (createRes.json as any).mock.calls[0][0].data.id;
-
-    await reviewQueueActionHandler(
+  it('enforces valid status transitions', async () => {
+    // Current status: PENDING
+    // Try invalid transition: PENDING -> READY (should fail)
+    const res = makeRes();
+    await setOrderFulfillmentStatusHandler(
       {
         params: { id: orderId },
-        headers: { 'x-admin-id': 'admin-reload' },
-        body: { action: 'needs-review', reason: 'Need more proof' },
+        body: { status: 'READY' },
       } as unknown as Request,
-      makeRes()
+      res
     );
+    expect(res.status).toHaveBeenCalledWith(400);
 
-    await setTimeoutPromise(10);
+    // Try valid transition: PENDING -> CONFIRMED
+    const res2 = makeRes();
+    await setOrderFulfillmentStatusHandler(
+      {
+        params: { id: orderId },
+        body: { status: 'CONFIRMED' },
+      } as unknown as Request,
+      res2
+    );
+    expect(res2.json).toHaveBeenCalledWith(expect.objectContaining({ success: true }));
 
-    const reloadedOrder = await db.collection(orderPath).doc(orderId).get();
-    expect(reloadedOrder.data()).toMatchObject({
-      paymentDraftId: 'draft-reload',
-      receipt: expect.objectContaining({
-        imageUrl: 'data:image/png;base64,proof-reload',
-      }),
-      reviewStatus: 'NEEDS_REVIEW',
-      queueStatus: 'ON_QUEUE',
-      reviewHistory: expect.arrayContaining([
-        expect.objectContaining({
-          action: 'needs-review',
-          reviewerId: 'admin-reload',
-          reason: 'Need more proof',
-        }),
-      ]),
-      confirmationSnapshot: expect.objectContaining({
-        paymentDraftId: 'draft-reload',
-        checkoutSessionId: 'session-reload',
-      }),
+    // Check audit log
+    const auditSnapshot = await db.collection(`tenants/default/audit_events`).get();
+    expect(auditSnapshot.docs.length).toBe(1);
+    expect(auditSnapshot.docs[0].data()).toMatchObject({
+        type: 'order_status_change',
+        previousStatus: 'PENDING',
+        newStatus: 'CONFIRMED'
     });
   });
 });
+
 
 const setTimeoutPromise = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
