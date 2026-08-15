@@ -3,6 +3,28 @@ import { db } from "../../packages/db/index.js";
 
 const tenantId = "default";
 
+export const getHeartbeatHandler = async (_req: Request, res: Response) => {
+  const STALE_THRESHOLD_SECONDS = 300;
+  const latestOrderSnapshot = await db
+    .collection(`tenants/${tenantId}/orders`)
+    .orderBy("updatedAt", "desc")
+    .limit(1)
+    .get();
+
+  const latestOrder = latestOrderSnapshot.docs[0]?.data();
+  const lastUpdatedAt = latestOrder?.updatedAt ? new Date(latestOrder.updatedAt).getTime() : 0;
+  const now = Date.now();
+  const secondsSinceLastUpdate = Math.floor((now - lastUpdatedAt) / 1000);
+  const isStale = lastUpdatedAt === 0 || secondsSinceLastUpdate > STALE_THRESHOLD_SECONDS;
+
+  res.json({
+    generatedAt: new Date().toISOString(),
+    lastUpdatedAt: latestOrder?.updatedAt || null,
+    secondsSinceLastUpdate,
+    status: isStale ? "stale" : "healthy",
+  });
+};
+
 export const getOperationalReportHandler = async (_req: Request, res: Response) => {
   const orders = (await db.collection(`tenants/${tenantId}/orders`).get()).docs.map((d: any) => d.data());
   const customers = (await db.collection(`tenants/${tenantId}/customers`).get()).docs.map((d: any) => d.data());

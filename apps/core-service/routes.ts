@@ -31,7 +31,7 @@ import * as orders from "./orders.js";
 import { getPromotionsHandler, createPromotionHandler, validatePromotionHandler } from "./promotions.js";
 import { autocompleteHandler as locationAutocomplete, geocodeHandler as locationGeocode, reverseGeocodeHandler as locationReverse, routeHandler } from "./location.js";
 import { createCheckoutSessionHandler, updateCheckoutSessionHandler, listCheckoutDraftsHandler, uploadDraftProofHandler, analyzeDraftProofHandler } from "./checkout.js";
-import { getOperationalReportHandler, createSupportTicketHandler, createFraudCaseHandler, listSupportTicketsHandler, updateSupportTicketHandler, listFraudCasesHandler, updateFraudCaseHandler } from "./reports.js";
+import { getOperationalReportHandler, getHeartbeatHandler, createSupportTicketHandler, createFraudCaseHandler, listSupportTicketsHandler, updateSupportTicketHandler, listFraudCasesHandler, updateFraudCaseHandler } from "./reports.js";
 import { finalizePaymentReviewHandler } from "./orders.js";
 
 export type HttpMethod = "get" | "post" | "patch" | "put" | "delete";
@@ -117,6 +117,7 @@ export const apiRoutes: ApiRoute[] = [
   { method: "post", path: "/v1/payments/drafts", handler: (orders as any).createPaymentDraftHandler },
 
   { method: "get", path: "/v1/reports/operational", handler: getOperationalReportHandler },
+  { method: "get", path: "/v1/reports/heartbeat", handler: getHeartbeatHandler },
   { method: "post", path: "/v1/support/tickets", handler: createSupportTicketHandler },
   { method: "get", path: "/v1/support/tickets", handler: listSupportTicketsHandler },
   { method: "patch", path: "/v1/support/tickets/:id", handler: updateSupportTicketHandler },

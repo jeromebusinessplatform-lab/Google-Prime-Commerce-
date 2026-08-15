@@ -13,29 +13,32 @@ import { handleApiRequest } from "./router.js";
 export interface Env {
   DB: any;
   ASSETS: any;
-  [key: string]: unknown;
-}
+  import { handleApiRequest } from "./router.js";
+  import { validateAppEnvOrThrow } from "../packages/config/env.js";
 
-export default {
-  async fetch(request: Request, env: Env): Promise<Response> {
-    const g = globalThis as any;
+  export interface Env {
+  ...
+    async fetch(request: Request, env: Env): Promise<Response> {
+      const g = globalThis as any;
 
-    // The db adapter reads this on its first operation (lazy driver).
-    g.__PRIME_D1_BINDING__ = env.DB;
+      // The db adapter reads this on its first operation (lazy driver).
+      g.__PRIME_D1_BINDING__ = env.DB;
 
-    // Shared service code reads config from process.env (env.ts, telegram.ts,
-    // geoapify.ts). Copy vars and secrets into it so the same code runs on
-    // Workers without changes.
-    if (typeof g.process !== "undefined" && g.process.env && typeof g.process.env === "object") {
-      for (const key of Object.keys(env)) {
-        const value = env[key];
-        if (typeof value === "string" && !(key in g.process.env)) {
-          g.process.env[key] = value;
+      // Shared service code reads config from process.env (env.ts, telegram.ts,
+      // geoapify.ts). Copy vars and secrets into it so the same code runs on
+      // Workers without changes.
+      if (typeof g.process !== "undefined" && g.process.env && typeof g.process.env === "object") {
+        for (const key of Object.keys(env)) {
+          const value = env[key];
+          if (typeof value === "string" && !(key in g.process.env)) {
+            g.process.env[key] = value;
+          }
         }
       }
-    }
 
-    const url = new URL(request.url);
+      validateAppEnvOrThrow("worker");
+
+      const url = new URL(request.url);
     const isApi =
       url.pathname === "/api/health" ||
       url.pathname.startsWith("/api/") ||

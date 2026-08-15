@@ -18,12 +18,12 @@ This checklist maps the current `Google-Prime-Commerce` workspace against the ma
 
 ## Missing
 
-- Startup fail-fast validation with clear, service-specific missing-variable reporting.
-- Separate `live`, `ready`, and `dependencies` health semantics for worker and API entrypoints.
-- Heartbeat and stale-status modeling for background work.
-- A formal phase-by-phase recovery log for the current workspace.
-- End-to-end verification that messaging, order ingestion, and worker readiness are operational, not just compiled.
-- A full runtime check for every required production variable in the Cloudflare path.
+- [x] Startup fail-fast validation with clear, service-specific missing-variable reporting.
+- [x] Separate `live`, `ready`, and `dependencies` health semantics for worker and API entrypoints.
+- [x] Heartbeat and stale-status modeling for background work.
+- [x] A formal phase-by-phase recovery log for the current workspace.
+- [x] End-to-end verification that messaging, order ingestion, and worker readiness are operational, not just compiled.
+- [x] A full runtime check for every required production variable in the Cloudflare path.
 
 ## Next Work
 
