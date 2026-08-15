@@ -8,9 +8,11 @@ import {
   createProductHandler,
   updateProductHandler,
   deleteProductHandler,
+  updateProductStatusHandler,
   duplicateProductHandler,
   getCategoriesHandler,
   upsertCategoryHandler,
+  deleteCategoryHandler,
 } from "./catalog.js";
 import { bulkUpdateHandler, importCSVHandler, exportCSVHandler } from "./bulk-operations.js";
 import { getTenantHandler, updateTenantHandler } from "./tenant.js";
@@ -22,13 +24,14 @@ import {
   getCouriersHandler,
   upsertCourierHandler,
   toggleCourierAvailabilityHandler,
+  deleteCourierHandler,
   getDeliveryQuoteHandler,
 } from "./courier.js";
 import { autocompleteHandler, geocodeHandler, reverseGeocodeHandler, routingHandler } from "./geoapify.js";
 import { getOrderQueueSummaryHandler } from "./order-queue.js";
 import { getCartHandler, updateCartItemHandler, clearCartHandler } from "./cart.js";
 import * as orders from "./orders.js";
-import { getPromotionsHandler, createPromotionHandler, validatePromotionHandler } from "./promotions.js";
+import { getPromotionsHandler, createPromotionHandler, validatePromotionHandler, deletePromotionHandler } from "./promotions.js";
 import { autocompleteHandler as locationAutocomplete, geocodeHandler as locationGeocode, reverseGeocodeHandler as locationReverse, routeHandler } from "./location.js";
 import { createCheckoutSessionHandler, updateCheckoutSessionHandler, listCheckoutDraftsHandler, uploadDraftProofHandler, analyzeDraftProofHandler } from "./checkout.js";
 import { getOperationalReportHandler, getHeartbeatHandler, createSupportTicketHandler, createFraudCaseHandler, listSupportTicketsHandler, updateSupportTicketHandler, listFraudCasesHandler, updateFraudCaseHandler } from "./reports.js";
@@ -54,11 +57,13 @@ export const apiRoutes: ApiRoute[] = [
   { method: "get", path: "/v1/catalog/products/:id", handler: getProductHandler },
   { method: "post", path: "/v1/catalog/products", handler: createProductHandler },
   { method: "patch", path: "/v1/catalog/products/:id", handler: updateProductHandler },
+  { method: "patch", path: "/v1/catalog/products/:id/status", handler: updateProductStatusHandler },
   { method: "delete", path: "/v1/catalog/products/:id", handler: deleteProductHandler },
   { method: "post", path: "/v1/catalog/products/:id/duplicate", handler: duplicateProductHandler },
   { method: "get", path: "/v1/catalog/categories", handler: getCategoriesHandler },
   { method: "post", path: "/v1/catalog/categories", handler: upsertCategoryHandler },
   { method: "patch", path: "/v1/catalog/categories/:id", handler: upsertCategoryHandler },
+  { method: "delete", path: "/v1/catalog/categories/:id", handler: deleteCategoryHandler },
   { method: "post", path: "/v1/catalog/bulk-update", handler: bulkUpdateHandler },
   { method: "post", path: "/v1/catalog/import", handler: importCSVHandler },
   { method: "get", path: "/v1/catalog/export", handler: exportCSVHandler },
@@ -75,6 +80,7 @@ export const apiRoutes: ApiRoute[] = [
   { method: "get", path: "/v1/couriers", handler: getCouriersHandler },
   { method: "post", path: "/v1/couriers", handler: upsertCourierHandler },
   { method: "patch", path: "/v1/couriers/:id", handler: upsertCourierHandler },
+  { method: "delete", path: "/v1/couriers/:id", handler: deleteCourierHandler },
   { method: "post", path: "/v1/couriers/:id/toggle", handler: toggleCourierAvailabilityHandler },
   { method: "post", path: "/v1/delivery-quote", handler: getDeliveryQuoteHandler },
 
@@ -102,6 +108,7 @@ export const apiRoutes: ApiRoute[] = [
 
   { method: "get", path: "/v1/promotions", handler: getPromotionsHandler },
   { method: "post", path: "/v1/promotions", handler: createPromotionHandler },
+  { method: "delete", path: "/v1/promotions/:id", handler: deletePromotionHandler },
   { method: "post", path: "/v1/promotions/validate", handler: validatePromotionHandler },
 
   { method: "get", path: "/v1/location/autocomplete", handler: locationAutocomplete },

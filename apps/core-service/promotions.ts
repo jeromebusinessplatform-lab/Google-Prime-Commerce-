@@ -56,3 +56,10 @@ export const validatePromotionHandler = async (req: Request, res: Response) => {
   
   res.json({ data: promo });
 };
+
+export const deletePromotionHandler = async (req: Request, res: Response) => {
+  const tenantId = "default";
+  const id = req.params.id;
+  await db.collection(`tenants/${tenantId}/promotions`).doc(id).delete();
+  res.json({ success: true });
+};
