@@ -87,14 +87,22 @@ const MIME = {
 const fakeAssets = {
   async fetch(request) {
     const url = request instanceof Request ? new URL(request.url) : new URL(request);
-    const rel = url.pathname === "/" ? "/index.html" : url.pathname === "/admin" ? "/admin/index.html" : url.pathname;
-    try {
-      const content = await fs.readFile(path.join(distDir, rel));
-      const ext = path.extname(rel);
-      return new Response(content, { status: 200, headers: { "content-type": MIME[ext] || "application/octet-stream" } });
-    } catch {
-      return new Response("not found", { status: 404 });
+    const requested = url.pathname;
+    const candidates = requested === "/"
+      ? ["/index.html", "/apps/storefront/src/index.html"]
+      : requested === "/admin" || requested === "/admin/"
+        ? ["/admin/index.html", "/apps/admin/src/index.html"]
+        : [requested];
+    for (const rel of candidates) {
+      try {
+        const content = await fs.readFile(path.join(distDir, rel));
+        const ext = path.extname(rel);
+        return new Response(content, { status: 200, headers: { "content-type": MIME[ext] || "application/octet-stream" } });
+      } catch {
+        // Try the next candidate.
+      }
     }
+    return new Response("not found", { status: 404 });
   },
 };
 
