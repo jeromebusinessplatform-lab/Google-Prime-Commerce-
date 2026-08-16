@@ -1,0 +1,35 @@
+name: PRIME Verification
+
+on:
+  pull_request:
+  push:
+    branches:
+      - gemini/phase-5-verification
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Lint / type verification
+        run: npm run lint
+
+      - name: Unit tests
+        run: npm test
+
+      - name: Build Shopfront + Admin + Worker
+        run: npm run build && npm run worker:build
