@@ -3,7 +3,7 @@ name: PRIME Cloudflare Deploy
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [main, gemini/phase-5-verification]
 
 jobs:
   deploy:
