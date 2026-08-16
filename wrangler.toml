@@ -3,24 +3,16 @@
 # Deploy (after `npm run build`):
 #   npm run deploy:cloudflare
 #
-# First-time setup (see DEPLOYMENT-CLOUDFLARE.md):
-#   npx wrangler d1 create prime-db
-#   npx wrangler d1 migrations apply prime-db --remote
-#   npx wrangler secret put SESSION_SIGNING_KEY_CURRENT
-#   ...
+# Production deployment currently uses the Cloudflare Workers.dev hostname.
+# The custom domain can be attached later once the zone/Workers Routes
+# permission is available to the deployment token.
 
 name = "prime-commerce"
 main = "dist-worker/index.js"
 compatibility_date = "2026-08-01"
 compatibility_flags = ["nodejs_compat"]
-workers_dev = false
+workers_dev = true
 preview_urls = false
-
-# Production custom domain. Cloudflare provisions the Worker route for the
-# hostname; DNS/zone ownership must be in the same Cloudflare account.
-routes = [
-  { pattern = "primecommerce.codespacelabs.online", custom_domain = true }
-]
 
 [[d1_databases]]
 binding = "DB"
