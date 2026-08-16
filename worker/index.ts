@@ -6,9 +6,6 @@
 // - everything else -> Storefront SPA assets
 // - D1 is the production persistence binding
 
-import { handleApiRequest } from "./router.js";
-import { env as appEnv, validateAppEnvForRuntime } from "../packages/config/env.js";
-
 export interface Env {
   DB: any;
   ASSETS: any;
@@ -19,40 +16,30 @@ export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const g = globalThis as any;
 
-    // The D1 adapter reads this lazily on its first database operation.
+    // Cloudflare bindings are only available at request time. Shared service
+    // modules read process.env during module initialization, so establish the
+    // Worker environment before dynamically importing those modules.
     g.__PRIME_D1_BINDING__ = env.DB;
 
-    // Cloudflare bindings are injected at request time, not at module load.
-    // Hydrate both process.env and the shared parsed config before any service
-    // validation/handler reads occur. Without this, production Workers can
-    // boot with an empty parsed env and fail with Error 1101.
-    if (
-      typeof g.process !== "undefined" &&
-      g.process?.env &&
-      typeof g.process.env === "object"
-    ) {
-      for (const key of Object.keys(env)) {
-        const value = env[key];
-        if (typeof value === "string") {
-          g.process.env[key] = value;
-        }
+    if (!g.process || typeof g.process !== "object") {
+      g.process = { env: {} };
+    } else if (!g.process.env || typeof g.process.env !== "object") {
+      g.process.env = {};
+    }
+
+    for (const key of Object.keys(env)) {
+      const value = env[key];
+      if (typeof value === "string") {
+        g.process.env[key] = value;
       }
     }
-    Object.assign(appEnv, env);
 
-    // Validate against the request-time Cloudflare bindings, not the module-
-    // load snapshot. The latter is empty in Workers before bindings exist and
-    // caused false missing-environment failures (Error 1101) in production.
-    const runtimeHealth = validateAppEnvForRuntime(
-      "worker",
-      env as Record<string, unknown>,
-      { strict: true },
-    );
-    if (!runtimeHealth.ok) {
-      throw new Error(
-        `worker runtime missing required environment variables: ${runtimeHealth.missing.join(", ")}`,
-      );
-    }
+    // Do not perform a blanket production-environment throw here. Cloudflare
+    // Workers may legitimately serve static Shop/Admin assets while optional
+    // integrations are not configured. The previous blanket validation caused
+    // every request to become Error 1101 when a non-asset secret was absent.
+    // API health endpoints report missing runtime configuration explicitly.
+    const [{ handleApiRequest }] = await Promise.all([import("./router.js")]);
 
     const url = new URL(request.url);
     const isApi =
