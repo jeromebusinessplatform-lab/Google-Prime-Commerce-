@@ -106,7 +106,7 @@ function PackingSlipModal({ order, onClose, onUpdateStatus }: PackingSlipModalPr
                        </div>
                     </div>
                     {order.payment.status === 'PENDING' && (
-                       <button 
+                       <button
                          onClick={() => onUpdateStatus?.(order.id, { payment: { ...order.payment, status: 'PAID' } })}
                          className="w-full py-2 bg-green-600 text-white rounded-lg text-[9px] uppercase tracking-widest hover:bg-green-700 shadow-lg shadow-green-600/20"
                        >
@@ -165,7 +165,7 @@ function PackingSlipModal({ order, onClose, onUpdateStatus }: PackingSlipModalPr
           </button>
         </div>
       </div>
-      
+
       <style>{`
         @media print {
           body * {
@@ -367,8 +367,8 @@ export function OrderFulfillmentPage() {
 
   const updateStatus = async (newStatus: string) => {
     try {
-      await fetch(`/v1/orders/${id}`, {
-        method: 'PATCH',
+      await fetch(`/v1/orders/${id}/status`, {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus })
       });
@@ -392,19 +392,24 @@ export function OrderFulfillmentPage() {
 
   const approvePayment = async () => {
     try {
-      await fetch(`/v1/orders/${id}/review-actions`, {
+      const response = await fetch(`/v1/orders/${id}/review-actions`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'approve', reason: reviewReason || 'Admin approved payment review' })
       });
-      setOrder((prev: any) => ({ 
-        ...prev, 
-        status: 'PROCESSING',
+      if (!response.ok) throw new Error('Failed to approve payment');
+
+      setOrder((prev: any) => ({
+        ...prev,
+        status: 'CONFIRMED',
         payment: { ...prev.payment, status: 'VERIFIED' },
         reviewStatus: 'VALIDATED'
       }));
+      setShowPrintModal(false);
+      alert('Payment validated successfully');
     } catch (e) {
       console.error("Failed to approve payment", e);
+      alert('Failed to validate payment: ' + (e as Error).message);
     }
   };
 
@@ -456,7 +461,7 @@ export function OrderFulfillmentPage() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <button 
+          <button
             onClick={() => setShowPrintModal(true)}
             className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-[10px] uppercase tracking-widest hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
           >
@@ -507,10 +512,10 @@ export function OrderFulfillmentPage() {
       </div>
 
       {showPrintModal && (
-        <PackingSlipModal 
-          order={order} 
-          onClose={() => setShowPrintModal(false)} 
-          onUpdateStatus={() => approvePayment()} 
+        <PackingSlipModal
+          order={order}
+          onClose={() => setShowPrintModal(false)}
+          onUpdateStatus={approvePayment}
         />
       )}
 
@@ -530,14 +535,14 @@ export function OrderFulfillmentPage() {
 
       <div className="p-4 max-w-6xl mx-auto w-full grid grid-cols-1 md:grid-cols-3 gap-4 pb-[100px]">
         <div className="md:col-span-2 space-y-4">
-          
+
           {/* Dynamic Order Management Actions */}
           <div className="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm space-y-6 transition-colors">
             <div className="space-y-4">
               <h3 className="text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">Logistics Execution</h3>
               <div className="flex flex-col sm:flex-row gap-3">
                 {nextStatus ? (
-                  <button 
+                  <button
                     onClick={() => updateStatus(nextStatus)}
                     className="flex-1 py-4 px-6 bg-black text-white text-[11px] font-black uppercase tracking-[0.2em] rounded-xl hover:bg-gray-800 transition-all shadow-xl shadow-black/20 flex items-center justify-center gap-3 active:scale-95"
                   >
@@ -548,8 +553,8 @@ export function OrderFulfillmentPage() {
                     <CheckCircle2 size={18} /> Cycle Completed
                   </div>
                 ) : null}
-                
-                <button 
+
+                <button
                   onClick={() => updateStatus('CANCELLED')}
                   className="px-6 py-4 bg-white dark:bg-gray-900 border-2 border-red-100 dark:border-red-900/30 text-red-600 dark:text-red-400 text-[11px] font-black uppercase tracking-[0.2em] rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 transition-all flex items-center justify-center gap-2"
                 >
@@ -566,7 +571,7 @@ export function OrderFulfillmentPage() {
                   { label: 'Follow-up', val: 'HOLD_FOLLOWUP' },
                   { label: 'Final Call', val: 'HOLD_FINAL_CALL' }
                 ].map(h => (
-                  <button 
+                  <button
                     key={h.val}
                     onClick={() => updateStatus(h.val)}
                     className={`py-3 px-2 border-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${
@@ -620,7 +625,7 @@ export function OrderFulfillmentPage() {
                   <AlertCircle size={18} /> NEEDS VERIFICATION
                 </div>
                 <img src={proofImageUrl} alt="Proof" className="w-full h-auto rounded border border-gray-200 dark:border-gray-700 mb-2 cursor-pointer hover:opacity-90" onClick={() => setEvidenceOpen(true)} />
-                <button 
+                <button
                   onClick={approvePayment}
                   className="w-full bg-green-600 text-white  py-2 rounded hover:bg-green-700"
                 >
