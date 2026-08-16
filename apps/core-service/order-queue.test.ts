@@ -76,22 +76,22 @@ describe("order queue summary", () => {
   });
 
   it("tracks persisted queue timestamps across fulfillment states", async () => {
-    // Sequence: PENDING -> CONFIRMED -> PREPARING -> READY
-    const statuses = ['CONFIRMED', 'PREPARING', 'READY'];
+    // Canonical sequence: PENDING -> CONFIRMED -> PACKING -> READY
+    const statuses = ["CONFIRMED", "PACKING", "READY"];
     for (const status of statuses) {
-        await setOrderFulfillmentStatusHandler(
-          {
-            params: { id: "ORD-1000" },
-            body: { status },
-          } as unknown as Request,
-          makeRes()
-        );
+      await setOrderFulfillmentStatusHandler(
+        {
+          params: { id: "ORD-1000" },
+          body: { status },
+        } as unknown as Request,
+        makeRes()
+      );
     }
 
     const updated = await db.collection("tenants/default/orders").doc("ORD-1000").get();
     expect(updated.data()).toMatchObject({
       status: "READY",
-      queueStatus: "READY",
+      queueStatus: "ON_QUEUE",
       queueEnteredAt: "2026-08-14T01:00:00.000Z",
       readyAt: expect.any(String),
     });
