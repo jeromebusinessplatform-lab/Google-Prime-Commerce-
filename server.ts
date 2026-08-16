@@ -14,7 +14,7 @@ async function startServer() {
   }
   const app = express();
   const PORT = Number(process.env.PORT) || 3000;
-  if (process.env.NODE_ENV === "production") validateAppEnvOrThrow("server");
+  validateAppEnvOrThrow("server");
 
   // Add JSON parsing middleware
   app.use(express.json({ limit: '10mb' }));
