@@ -1,7 +1,5 @@
 // Local end-to-end smoke test for the Cloudflare Worker bundle.
-//
-// Runs the built worker (dist-worker/index.js) in Node with a fake D1 binding
-// backed by an in-memory store and a fake ASSETS binding backed by dist/.
+// Runs the built worker in Node with fake D1 + Assets bindings.
 import path from "path";
 import fs from "fs/promises";
 import { fileURLToPath } from "url";
@@ -13,6 +11,17 @@ if (typeof globalThis.require !== "function") {
   const { createRequire } = await import("node:module");
   globalThis.require = createRequire(import.meta.url);
 }
+
+// The production Worker requires these secrets. The smoke harness uses
+// deterministic non-secret placeholders so it exercises routing/runtime
+// validation without requiring real Cloudflare credentials.
+process.env.NODE_ENV = "production";
+process.env.APP_ENV = "production";
+process.env.SESSION_SIGNING_KEY_CURRENT ||= "smoke-session-signing-key";
+process.env.FIELD_ENCRYPTION_KEY_CURRENT ||= "smoke-field-encryption-key";
+process.env.ADMIN_CODE_PEPPER ||= "smoke-admin-code-pepper";
+process.env.TELEGRAM_BOT_TOKEN ||= "smoke-telegram-token";
+process.env.TELEGRAM_WEBHOOK_SECRET ||= "smoke-telegram-secret";
 
 const fakeD1 = (() => {
   const store = new Map();
