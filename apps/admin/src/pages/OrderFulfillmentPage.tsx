@@ -51,11 +51,9 @@ export function OrderFulfillmentPage() {
     ];
     if (status === 'PAYMENT_FAILED') return [
       { text: 'HOLD ORDER', action: () => statusAction('HOLD_ORDER'), danger: true },
-      { text: 'REQUEST RESUBMIT', action: () => statusAction('REQUEST_RESUBMIT'), primary: true },
     ];
     if (status === 'HOLD_ORDER') return [
       { text: 'REQUEST RESUBMIT', action: () => statusAction('REQUEST_RESUBMIT'), primary: true },
-      { text: 'REJECT ORDER', action: () => statusAction('CANCELLED'), danger: true },
     ];
     if (status === 'REQUEST_RESUBMIT') return [
       { text: 'PAYMENT CLEARED', action: () => reviewAction('approve'), primary: true },
