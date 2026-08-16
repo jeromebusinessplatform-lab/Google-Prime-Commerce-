@@ -55,22 +55,26 @@ export default {
       return asset;
     }
 
-    // Vite builds the two SPAs into their application directories. When a
-    // client requests a client-side route, serve that SPA's index.html.
-    const indexPath = url.pathname.startsWith("/admin")
-      ? "/admin/index.html"
-      : "/index.html";
-    const fallback = await env.ASSETS.fetch(
-      new Request(new URL(indexPath, request.url), request)
-    );
+    // Vite's multi-page build preserves the source HTML directory structure.
+    // Resolve the built SPA entry from both the conventional root location and
+    // the repository's actual source-entry output location. This keeps the
+    // Cloudflare Worker independent of Vite's HTML output layout.
+    const candidates = url.pathname.startsWith("/admin")
+      ? ["/admin/index.html", "/apps/admin/src/index.html"]
+      : ["/index.html", "/apps/storefront/src/index.html"];
 
-    if (fallback.status === 404) {
-      return new Response("Not Found", { status: 404 });
+    for (const indexPath of candidates) {
+      const fallback = await env.ASSETS.fetch(
+        new Request(new URL(indexPath, request.url), request)
+      );
+      if (fallback.status !== 404) {
+        return new Response(fallback.body, {
+          status: 200,
+          headers: new Headers({ "content-type": "text/html; charset=utf-8" }),
+        });
+      }
     }
 
-    return new Response(fallback.body, {
-      status: 200,
-      headers: new Headers({ "content-type": "text/html; charset=utf-8" }),
-    });
+    return new Response("Not Found", { status: 404 });
   },
 };
