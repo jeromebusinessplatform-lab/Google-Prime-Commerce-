@@ -7,7 +7,7 @@
 // - D1 is the production persistence binding
 
 import { handleApiRequest } from "./router.js";
-import { validateAppEnvOrThrow } from "../packages/config/env.js";
+import { env as appEnv, validateAppEnvOrThrow } from "../packages/config/env.js";
 
 export interface Env {
   DB: any;
@@ -22,8 +22,10 @@ export default {
     // The D1 adapter reads this lazily on its first database operation.
     g.__PRIME_D1_BINDING__ = env.DB;
 
-    // Shared Node-flavoured service modules read process.env. Mirror Worker
-    // vars/secrets into it without overwriting an explicitly populated value.
+    // Cloudflare bindings are injected at request time, not at module load.
+    // Hydrate both process.env and the shared parsed config before any service
+    // validation/handler reads occur. Without this, production Workers can
+    // boot with an empty parsed env and fail with Error 1101.
     if (
       typeof g.process !== "undefined" &&
       g.process?.env &&
@@ -31,13 +33,14 @@ export default {
     ) {
       for (const key of Object.keys(env)) {
         const value = env[key];
-        if (typeof value === "string" && !(key in g.process.env)) {
+        if (typeof value === "string") {
           g.process.env[key] = value;
         }
       }
     }
+    Object.assign(appEnv, env);
 
-    validateAppEnvOrThrow("worker");
+    validateAppEnvOrThrow("worker", env as Record<string, unknown>);
 
     const url = new URL(request.url);
     const isApi =
