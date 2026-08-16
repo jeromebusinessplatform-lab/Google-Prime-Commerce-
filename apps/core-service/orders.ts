@@ -21,9 +21,9 @@ const HOLD_STATES = ["HOLD_ORDER", "REQUEST_RESUBMIT", "FINAL_FOLLOWUP"] as cons
 const PAYMENT_REVIEW_STATES = ["payment_review", "PENDING", "UPDATED", "PAYMENT_FAILED", ...HOLD_STATES, "PAYMENT_CLEARED"];
 
 const canTransition = (current: string, next: string) => {
-  if (next === "CANCELLED") return true;
+  if (next === "CANCELLED") return current !== "CANCELLED" && current !== "DELIVERED";
   if (next === "HOLD_ORDER" && current === "PAYMENT_FAILED") return true;
-  if (next === "REQUEST_RESUBMIT" && ["PAYMENT_FAILED", "HOLD_ORDER"].includes(current)) return true;
+  if (next === "REQUEST_RESUBMIT" && current === "HOLD_ORDER") return true;
   if (next === "FINAL_FOLLOWUP" && current === "REQUEST_RESUBMIT") return true;
   if (next === "CONFIRMED" && PAYMENT_REVIEW_STATES.includes(current)) return true;
   const index = FULFILLMENT_SEQUENCE.indexOf(current as any);
@@ -133,6 +133,11 @@ export const reviewQueueActionHandler = async (req: Request, res: Response) => {
   if (!existing.exists) return res.status(404).json({ error: "Order not found" });
   const current = existing.data() as Record<string, any>; const action = String(req.body?.action || "").toLowerCase(); const reason = req.body?.reason || null; const reviewerId = (req.headers["x-admin-id"] || req.headers["x-user-id"] || "system").toString();
   if (!["approve", "reject", "needs-review"].includes(action)) return res.status(400).json({ error: "Invalid review action" });
+  const reviewableForApprove = ["payment_review", "PENDING", "UPDATED", "REQUEST_RESUBMIT", "FINAL_FOLLOWUP"];
+  const reviewableForReject = ["payment_review", "PENDING", "UPDATED"];
+  if (action === "approve" && !reviewableForApprove.includes(String(current.status))) return res.status(400).json({ error: `Payment cannot be cleared from ${current.status}` });
+  if (action === "reject" && !reviewableForReject.includes(String(current.status))) return res.status(400).json({ error: `Payment cannot be failed from ${current.status}` });
+  if (action === "needs-review" && !["payment_review", "PENDING", "UPDATED"].includes(String(current.status))) return res.status(400).json({ error: `Review is not available from ${current.status}` });
   const reviewStatus = action === "approve" ? "VALIDATED" : action === "reject" ? "UNVALIDATED" : "NEEDS_REVIEW";
   const reviewEvent = { action, reason, reviewerId, reviewedAt: new Date().toISOString(), previousReviewStatus: current.reviewStatus || null };
   const nextStatus = action === "approve" ? "CONFIRMED" : action === "reject" ? "PAYMENT_FAILED" : current.status;
@@ -180,6 +185,7 @@ export const setOrderFulfillmentStatusHandler = async (req: Request, res: Respon
 export const createOrderAmendmentHandler = async (req: Request, res: Response) => {
   const tenantId = "default"; const orderId = req.params.id; const orderRef = db.collection(`tenants/${tenantId}/orders`).doc(orderId); const existing = await orderRef.get();
   if (!existing.exists) return res.status(404).json({ error: "Order not found" }); const current = existing.data() as Record<string, any>;
+  if (["DELIVERED", "CANCELLED"].includes(String(current.status))) return res.status(400).json({ error: `Order cannot be modified from ${current.status}` });
   const amendment = { id: crypto.randomUUID(), orderId, patch: sanitize(req.body || {}), createdAt: new Date().toISOString(), status: "pending" };
   await db.collection(`tenants/${tenantId}/order_amendments`).doc(amendment.id).set(amendment); await orderRef.set({ ...current, amendmentStatus: "UPDATED", status: "UPDATED", updatedAt: new Date().toISOString() }); return res.json({ success: true, data: amendment });
 };
