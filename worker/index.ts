@@ -7,7 +7,7 @@
 // - D1 is the production persistence binding
 
 import { handleApiRequest } from "./router.js";
-import { env as appEnv, validateAppEnvOrThrow } from "../packages/config/env.js";
+import { env as appEnv, validateAppEnvForRuntime } from "../packages/config/env.js";
 
 export interface Env {
   DB: any;
@@ -40,7 +40,19 @@ export default {
     }
     Object.assign(appEnv, env);
 
-    validateAppEnvOrThrow("worker", env as Record<string, unknown>);
+    // Validate against the request-time Cloudflare bindings, not the module-
+    // load snapshot. The latter is empty in Workers before bindings exist and
+    // caused false missing-environment failures (Error 1101) in production.
+    const runtimeHealth = validateAppEnvForRuntime(
+      "worker",
+      env as Record<string, unknown>,
+      { strict: true },
+    );
+    if (!runtimeHealth.ok) {
+      throw new Error(
+        `worker runtime missing required environment variables: ${runtimeHealth.missing.join(", ")}`,
+      );
+    }
 
     const url = new URL(request.url);
     const isApi =
