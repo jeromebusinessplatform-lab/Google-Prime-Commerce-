@@ -8,8 +8,6 @@
 //   - serve static assets (storefront + admin SPAs) from the ASSETS binding
 //     with per-SPA fallbacks
 
-import { handleApiRequest } from "./router.js";
-
 export interface Env {
   DB: any;
   ASSETS: any;
@@ -20,16 +18,15 @@ export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const g = globalThis as any;
 
-    // The db adapter reads this on its first operation (lazy driver).
+    // Initialize Cloudflare bindings BEFORE importing shared service modules.
+    // Those modules read configuration at module initialization, so importing
+    // the router at top-level can snapshot an empty process.env on Workers.
     g.__PRIME_D1_BINDING__ = env.DB;
 
-    // Shared service code reads config from process.env (env.ts, telegram.ts,
-    // geoapify.ts). Copy vars and secrets into it so the same code runs on
-    // Workers without changes.
     if (typeof g.process !== "undefined" && g.process.env && typeof g.process.env === "object") {
       for (const key of Object.keys(env)) {
         const value = env[key];
-        if (typeof value === "string" && !(key in g.process.env)) {
+        if (typeof value === "string") {
           g.process.env[key] = value;
         }
       }
@@ -40,15 +37,22 @@ export default {
       url.pathname === "/api/health" ||
       url.pathname.startsWith("/api/") ||
       url.pathname.startsWith("/v1/");
-    if (isApi) return handleApiRequest(request);
+
+    if (isApi) {
+      // Deliberately load the router after Worker bindings/configuration have
+      // been initialized. ES module imports are otherwise evaluated before
+      // fetch() runs, which is too early for Cloudflare env bindings.
+      const { handleApiRequest } = await import("./router.js");
+      return handleApiRequest(request);
+    }
 
     // Static assets (dist/ is uploaded to the ASSETS binding).
     const asset = await env.ASSETS.fetch(request);
     if (asset.status !== 404) return asset;
 
     // Vite emits the named HTML entrypoints as /storefront/index.html and
-    // /admin/index.html. The previous fallback referenced source-tree paths
-    // that are not present in the deployed dist/ asset namespace.
+    // /admin/index.html. The fallback references the deployed dist asset
+    // namespace rather than source-tree paths.
     const indexPath = url.pathname.startsWith("/admin")
       ? "/admin/index.html"
       : "/storefront/index.html";
