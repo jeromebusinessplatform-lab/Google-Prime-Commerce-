@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    { "source": "/shop", "destination": "/apps/storefront/src/index.html" },
+    { "source": "/shop/(.*)", "destination": "/apps/storefront/src/index.html" },
+    { "source": "/admin", "destination": "/apps/admin/src/index.html" },
+    { "source": "/admin/(.*)", "destination": "/apps/admin/src/index.html" }
+  ]
+}
