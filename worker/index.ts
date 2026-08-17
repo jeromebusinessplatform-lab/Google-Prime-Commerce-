@@ -46,10 +46,12 @@ export default {
     const asset = await env.ASSETS.fetch(request);
     if (asset.status !== 404) return asset;
 
-    // SPA fallback: /admin* -> admin bundle, everything else -> storefront.
+    // Vite emits the named HTML entrypoints as /storefront/index.html and
+    // /admin/index.html. The previous fallback referenced source-tree paths
+    // that are not present in the deployed dist/ asset namespace.
     const indexPath = url.pathname.startsWith("/admin")
-      ? "/apps/admin/src/index.html"
-      : "/apps/storefront/src/index.html";
+      ? "/admin/index.html"
+      : "/storefront/index.html";
     const fallback = await env.ASSETS.fetch(new URL(indexPath, request.url));
     if (fallback.status === 404) return fallback;
     return new Response(fallback.body, {
