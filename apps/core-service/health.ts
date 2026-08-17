@@ -1,7 +1,7 @@
 import { validateAppEnvForRuntime } from "../../packages/config/env.js";
 
-export function getRuntimeHealth(runtime: "server" | "worker") {
-  const envHealth = validateAppEnvForRuntime(runtime);
+export function getRuntimeHealth(runtime: "server" | "worker", values?: Record<string, unknown>) {
+  const envHealth = validateAppEnvForRuntime(runtime, values);
   const service = runtime === "worker" ? "prime-commerce-worker" : "prime-commerce-server";
   return {
     service,
@@ -15,19 +15,15 @@ export function getRuntimeHealth(runtime: "server" | "worker") {
             db: Boolean((globalThis as any).__PRIME_D1_BINDING__),
             env: envHealth.ok,
           }
-        : {
-            api: true,
-          },
+        : { api: true },
   };
 }
 
-export function getDependencyHealth(runtime: "server" | "worker") {
-  const health = getRuntimeHealth(runtime);
-  const ready =
-    runtime === "worker"
-      ? Boolean(health.dependencies.db && health.dependencies.env)
-      : Boolean(health.dependencies.api && health.ok);
-
+export function getDependencyHealth(runtime: "server" | "worker", values?: Record<string, unknown>) {
+  const health = getRuntimeHealth(runtime, values);
+  const ready = runtime === "worker"
+    ? Boolean(health.dependencies.db && health.dependencies.env)
+    : Boolean(health.dependencies.api && health.ok);
   return {
     service: health.service,
     status: ready ? "ready" : "dependency_error",
