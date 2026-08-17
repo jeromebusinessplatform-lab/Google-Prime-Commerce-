@@ -39,3 +39,6 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: deploy
+
+      # Keep deployment workflow explicitly touched after production hotfixes so
+      # GitHub creates a fresh deployment run from the corrected main revision.
