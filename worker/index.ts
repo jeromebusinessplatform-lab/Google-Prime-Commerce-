@@ -57,13 +57,13 @@ export default {
       return asset;
     }
 
-    // Vite's multi-page build preserves the source HTML directory structure.
-    // Resolve the built SPA entry from both the conventional root location and
-    // the repository's actual source-entry output location. This keeps the
-    // Cloudflare Worker independent of Vite's HTML output layout.
+    // Vite's multi-page build uses the Rollup input keys `storefront` and
+    // `admin`, producing root-level storefront.html and admin.html entries.
+    // Keep the older source-layout paths as a fallback for compatibility with
+    // any prior asset upload layout.
     const candidates = url.pathname.startsWith("/admin")
-      ? ["/admin/index.html", "/apps/admin/src/index.html"]
-      : ["/index.html", "/apps/storefront/src/index.html"];
+      ? ["/admin.html", "/admin/index.html", "/apps/admin/src/index.html"]
+      : ["/storefront.html", "/index.html", "/apps/storefront/src/index.html"];
 
     for (const indexPath of candidates) {
       const fallback = await env.ASSETS.fetch(
