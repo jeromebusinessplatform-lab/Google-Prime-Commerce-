@@ -63,10 +63,8 @@ export default {
       : "/apps/storefront/src/index.html";
 
     const fallback = await env.ASSETS.fetch(new Request(new URL(indexPath, request.url), request));
-    if (fallback.status === 404) return fallback;
-    return new Response(fallback.body, {
-      status: 200,
-      headers: { "content-type": "text/html; charset=utf-8" },
-    });
+    
+    // Return the response directly to ensure body is piped correctly.
+    return fallback;
   },
 };
