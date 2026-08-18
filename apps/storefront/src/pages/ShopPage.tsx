@@ -140,28 +140,28 @@ export function ShopPage() {
             </div>
           ))
         ) : filteredProducts.map((p) => (
-          <div key={p.id} className="flex flex-col border border-gray-200 dark:border-gray-800 rounded-md overflow-hidden bg-white dark:bg-gray-900 cursor-pointer relative shadow-sm group transition-colors">
+          <div key={p.id} className="prime-card flex flex-col overflow-hidden bg-white dark:bg-gray-900 cursor-pointer relative shadow-sm group transition-colors">
             <div className="w-full aspect-[4/5] bg-gray-100 dark:bg-gray-800 relative overflow-hidden">
               <img src={p.media?.[0]?.url || p.image || 'https://placehold.co/400x500'} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
               {p.availability !== "in_stock" && (
-                <div className="absolute top-1 left-1 bg-gray-800 text-white text-[9px]  px-1.5 py-0.5 rounded">
+                <div className={`prime-badge absolute top-1 left-1 ${p.availability === "out_of_stock" ? 'badge-sale' : 'badge-low-stock'}`}>
                   {p.availability === "out_of_stock" ? "OUT OF STOCK" : "LOW STOCK"}
                 </div>
               )}
             </div>
-            <div className="p-1.5 flex flex-col flex-1">
-              <div className="text-[11px]  leading-tight line-clamp-1 text-gray-900 dark:text-gray-100 uppercase tracking-tighter">{p.name}</div>
-              {p.subname && <div className="text-[9px]  text-gray-400 dark:text-gray-500 uppercase line-clamp-1">{p.subname}</div>}
+            <div className="p-3 flex flex-col flex-1">
+              <div className="text-sm font-semibold leading-tight line-clamp-1 text-gray-900 dark:text-gray-100 uppercase tracking-tight">{p.name}</div>
+              {p.subname && <div className="text-xs text-prime-gray-500 dark:text-gray-400 uppercase line-clamp-1">{p.subname}</div>}
               
-              <div className="mt-1 flex items-center justify-between border-t border-gray-50 dark:border-gray-800 pt-1.5">
+              <div className="mt-auto pt-3 flex items-center justify-between">
                 <div className="flex flex-col">
-                  <div className="text-[12px]  tracking-tighter">₱{p.price.toLocaleString()}</div>
-                  <div className={`text-[8px]  uppercase tracking-widest ${p.stockQuantity <= 5 ? 'text-red-500' : 'text-gray-400'}`}>
+                  <div className="text-lg font-bold">₱{p.price.toLocaleString()}</div>
+                  <div className={`text-[10px] font-semibold uppercase tracking-wider ${p.stockQuantity <= 5 ? 'text-prime-red' : 'text-prime-gray-500'}`}>
                     STOCKS: {p.stockQuantity || 0}
                   </div>
                 </div>
                 <button 
-                  className="w-6 h-6 bg-gray-100 dark:bg-gray-800 flex items-center justify-center rounded text-lg  text-gray-600 dark:text-gray-300 hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-colors"
+                  className="w-10 h-10 bg-prime-gray-100 dark:bg-gray-800 flex items-center justify-center rounded-lg text-lg font-bold text-gray-600 dark:text-gray-300 hover:bg-prime-text hover:text-white dark:hover:bg-white dark:hover:text-prime-text transition-colors"
                   onClick={(e) => {
                     e.stopPropagation();
                     handleAddToCart(p);

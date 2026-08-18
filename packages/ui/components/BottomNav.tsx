@@ -24,14 +24,14 @@ export function BottomNav() {
     { name: "SHOP", path: "/shop", icon: Store },
     { name: "CART", path: "/cart", icon: ShoppingCart, badge: cartCount },
     { name: "ORDERS", path: "/orders", icon: ListOrdered },
-    { name: "NOTIFICATION", path: "/notifications", icon: Bell, badge: 5 }, // mock badge
+    { name: "NOTIFICATIONS", path: "/notifications", icon: Bell },
     { name: "ACCOUNT", path: "/account", icon: User },
     { name: "SUPPORT", path: "/support", icon: Headset },
   ];
 
   return (
     <div 
-      className="fixed bottom-[calc(18px+env(safe-area-inset-bottom,0px))] left-0 right-0 h-[44px] bg-white dark:bg-gray-950 border-t border-gray-200 dark:border-gray-800 z-40 flex items-center transition-colors"
+      className="fixed bottom-0 left-0 right-0 h-16 bg-white dark:bg-gray-900 border-t border-prime-gray-200 dark:border-gray-800 z-40 flex items-center shadow-sm transition-colors"
     >
       {tabs.map((tab) => {
         const Icon = tab.icon;
@@ -40,18 +40,19 @@ export function BottomNav() {
             key={tab.name}
             to={tab.path}
             className={({ isActive }) => 
-              `flex-1 h-full flex items-center justify-center relative ${isActive ? 'text-black dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'}`
+              `flex-1 h-full flex flex-col items-center justify-center gap-1 ${isActive ? 'text-prime-text dark:text-white' : 'text-prime-gray-500 hover:text-prime-text dark:hover:text-gray-300'}`
             }
             aria-label={tab.name}
           >
-            <div className="relative flex items-center justify-center w-[44px] h-[44px]">
-              <Icon size={20} strokeWidth={2} />
-              {tab.badge && (
-                <span className="absolute top-[8px] right-[8px] bg-red-500 text-white text-[9px]  px-1 rounded-full min-w-[14px] h-[14px] flex items-center justify-center pointer-events-none">
+            <div className="relative">
+              <Icon size={20} strokeWidth={isActive => isActive ? 2.5 : 2} />
+              {tab.badge && tab.badge > 0 && (
+                <span className="absolute -top-1 -right-2 bg-prime-red text-white text-[10px] font-bold px-1 rounded-full min-w-[16px] h-[16px] flex items-center justify-center pointer-events-none">
                   {tab.badge > 99 ? '99+' : tab.badge}
                 </span>
               )}
             </div>
+            <span className="text-[9px] font-bold uppercase tracking-wider">{tab.name}</span>
           </NavLink>
         );
       })}

@@ -3,17 +3,35 @@ import { validateAppEnvForRuntime } from "../../packages/config/env.js";
 export function getRuntimeHealth(runtime: "server" | "worker", values?: Record<string, unknown>) {
   const envHealth = validateAppEnvForRuntime(runtime, values);
   const service = runtime === "worker" ? "prime-commerce-worker" : "prime-commerce-server";
+
+  const db = Boolean((globalThis as any).__PRIME_D1_BINDING__);
+  const env = envHealth.ok;
+
+  let status = "ready";
+  const errors: string[] = [];
+
+  if (!env) {
+    status = "config_error";
+    errors.push("Missing required environment variables");
+  }
+
+  if (runtime === "worker" && !db) {
+    status = "dependency_error";
+    errors.push("Database binding missing");
+  }
+
   return {
     service,
-    status: envHealth.ok ? "ready" : "config_error",
-    ok: envHealth.ok,
+    status,
+    ok: status === "ready",
+    errors,
     live: true,
     missing: envHealth.missing,
     dependencies:
       runtime === "worker"
         ? {
-            db: Boolean((globalThis as any).__PRIME_D1_BINDING__),
-            env: envHealth.ok,
+            db,
+            env,
           }
         : { api: true },
   };

@@ -17,11 +17,11 @@ const dbAliasPlugin = {
   name: "prime-db-alias",
   setup(build) {
     build.onResolve({ filter: /.*/ }, (args) => {
-      if (args.path.endsWith("packages/db/index.js")) {
+      if (args.path.endsWith("packages/db/index.js") || args.path.endsWith("packages/db/index.ts")) {
         return { path: dbD1Entry };
       }
       if (
-        args.path === "../db/index.js" &&
+        (args.path === "../db/index.js" || args.path === "../db/index.ts") &&
         args.resolveDir.includes(path.sep + "packages" + path.sep + "domain")
       ) {
         return { path: dbD1Entry };

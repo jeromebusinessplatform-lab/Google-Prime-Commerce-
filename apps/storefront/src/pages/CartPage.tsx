@@ -56,48 +56,48 @@ export function CartPage() {
   const selectedCount = cart.items.filter(i => i.selected).reduce((acc, i) => acc + i.quantity, 0);
 
   return (
-    <div className="p-2 md:p-3 max-w-3xl mx-auto flex flex-col h-[calc(100vh-55px-35px-44px-18px)]">
-      <div className="flex justify-between items-center pb-2 border-b border-gray-200 dark:border-gray-800 transition-colors">
-        <h2 className="text-base ">My Cart</h2>
+    <div className="p-4 max-w-3xl mx-auto flex flex-col h-full bg-white dark:bg-gray-950 transition-colors">
+      <div className="flex justify-between items-center pb-4 border-b border-prime-gray-200">
+        <h2 className="text-lg font-bold uppercase tracking-wider">My Cart</h2>
         {cart.items.length > 0 && (
           <button 
             onClick={() => selectAll(!allSelected)}
-            className="text-xs  text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white uppercase transition-colors"
+            className="text-xs font-bold text-prime-gray-500 hover:text-prime-text uppercase tracking-wider transition-colors"
           >
             {allSelected ? "CLEAR SELECTION" : "SELECT ALL"}
           </button>
         )}
       </div>
 
-      <div className="flex-1 overflow-y-auto mt-2 space-y-3">
+      <div className="flex-1 overflow-y-auto mt-4 space-y-4">
         {cart.items.length === 0 ? (
-          <div className="text-center text-gray-500 dark:text-gray-400 mt-10 transition-colors">Your cart is empty.</div>
+          <div className="text-center text-prime-gray-500 mt-10">Your cart is empty.</div>
         ) : (
           cart.items.map(item => (
-            <div key={item.id} className="flex gap-3 bg-white dark:bg-gray-900 p-2 rounded-md shadow-sm border border-gray-100 dark:border-gray-800 transition-colors">
+            <div key={item.id} className="prime-card flex gap-4 bg-white dark:bg-gray-900 shadow-sm border border-prime-gray-200 transition-colors">
               <div className="flex items-center">
                 <input 
                   type="checkbox" 
                   checked={item.selected} 
                   onChange={() => toggleSelection(item.id)}
-                  className="w-5 h-5 accent-black cursor-pointer"
+                  className="w-5 h-5 accent-prime-text cursor-pointer"
                 />
               </div>
-              <img src={item.image} alt={item.name} className="w-16 h-16 object-cover bg-gray-100 dark:bg-gray-800 rounded transition-colors" />
+              <img src={item.image} alt={item.name} className="w-20 h-20 object-cover bg-prime-gray-100 dark:bg-gray-800 rounded-lg" />
               <div className="flex-1 flex flex-col justify-between">
                 <div>
-                  <div className=" text-[12px] uppercase leading-tight text-gray-900 dark:text-gray-100 tracking-tighter transition-colors">{item.name}</div>
-                  <div className="text-[9px]  text-gray-400 dark:text-gray-500 uppercase tracking-widest transition-colors">{item.subname || 'Standard Edition'}</div>
-                  <div className="text-[14px]  mt-1 tracking-tight">₱{item.price.toLocaleString()}</div>
+                  <div className="text-sm font-bold uppercase text-prime-text dark:text-gray-100">{item.name}</div>
+                  <div className="text-xs text-prime-gray-500 uppercase">{item.subname || 'Standard Edition'}</div>
+                  <div className="text-base font-bold mt-1">₱{item.price.toLocaleString()}</div>
                 </div>
-                <div className="flex items-center justify-between mt-2">
-                  <div className="flex items-center border border-gray-300 dark:border-gray-700 rounded overflow-hidden h-7 transition-colors">
-                    <button onClick={() => updateQuantity(item, item.quantity - 1)} className="px-2 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition-colors">-</button>
-                    <span className="px-2 text-[12px]  min-w-[24px] text-center">{item.quantity}</span>
-                    <button onClick={() => updateQuantity(item, item.quantity + 1)} className="px-2 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition-colors">+</button>
+                <div className="flex items-center justify-between mt-3">
+                  <div className="flex items-center border border-prime-gray-200 rounded-lg overflow-hidden h-9">
+                    <button onClick={() => updateQuantity(item, item.quantity - 1)} className="px-3 bg-prime-gray-100 hover:bg-prime-gray-200 text-prime-gray-500">-</button>
+                    <span className="px-3 text-sm font-bold min-w-[32px] text-center">{item.quantity}</span>
+                    <button onClick={() => updateQuantity(item, item.quantity + 1)} className="px-3 bg-prime-gray-100 hover:bg-prime-gray-200 text-prime-gray-500">+</button>
                   </div>
-                  <button onClick={() => updateQuantity(item, 0)} className="text-gray-400 dark:text-gray-500 hover:text-red-600 p-1 transition-colors">
-                    <Trash2 size={16} />
+                  <button onClick={() => updateQuantity(item, 0)} className="text-prime-gray-500 hover:text-prime-red p-1">
+                    <Trash2 size={18} />
                   </button>
                 </div>
               </div>
@@ -106,20 +106,20 @@ export function CartPage() {
         )}
       </div>
 
-      <div className="pt-3 border-t border-gray-200 dark:border-gray-800 mt-auto bg-white dark:bg-gray-950 sticky bottom-0 transition-colors">
-        <div className="flex justify-between items-end mb-3">
-          <div className="text-gray-600 dark:text-gray-300 text-[12px] uppercase transition-colors">
+      <div className="pt-4 border-t border-prime-gray-200 mt-4 bg-white dark:bg-gray-950 sticky bottom-0">
+        <div className="flex justify-between items-end mb-4">
+          <div className="text-prime-gray-500 text-xs font-bold uppercase">
             Selected ({selectedCount})
           </div>
           <div className="text-right">
-            <div className="text-xs text-gray-500 dark:text-gray-400 transition-colors">Subtotal</div>
-            <div className="text-base  leading-none">₱{selectedTotal.toLocaleString()}</div>
+            <div className="text-xs text-prime-gray-500">Subtotal</div>
+            <div className="text-xl font-bold leading-none">₱{selectedTotal.toLocaleString()}</div>
           </div>
         </div>
         <button 
           disabled={selectedCount === 0}
           onClick={() => navigate('/checkout')}
-          className="w-full bg-black text-white  py-3 rounded-md hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed"
+          className="w-full bg-prime-text text-white font-bold py-4 rounded-lg hover:bg-gray-800 disabled:bg-prime-gray-200"
         >
           CHECKOUT {selectedCount > 0 ? `(${selectedCount})` : ''}
         </button>

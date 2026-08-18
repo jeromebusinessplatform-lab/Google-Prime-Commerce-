@@ -13,8 +13,8 @@ name = "prime-commerce"
 main = "dist-worker/index.js"
 compatibility_date = "2026-08-01"
 compatibility_flags = ["nodejs_compat"]
-workers_dev = false
-preview_urls = false
+workers_dev = true
+preview_urls = true
 
 # Cloudflare D1 database. Replace database_id with the value from
 # `npx wrangler d1 create prime-db`.

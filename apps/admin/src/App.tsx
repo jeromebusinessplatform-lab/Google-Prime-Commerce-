@@ -105,7 +105,7 @@ export default function App() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          tenantId,
+          tenantId: 'default', // Implicit tenant
           accessCode,
           initData: 'PREVIEW_MOCK'
         })
@@ -116,8 +116,21 @@ export default function App() {
       }
       setIsAuthenticated(true);
       setError('');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Invalid Access Code');
+    } catch (err: any) {
+      console.error("Login error:", err);
+      // More robust error extraction
+      let message = 'Invalid Access Code';
+      if (err instanceof Error) {
+        message = err.message;
+      } else if (typeof err === 'object' && err !== null && 'message' in err) {
+        message = (err as any).message;
+      } else if (typeof err === 'string') {
+        message = err;
+      } else {
+        // Fallback for unexpected object structure
+        message = JSON.stringify(err);
+      }
+      setError(message);
     }
   };
 
@@ -140,16 +153,6 @@ export default function App() {
             </div>
             <h1 className="text-xl  text-center mb-6">Admin Access</h1>
             <form onSubmit={handleLogin} className="space-y-4">
-              <div>
-                <label className="block text-xs  text-gray-700 dark:text-gray-400 mb-1">TENANT</label>
-                <input
-                  type="text"
-                  value={tenantId}
-                  onChange={(e) => setTenantId(e.target.value)}
-                  className="w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-800 rounded px-3 py-2 focus:border-black dark:focus:border-white focus:outline-none"
-                  placeholder="default"
-                />
-              </div>
               <div>
                 <label className="block text-xs  text-gray-700 dark:text-gray-400 mb-1">ACCESS CODE</label>
                 <input 

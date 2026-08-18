@@ -75,6 +75,17 @@ class WorkerResponse {
     return this;
   }
 
+  cookie(name: string, value: string, options: any) {
+    let cookieStr = `${name}=${value}`;
+    if (options.httpOnly) cookieStr += "; HttpOnly";
+    if (options.secure) cookieStr += "; Secure";
+    if (options.sameSite) cookieStr += `; SameSite=${options.sameSite}`;
+    if (options.maxAge) cookieStr += `; Max-Age=${options.maxAge / 1000}`;
+    cookieStr += "; Path=/";
+    this.headers.append("Set-Cookie", cookieStr);
+    return this;
+  }
+
   end(data?: any) {
     if (data !== undefined) this.send(data);
     return this;

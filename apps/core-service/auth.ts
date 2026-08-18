@@ -89,6 +89,15 @@ export const adminLoginHandler = async (req: Request, res: Response) => {
       username: "browser_admin"
     };
 
+    // Validate access code first
+    const normalizedCode = accessCode.trim().toUpperCase().normalize('NFKC');
+    const expectedCode = (env.ADMIN_ACCESS_CODE || env.ADMIN_BOOTSTRAP_CODE || "").trim().toUpperCase().normalize('NFKC');
+
+    if (normalizedCode !== expectedCode) {
+      console.error("Auth Failure: Invalid access code.");
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
+
     if (initData && initData !== "PREVIEW_MOCK") {
       const isValid = verifyTelegramInitData(
         initData,
@@ -96,30 +105,29 @@ export const adminLoginHandler = async (req: Request, res: Response) => {
         env.TELEGRAM_AUTH_MAX_AGE_SECONDS
       );
 
-      if (!isValid) return res.status(401).json({ error: "Invalid initData" });
-
-      const urlParams = new URLSearchParams(initData);
-      const userStr = urlParams.get("user");
-      if (!userStr) return res.status(400).json({ error: "Missing user" });
-      user = JSON.parse(userStr);
-    }
-    
-    const normalizedCode = accessCode.trim().toUpperCase().normalize('NFKC');
-    const expectedCode = (env.ADMIN_ACCESS_CODE || env.ADMIN_BOOTSTRAP_CODE).trim().toUpperCase().normalize('NFKC');
-
-    if (normalizedCode !== expectedCode) {
-      return res.status(401).json({ error: "Invalid credentials" }); // Generic message
+      if (!isValid) {
+        console.error("Auth Failure: Invalid initData.");
+        return res.status(401).json({ error: "Invalid initData" });
+      }
+      // ...
     }
     
     // In a real system, verify if user.id is in the operator allowlist for this tenant
     // For this greenfield setup, we might implicitly add them or check BOOTSTRAP_OWNER_TELEGRAM_ID
     if (env.BOOTSTRAP_OWNER_TELEGRAM_ID && user.id.toString() !== env.BOOTSTRAP_OWNER_TELEGRAM_ID && !env.IS_PREVIEW && user.id !== "browser-admin") {
+      console.error("Auth Failure: User not owner.");
       return res.status(401).json({ error: "Invalid credentials" }); // Not an owner
     }
 
     // Upsert operator
     const opsRef = db.collection(`tenants/${tenantId}/operators`);
-    const opsQuery = await opsRef.where("telegramUserId", "==", user.id.toString()).limit(1).get();
+    let opsQuery: any;
+    try {
+        opsQuery = await opsRef.where("telegramUserId", "==", user.id.toString()).limit(1).get();
+    } catch (e) {
+        console.error("Auth Failure: Database error.", e);
+        return res.status(500).json({ error: "Database Error" });
+    }
     
     let opDocId;
     if (opsQuery.empty) {
