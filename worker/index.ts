@@ -57,26 +57,16 @@ export default {
       return asset;
     }
 
-    // Vite's multi-page build uses the Rollup input keys `storefront` and
-    // `admin`, producing root-level storefront.html and admin.html entries.
-    // Keep the older source-layout paths as a fallback for compatibility with
-    // any prior asset upload layout.
-    const candidates = url.pathname.startsWith("/admin")
-      ? ["/admin.html", "/admin/index.html", "/apps/admin/src/index.html"]
-      : ["/storefront.html", "/index.html", "/apps/storefront/src/index.html"];
+    // Vite build structure places index.html files in nested paths.
+    const indexPath = url.pathname.startsWith("/admin")
+      ? "/apps/admin/src/index.html"
+      : "/apps/storefront/src/index.html";
 
-    for (const indexPath of candidates) {
-      const fallback = await env.ASSETS.fetch(
-        new Request(new URL(indexPath, request.url), request)
-      );
-      if (fallback.status !== 404) {
-        return new Response(fallback.body, {
-          status: 200,
-          headers: new Headers({ "content-type": "text/html; charset=utf-8" }),
-        });
-      }
-    }
-
-    return new Response("Not Found", { status: 404 });
+    const fallback = await env.ASSETS.fetch(new Request(new URL(indexPath, request.url), request));
+    if (fallback.status === 404) return fallback;
+    return new Response(fallback.body, {
+      status: 200,
+      headers: { "content-type": "text/html; charset=utf-8" },
+    });
   },
 };
