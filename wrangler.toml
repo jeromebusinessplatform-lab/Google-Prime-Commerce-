@@ -3,29 +3,25 @@
 # Deploy (after `npm run build`):
 #   npm run deploy:cloudflare
 #
-# First-time setup (see DEPLOYMENT-CLOUDFLARE.md):
-#   npx wrangler d1 create prime-db          # prints a database_id
-#   npx wrangler d1 migrations apply prime-db --remote
-#   npx wrangler secret put SESSION_SIGNING_KEY_CURRENT
-#   ...
+# Production deployment currently uses the Cloudflare Workers.dev hostname.
+# The custom domain can be attached later once the zone/Workers Routes
+# permission is available to the deployment token.
 
 name = "prime-commerce"
 main = "dist-worker/index.js"
 compatibility_date = "2026-08-01"
 compatibility_flags = ["nodejs_compat"]
 workers_dev = true
-preview_urls = true
+preview_urls = false
 
-# Cloudflare D1 database. Replace database_id with the value from
-# `npx wrangler d1 create prime-db`.
 [[d1_databases]]
 binding = "DB"
 database_name = "prime-db"
 database_id = "482cd1f2-9570-42e6-bc19-2c49a6c4071a"
 migrations_dir = "migrations"
 
-# Vite build output (storefront at /, admin at /admin). The Worker handles
-# SPA fallback routing itself (see worker/index.ts).
+# Vite build output. The Worker handles SPA fallback routing itself:
+# /shop -> storefront SPA, /admin -> admin SPA.
 [assets]
 directory = "./dist"
 binding = "ASSETS"

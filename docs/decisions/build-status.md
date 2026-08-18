@@ -4,7 +4,7 @@
 - Cloudflare deployment baseline exists.
 - Storefront/admin/core-service split exists.
 - Core commerce flows exist: auth, catalog, cart, checkout, orders, courier, geo, and queue domain.
-- Runtime validation and health semantics now exist for Node and Worker entrypoints.
+- Runtime validation and health semantics now exist for Node and Worker entrypoints (Phase 5 verified).
 - Recovery log added for the interrupted rebuild.
 - Phase 5: Runtime verification, deployment readiness, and operational guardrails.
 

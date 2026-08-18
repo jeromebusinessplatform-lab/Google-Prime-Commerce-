@@ -48,7 +48,7 @@ export function ShopPage() {
       const items = cartData.data?.items || [];
       const existing = items.find((i: any) => i.id === product.id);
       const newQuantity = (existing?.quantity || 0) + 1;
-      
+
       await fetch(`/v1/cart/items/${product.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -56,7 +56,7 @@ export function ShopPage() {
       });
       setToast(`Added ${product.name} to cart!`);
       setTimeout(() => setToast(null), 2500);
-      
+
       // Dispatch custom event to trigger badge update
       window.dispatchEvent(new CustomEvent('cart-updated'));
     } catch (e) {
@@ -65,48 +65,28 @@ export function ShopPage() {
   };
 
   return (
-    <div className="p-2 md:p-3 max-w-7xl mx-auto">
+    <div className="p-2 w-full mx-auto pb-20">
       {toast && (
-        <div className="fixed top-[100px] left-1/2 -translate-x-1/2 bg-black text-white px-4 py-2 rounded-full text-sm  shadow-lg z-50 flex items-center gap-2 animate-in fade-in slide-in-from-top-4">
-          <CheckCircle2 size={16} />
+        <div className="fixed top-[100px] left-1/2 -translate-x-1/2 bg-black text-white px-4 py-2 rounded-full text-xs uppercase tracking-widest shadow-lg z-50 flex items-center gap-2">
+          <CheckCircle2 size={14} />
           {toast}
         </div>
       )}
-      <div className="sticky top-[calc(90px+env(safe-area-inset-top,0px))] bg-white dark:bg-gray-950 z-30 pb-2 pt-2 border-b border-gray-100 dark:border-gray-800 flex flex-col gap-2 transition-colors">
+      <div className="sticky top-[env(safe-area-inset-top,0px)] bg-white dark:bg-gray-950 z-30 pb-2 pt-2 border-b border-gray-100 dark:border-gray-800 flex flex-col gap-2 transition-colors">
         <div className="flex gap-2 relative" ref={searchRef}>
           <div className="relative flex-1">
-            <Search className="absolute left-2 top-1.5 text-gray-400" size={16} />
-            <input 
-              type="text" 
-              value={search} 
+            <Search className="absolute left-2 top-2 text-gray-400" size={14} />
+            <input
+              type="text"
+              value={search}
               onFocus={() => setShowAutocomplete(true)}
               onChange={(e) => {
                 setSearch(e.target.value);
                 setShowAutocomplete(true);
-              }} 
-              placeholder="Search products..." 
-              className="w-full bg-gray-100 dark:bg-gray-800 border-none rounded-md pl-8 pr-3 py-1.5 text-sm outline-none focus:ring-1 focus:ring-black dark:focus:ring-white transition-colors" 
+              }}
+              placeholder="SEARCH PRODUCTS..."
+              className="w-full bg-gray-100 dark:bg-gray-800 border-none rounded-xl pl-8 pr-3 py-2 text-xs outline-none focus:ring-1 focus:ring-black dark:focus:ring-white transition-colors uppercase tracking-widest"
             />
-            {showAutocomplete && search.length > 0 && filteredProducts.length > 0 && (
-              <div className="absolute top-full left-0 right-0 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 mt-1 rounded-md shadow-lg z-50 max-h-64 overflow-y-auto">
-                {filteredProducts.slice(0, 5).map(p => (
-                  <div 
-                    key={p.id}
-                    onClick={() => {
-                      setSearch(p.name);
-                      setShowAutocomplete(false);
-                    }}
-                    className="flex items-center gap-3 p-2 border-b border-gray-100 dark:border-gray-800 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors"
-                  >
-                    <img src={p.media?.[0]?.url || p.image || 'https://placehold.co/400x500'} alt={p.name} className="w-10 h-10 object-cover rounded bg-gray-100 dark:bg-gray-800" />
-                    <div className="flex-1">
-                      <div className="text-sm  text-gray-900 dark:text-gray-100 line-clamp-1">{p.name}</div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400">₱{p.price.toLocaleString()}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
         </div>
         <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
@@ -114,8 +94,8 @@ export function ShopPage() {
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className={`px-3 py-1 text-xs  rounded-full whitespace-nowrap transition-colors ${
-                selectedCategory === cat ? 'bg-black dark:bg-white text-white dark:text-black' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+              className={`px-4 py-1.5 text-[10px] font-bold rounded-full whitespace-nowrap transition-colors uppercase tracking-widest ${
+                selectedCategory === cat ? 'bg-black dark:bg-white text-white dark:text-black' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
               }`}
             >
               {cat}
@@ -124,22 +104,19 @@ export function ShopPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2 mt-3">
+      <div className="grid grid-cols-2 gap-2 mt-3">
         {isLoading ? (
-          Array.from({ length: 15 }).map((_, i) => (
-            <div key={i} className="flex flex-col border border-gray-100 dark:border-gray-900 rounded-md overflow-hidden bg-white dark:bg-gray-950 animate-pulse">
-              <div className="w-full aspect-[4/5] bg-gray-100 dark:bg-gray-900" />
-              <div className="p-1.5 space-y-1.5">
-                <div className="h-3 bg-gray-100 dark:bg-gray-900 rounded w-3/4" />
-                <div className="h-2 bg-gray-50 dark:bg-gray-900 rounded w-1/2" />
-                <div className="pt-2 flex justify-between items-center">
-                  <div className="h-3 bg-gray-100 dark:bg-gray-900 rounded w-1/3" />
-                  <div className="w-6 h-6 bg-gray-100 dark:bg-gray-900 rounded" />
-                </div>
+          Array.from({ length: 10 }).map((_, i) => (
+            <div key={i} className="flex flex-col border border-gray-100 dark:border-gray-900 rounded-xl overflow-hidden bg-white dark:bg-gray-950 animate-pulse">
+              <div className="w-full aspect-square bg-gray-100 dark:bg-gray-900" />
+              <div className="p-2 space-y-1">
+                <div className="h-3 bg-gray-100 dark:bg-gray-900 rounded w-full" />
+                <div className="h-3 bg-gray-100 dark:bg-gray-900 rounded w-1/2" />
               </div>
             </div>
           ))
         ) : filteredProducts.map((p) => (
+<<<<<<< HEAD
           <div key={p.id} className="prime-card flex flex-col overflow-hidden bg-white dark:bg-gray-900 cursor-pointer relative shadow-sm group transition-colors">
             <div className="w-full aspect-[4/5] bg-gray-100 dark:bg-gray-800 relative overflow-hidden">
               <img src={p.media?.[0]?.url || p.image || 'https://placehold.co/400x500'} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
@@ -162,6 +139,18 @@ export function ShopPage() {
                 </div>
                 <button 
                   className="w-10 h-10 bg-prime-gray-100 dark:bg-gray-800 flex items-center justify-center rounded-lg text-lg font-bold text-gray-600 dark:text-gray-300 hover:bg-prime-text hover:text-white dark:hover:bg-white dark:hover:text-prime-text transition-colors"
+=======
+          <div key={p.id} className="flex flex-col border border-gray-100 dark:border-gray-800 rounded-xl overflow-hidden bg-white dark:bg-gray-900 shadow-sm transition-colors">
+            <div className="w-full aspect-square bg-gray-100 dark:bg-gray-800 relative overflow-hidden">
+              <img src={p.media?.[0]?.url || p.image || 'https://placehold.co/400x400'} alt={p.name} className="w-full h-full object-cover" />
+            </div>
+            <div className="p-2 flex flex-col flex-1">
+              <div className="text-[10px] font-bold leading-tight line-clamp-1 text-gray-900 dark:text-gray-100 uppercase tracking-widest">{p.name}</div>
+              <div className="mt-1 flex items-center justify-between pt-1">
+                <div className="text-[11px] font-black tracking-widest">₱{p.price.toLocaleString()}</div>
+                <button
+                  className="w-7 h-7 bg-black text-white flex items-center justify-center rounded-lg text-lg hover:bg-gray-800 transition-colors"
+>>>>>>> origin/gemini/phase-5-verification
                   onClick={(e) => {
                     e.stopPropagation();
                     handleAddToCart(p);

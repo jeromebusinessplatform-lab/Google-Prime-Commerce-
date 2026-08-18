@@ -15,17 +15,16 @@ export const upsertDeliveryOriginHandler = async (req: Request, res: Response) =
   try {
     const tenantId = DEFAULT_TENANT;
     const { id } = req.params;
-    const { id: _, ...data } = req.body; // sanitize
-    
+    const { id: _, ...data } = req.body;
+
     const originsRef = db.collection(`tenants/${tenantId}/delivery_origins`);
-    
+
     if (id) {
       const doc = await originsRef.doc(id).get();
       if (!doc.exists) return res.status(404).json({ error: "Origin not found" });
-      
+
       const oldData = doc.data() as any;
-      
-      // revalidate lat/lng ranges
+
       if (data.lat !== undefined && (data.lat < -90 || data.lat > 90)) {
         return res.status(400).json({ error: "Invalid latitude" });
       }
@@ -60,11 +59,11 @@ export const upsertDeliveryOriginHandler = async (req: Request, res: Response) =
 export const setDefaultDeliveryOriginHandler = async (req: Request, res: Response) => {
   const tenantId = DEFAULT_TENANT;
   const { id } = req.body;
-  
+
   const originsRef = db.collection(`tenants/${tenantId}/delivery_origins`);
   const snapshot = await originsRef.get();
   const batch = db.batch();
-  
+
   let targetFound = false;
   snapshot.docs.forEach((d: any) => {
     if (d.id === id) {
@@ -74,19 +73,18 @@ export const setDefaultDeliveryOriginHandler = async (req: Request, res: Respons
       batch.update(d.ref, { isDefault: false, updatedAt: new Date().toISOString() });
     }
   });
-  
+
   if (!targetFound) return res.status(404).json({ error: "Origin not found" });
-  
+
   await batch.commit();
-  
-  // Audit the switch
+
   await db.collection(`tenants/${tenantId}/audit_events`).add({
     type: 'default_origin_switch',
     newDefaultId: id,
     timestamp: new Date().toISOString(),
     operator: 'admin'
   });
-  
+
   res.json({ success: true });
 };
 
@@ -101,24 +99,23 @@ export const upsertCourierHandler = async (req: Request, res: Response) => {
   try {
     const tenantId = DEFAULT_TENANT;
     const { id } = req.params;
-    const { id: _, availabilityHistory, _testDist, ...data } = req.body; // sanitize
-    
+    const { id: _, availabilityHistory, _testDist, ...data } = req.body;
+
     const couriersRef = db.collection(`tenants/${tenantId}/couriers`);
-    
+
     if (id) {
       const doc = await couriersRef.doc(id).get();
       if (!doc.exists) return res.status(404).json({ error: "Courier not found" });
-      
+
       const oldData = doc.data() as any;
       const newVersion = (oldData.config?.version || 0) + 1;
-      
-      // Merge config carefully
+
       const config = {
         ...(oldData.config || {}),
         ...(data.config || {}),
         version: newVersion
       };
-      
+
       await couriersRef.doc(id).update({
         ...data,
         config,
@@ -143,25 +140,24 @@ export const toggleCourierAvailabilityHandler = async (req: Request, res: Respon
   const tenantId = DEFAULT_TENANT;
   const { id } = req.params;
   const { status, reason, operator } = req.body;
-  
+
   const ref = db.collection(`tenants/${tenantId}/couriers`).doc(id);
   const doc = await ref.get();
   const data = doc.data() as any;
-  
+
   const historyEvent = {
     status,
     operator,
     reason,
     timestamp: new Date().toISOString()
   };
-  
+
   await ref.update({
     status,
     availabilityHistory: [historyEvent, ...(data.availabilityHistory || [])].slice(0, 50),
     updatedAt: new Date().toISOString()
   });
-  
-  // Audit
+
   await db.collection(`tenants/${tenantId}/audit_events`).add({
     type: 'courier_availability_change',
     courierId: id,
@@ -170,7 +166,14 @@ export const toggleCourierAvailabilityHandler = async (req: Request, res: Respon
     operator,
     timestamp: new Date().toISOString()
   });
-  
+
+  res.json({ success: true });
+};
+
+export const deleteCourierHandler = async (req: Request, res: Response) => {
+  const tenantId = DEFAULT_TENANT;
+  const id = req.params.id;
+  await db.collection(`tenants/${tenantId}/couriers`).doc(id).delete();
   res.json({ success: true });
 };
 
@@ -178,15 +181,14 @@ export const getDeliveryQuoteHandler = async (req: Request, res: Response) => {
   try {
     const tenantId = DEFAULT_TENANT;
     const { destinationLat, destinationLng, paymentTiming } = req.body;
-    
+
     if (!destinationLat || !destinationLng) {
       return res.status(400).json({ error: "Destination coordinates are required" });
     }
 
-    // 1. Get origin (prefer default, fallback to first)
     const originsRef = db.collection(`tenants/${tenantId}/delivery_origins`);
     let originDoc = null;
-    
+
     const defaultOriginQuery = await originsRef.where("isDefault", "==", true).limit(1).get();
     if (!defaultOriginQuery.empty) {
       originDoc = defaultOriginQuery.docs[0];
@@ -195,24 +197,22 @@ export const getDeliveryQuoteHandler = async (req: Request, res: Response) => {
       if (allOrigins.empty) return res.status(500).json({ error: "No delivery origins configured. Please add an origin in Admin -> Courier Management." });
       originDoc = allOrigins.docs[0];
     }
-    
+
     const origin = originDoc.data() as any;
     const originId = originDoc.id;
-    
-    // 2. Get available couriers
+
     const couriersSnapshot = await db.collection(`tenants/${tenantId}/couriers`).where("status", "==", "available").get();
     const couriers = couriersSnapshot.docs.map((d: any) => ({ id: d.id, ...d.data() }));
-    
+
     if (couriers.length === 0) {
       return res.json({ data: [] });
     }
 
     const GEOAPIFY_API_KEY = process.env.GEOAPIFY_API_KEY;
 
-    // 3. Calculate quotes for each courier
     const quotes = await Promise.all(couriers.map(async (courier) => {
-      let routeDistanceMeters = 5000; // Mock 5km default
-      let durationSeconds = 900; // Mock 15 mins
+      let routeDistanceMeters = 5000;
+      let durationSeconds = 900;
 
       if (GEOAPIFY_API_KEY) {
         try {
@@ -229,15 +229,15 @@ export const getDeliveryQuoteHandler = async (req: Request, res: Response) => {
           console.error("Routing error for courier", courier.id, e);
         }
       }
-      
-      const isNight = false; // logic to check based on tenant timezone can be added here
-      
+
+      const isNight = false;
+
       const feeResult = calculateDeliveryFee(routeDistanceMeters, courier.config, isNight);
-      
+
       const quoteId = `quote_${Date.now()}_${courier.id}`;
-      
+
       return {
-        id: quoteId, // Add ID for the quote session
+        id: quoteId,
         courierId: courier.id,
         courierName: courier.name,
         logoUrl: courier.logoUrl,
@@ -268,7 +268,7 @@ export const getDeliveryQuoteHandler = async (req: Request, res: Response) => {
         expiresAt: new Date(Date.now() + 15 * 60000).toISOString()
       };
     }));
-    
+
     res.json({ data: quotes });
   } catch (err: any) {
     console.error("Delivery quote error:", err);

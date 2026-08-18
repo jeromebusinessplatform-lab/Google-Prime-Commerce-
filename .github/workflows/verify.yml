@@ -1,13 +1,13 @@
-name: PRIME Cloudflare Deploy
+name: PRIME Verification
 
 on:
-  workflow_dispatch:
+  pull_request:
   push:
-    branches: [main, gemini/phase-5-verification]
+    branches:
+      - gemini/phase-5-verification
 
 jobs:
-  deploy:
-    environment: production
+  verify:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
@@ -25,7 +25,7 @@ jobs:
       - name: Install dependencies
         run: npm install --no-audit --no-fund
 
-      - name: Typecheck
+      - name: Lint / type verification
         run: npm run lint
 
       - name: Unit tests
@@ -33,10 +33,3 @@ jobs:
 
       - name: Build Shopfront + Admin + Worker
         run: npm run build && npm run worker:build
-
-      - name: Deploy to Cloudflare Workers
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: deploy

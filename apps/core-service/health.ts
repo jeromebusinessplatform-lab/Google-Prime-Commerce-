@@ -1,5 +1,6 @@
 import { validateAppEnvForRuntime } from "../../packages/config/env.js";
 
+<<<<<<< HEAD
 export function getRuntimeHealth(runtime: "server" | "worker", values?: Record<string, unknown>) {
   const envHealth = validateAppEnvForRuntime(runtime, values);
   const service = runtime === "worker" ? "prime-commerce-worker" : "prime-commerce-server";
@@ -20,6 +21,14 @@ export function getRuntimeHealth(runtime: "server" | "worker", values?: Record<s
     errors.push("Database binding missing");
   }
 
+=======
+export function getRuntimeHealth(runtime: "server" | "worker") {
+  const envHealth = validateAppEnvForRuntime(runtime, process.env as any, {
+    strict: true,
+  });
+  const service =
+    runtime === "worker" ? "prime-commerce-worker" : "prime-commerce-server";
+>>>>>>> origin/gemini/phase-5-verification
   return {
     service,
     status,

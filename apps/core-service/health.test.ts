@@ -29,4 +29,31 @@ describe("shared runtime health", () => {
       ok: false,
     });
   });
+
+  it("marks server readiness as config_error when required env is missing", () => {
+    process.env.SESSION_SIGNING_KEY_CURRENT = "";
+    process.env.FIELD_ENCRYPTION_KEY_CURRENT = "";
+    process.env.ADMIN_CODE_PEPPER = "";
+
+    const health = getRuntimeHealth("server");
+    expect(health).toMatchObject({
+      status: "config_error",
+      ok: false,
+      missing: expect.arrayContaining([
+        "SESSION_SIGNING_KEY_CURRENT",
+        "FIELD_ENCRYPTION_KEY_CURRENT",
+        "ADMIN_CODE_PEPPER",
+      ]),
+    });
+  });
+
+  it("marks worker dependency health as dependency_error when DB binding is missing", () => {
+    delete (globalThis as any).__PRIME_D1_BINDING__;
+    const health = getDependencyHealth("worker");
+    expect(health).toMatchObject({
+      status: "dependency_error",
+      ok: false,
+      dependencies: { db: false, env: true },
+    });
+  });
 });

@@ -5,7 +5,11 @@ export function SupportPage() {
   const [subject, setSubject] = useState('');
   const [body, setBody] = useState('');
 
-  const refresh = () => fetch('/v1/reports/operational').then(r => r.json()).then(() => fetch('/v1/support/tickets').then(() => {}));
+  const refresh = async () => {
+    const res = await fetch('/v1/support/tickets');
+    const data = await res.json();
+    setTickets(data.data || []);
+  };
 
   useEffect(() => {
     refresh().catch(() => {});
@@ -19,6 +23,7 @@ export function SupportPage() {
     });
     setSubject('');
     setBody('');
+    await refresh();
   };
 
   return (
@@ -30,7 +35,17 @@ export function SupportPage() {
         <button onClick={createTicket} className="px-4 py-2 bg-black text-white rounded">Create Ticket</button>
       </div>
       <div className="text-xs text-gray-500 uppercase">Ticket list is persisted server-side.</div>
-      {tickets.map(ticket => <div key={ticket.id} />)}
+      <div className="space-y-3">
+        {tickets.map(ticket => (
+          <div key={ticket.id} className="p-4 border rounded-xl bg-white dark:bg-gray-900 flex justify-between items-center">
+             <div>
+               <div className="text-sm uppercase font-bold">{ticket.subject}</div>
+               <div className="text-xs text-gray-500">{ticket.body}</div>
+             </div>
+             <div className="text-[10px] uppercase font-bold px-2 py-1 rounded bg-gray-100 dark:bg-gray-800">{ticket.status}</div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
