@@ -116,7 +116,6 @@ export function ShopPage() {
             </div>
           ))
         ) : filteredProducts.map((p) => (
-<<<<<<< HEAD
           <div key={p.id} className="prime-card flex flex-col overflow-hidden bg-white dark:bg-gray-900 cursor-pointer relative shadow-sm group transition-colors">
             <div className="w-full aspect-[4/5] bg-gray-100 dark:bg-gray-800 relative overflow-hidden">
               <img src={p.media?.[0]?.url || p.image || 'https://placehold.co/400x500'} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
@@ -139,18 +138,6 @@ export function ShopPage() {
                 </div>
                 <button 
                   className="w-10 h-10 bg-prime-gray-100 dark:bg-gray-800 flex items-center justify-center rounded-lg text-lg font-bold text-gray-600 dark:text-gray-300 hover:bg-prime-text hover:text-white dark:hover:bg-white dark:hover:text-prime-text transition-colors"
-=======
-          <div key={p.id} className="flex flex-col border border-gray-100 dark:border-gray-800 rounded-xl overflow-hidden bg-white dark:bg-gray-900 shadow-sm transition-colors">
-            <div className="w-full aspect-square bg-gray-100 dark:bg-gray-800 relative overflow-hidden">
-              <img src={p.media?.[0]?.url || p.image || 'https://placehold.co/400x400'} alt={p.name} className="w-full h-full object-cover" />
-            </div>
-            <div className="p-2 flex flex-col flex-1">
-              <div className="text-[10px] font-bold leading-tight line-clamp-1 text-gray-900 dark:text-gray-100 uppercase tracking-widest">{p.name}</div>
-              <div className="mt-1 flex items-center justify-between pt-1">
-                <div className="text-[11px] font-black tracking-widest">₱{p.price.toLocaleString()}</div>
-                <button
-                  className="w-7 h-7 bg-black text-white flex items-center justify-center rounded-lg text-lg hover:bg-gray-800 transition-colors"
->>>>>>> origin/gemini/phase-5-verification
                   onClick={(e) => {
                     e.stopPropagation();
                     handleAddToCart(p);
