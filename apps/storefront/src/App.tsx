@@ -18,9 +18,6 @@ function useTelegramEnvironment() {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    // For debugging/development:
-    // console.log("Telegram object:", (window as any).Telegram);
-    
     // Check after a short delay to account for potential load timing
     const checkTelegram = () => {
         const telegram = (window as any).Telegram?.WebApp;
@@ -66,8 +63,6 @@ function TelegramGate() {
 function AppLayout() {
   const location = useLocation();
   const isCheckout = location.pathname === '/checkout';
-  const webApp = useTelegramWebApp();
-  // themeClass removed for debugging blank screen
 
   return (
     <div className={`min-h-screen bg-white dark:bg-gray-950 dark:text-gray-100 transition-colors pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]`}>
@@ -112,10 +107,4 @@ export default function App() {
       </BrowserRouter>
     </ThemeProvider>
   );
-}
-  // Original check (commented out)
-  /*
-  const { available, ready } = useTelegramEnvironment();
-  ...
-  */
 }
