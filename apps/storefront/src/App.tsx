@@ -103,6 +103,7 @@ function AppLayout() {
 }
 
 export default function App() {
+  console.log("App component rendered");
   // Force bypass for testing
   return (
     <ThemeProvider>
@@ -111,7 +112,7 @@ export default function App() {
       </BrowserRouter>
     </ThemeProvider>
   );
-
+}
   // Original check (commented out)
   /*
   const { available, ready } = useTelegramEnvironment();
