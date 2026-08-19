@@ -43,9 +43,10 @@ export default {
 
     const url = new URL(request.url);
 
-    // FIX: Ensure all asset requests are routed to the root dist folder
-    if (url.pathname.startsWith("/assets/")) {
-      return await env.ASSETS.fetch(request);
+    // FIX: Ensure all asset requests (including those from nested paths) are routed to the root /assets/ folder
+    if (url.pathname.includes("/assets/")) {
+      const assetPath = "/assets/" + url.pathname.split("/assets/").pop();
+      return await env.ASSETS.fetch(new Request(new URL(assetPath, request.url), request));
     }
 
     const isApi =
