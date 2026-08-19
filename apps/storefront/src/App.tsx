@@ -75,17 +75,23 @@ function AppLayout() {
 
 export default function App() {
   const webApp = useTelegramWebApp();
-  const [isReady, setIsReady] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(true);
 
   useEffect(() => {
-    // Wait briefly to allow environment check
-    const timer = setTimeout(() => setIsReady(true), 500);
+    // Wait for SDK or timeout after 2 seconds
+    const timer = setTimeout(() => setIsInitializing(false), 2000);
     return () => clearTimeout(timer);
   }, []);
 
-  if (!isReady) return null; // Or a loading spinner
+  useEffect(() => {
+    if (webApp) setIsInitializing(false);
+  }, [webApp]);
 
-  // Enforce Telegram-only gating
+  if (isInitializing) {
+    return <div className="min-h-screen flex items-center justify-center">Loading Prime...</div>;
+  }
+
+  // Enforce Telegram-only gating only after initialization
   if (!webApp) return <TelegramGate />;
 
   return (
