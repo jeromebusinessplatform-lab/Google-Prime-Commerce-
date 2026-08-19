@@ -51,20 +51,18 @@ export default {
       return handleApiRequest(request);
     }
 
-    // Workers Static Assets serves the built storefront and admin bundles.
+// Workers Static Assets serves the built storefront and admin bundles.
     const asset = await env.ASSETS.fetch(request);
     if (asset.status !== 404) {
       return asset;
     }
 
-    // Vite build structure places index.html files in nested paths.
+    // SPA routing: Serve appropriate index.html for unknown paths.
+    // Use the dist folder structure directly.
     const indexPath = url.pathname.startsWith("/admin")
       ? "/apps/admin/src/index.html"
       : "/apps/storefront/src/index.html";
 
-    const fallback = await env.ASSETS.fetch(new Request(new URL(indexPath, request.url), request));
-    
-    // Return the response directly to ensure body is piped correctly.
-    return fallback;
+    return await env.ASSETS.fetch(new Request(new URL(indexPath, request.url), request));
   },
 };
