@@ -11,6 +11,7 @@ export const telegramExchangeHandler = async (req: Request, res: Response) => {
     const { tenantId } = req.body;
     
     if (!tenantId) {
+      console.error("Auth Failure: Missing tenantId");
       return res.status(400).json({ error: "Missing tenantId" });
     }
 
@@ -25,6 +26,7 @@ export const telegramExchangeHandler = async (req: Request, res: Response) => {
       };
     } else {
       if (!initData) {
+        console.error("Auth Failure: Missing initData");
         return res.status(400).json({ error: "Missing initData" });
       }
 
@@ -35,12 +37,14 @@ export const telegramExchangeHandler = async (req: Request, res: Response) => {
       );
 
       if (!isValid) {
+        console.error("Auth Failure: Invalid initData HMAC verification failed");
         return res.status(401).json({ error: "Invalid initData" });
       }
 
       const urlParams = new URLSearchParams(initData);
       const userStr = urlParams.get("user");
       if (!userStr) {
+        console.error("Auth Failure: Missing user in initData");
         return res.status(400).json({ error: "Missing user in initData" });
       }
       user = JSON.parse(userStr);
@@ -70,7 +74,7 @@ export const telegramExchangeHandler = async (req: Request, res: Response) => {
 
     return res.json({ success: true, primeMemberId });
   } catch (error) {
-    console.error(error);
+    console.error("Auth Failure: Internal Server Error", error);
     return res.status(500).json({ error: "Internal Server Error" });
   }
 };

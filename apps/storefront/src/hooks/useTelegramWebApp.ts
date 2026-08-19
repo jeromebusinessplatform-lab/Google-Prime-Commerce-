@@ -8,9 +8,9 @@ export function useTelegramWebApp() {
 
     const checkWebApp = () => {
       const telegram = (window as any).Telegram?.WebApp;
-      if (telegram && telegram.initData) {
+      if (telegram) {
         telegram.ready();
-        setWebApp(telegram);
+        setWebApp(telegram); // Set as soon as it exists
         clearInterval(interval);
       }
     };

@@ -106,8 +106,7 @@ export default function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           tenantId: 'default', // Implicit tenant
-          accessCode,
-          initData: 'PREVIEW_MOCK'
+          accessCode
         })
       });
       if (!response.ok) {

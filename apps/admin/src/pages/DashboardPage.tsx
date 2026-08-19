@@ -21,40 +21,22 @@ export function DashboardPage() {
   const activeOrders = orders.filter(o => o.status !== 'DELIVERED' && o.status !== 'COMPLETED').length;
   const newCustomers = new Set(orders.map(o => o.customerId)).size;
 
-  // Generate chart data from orders
-  // Using a simple 7-day mock grouping or mapping actual dates if they exist
-  // We'll create a 7-day span based on current date, filling in order totals
   const chartData = React.useMemo(() => {
     const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    // Default zero data
     const data = days.map(day => ({ name: day, sales: 0 }));
     
-    // Aggregate by day of week if orders have dates
     orders.forEach(o => {
       if (o.date) {
         const d = new Date(o.date);
-        const dayIdx = (d.getDay() + 6) % 7; // Monday = 0
+        const dayIdx = (d.getDay() + 6) % 7; 
         if (data[dayIdx]) {
           data[dayIdx].sales += (o.total || 0);
         }
       }
     });
     
-    // If no orders have dates or data is empty, put some mock trends for the preview
-    if (totalSales === 0) {
-      return [
-        { name: 'Mon', sales: 0 },
-        { name: 'Tue', sales: 0 },
-        { name: 'Wed', sales: 0 },
-        { name: 'Thu', sales: 0 },
-        { name: 'Fri', sales: 0 },
-        { name: 'Sat', sales: 0 },
-        { name: 'Sun', sales: 0 },
-      ];
-    }
-    
     return data;
-  }, [orders, totalSales]);
+  }, [orders]);
 
   const stats = [
     { label: "Total Sales", value: `₱${totalSales.toLocaleString()}`, icon: TrendingUp },
@@ -64,90 +46,72 @@ export function DashboardPage() {
   ];
 
   return (
-    <div className="p-4 max-w-6xl mx-auto w-full">
-      <h2 className="text-base  mb-4">Business Overview</h2>
+    <div className="p-6 max-w-6xl mx-auto w-full bg-white dark:bg-gray-950 transition-colors">
+      <h2 className="text-xl font-bold uppercase tracking-widest text-prime-text dark:text-gray-100 mb-6">Business Overview</h2>
       
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         {isLoading ? (
           Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="bg-white dark:bg-gray-900 p-3 rounded-md border border-gray-100 dark:border-gray-800 shadow-xs flex flex-col items-center justify-center text-center py-4 animate-pulse">
-              <div className="w-5 h-5 bg-gray-100 dark:bg-gray-800 rounded-full mb-2" />
-              <div className="h-5 bg-gray-100 dark:bg-gray-800 rounded w-2/3 mb-1" />
-              <div className="h-2 bg-gray-50 dark:bg-gray-800 rounded w-1/2" />
-            </div>
+            <div key={i} className="prime-card h-32 animate-pulse" />
           ))
         ) : stats.map((s, i) => {
           const Icon = s.icon;
           return (
-            <div key={i} className="bg-white dark:bg-gray-900 p-3 rounded-xl border border-gray-100 dark:border-gray-800 shadow-lg flex flex-col items-center justify-center text-center py-5 transition-all text-gray-900 dark:text-gray-100 hover:shadow-xl">
-              <Icon size={20} className="text-gray-400 dark:text-gray-500 mb-2" />
-              <div className="text-2xl font-sans font-semibold tracking-tighter">{s.value}</div>
-              <div className="text-[10px] font-semibold text-black dark:text-white uppercase tracking-widest mt-1">{s.label}</div>
+            <div key={i} className="prime-card flex flex-col items-center justify-center py-6 border-prime-gray-200 hover:shadow-md transition-all">
+              <Icon size={24} className="text-prime-text dark:text-gray-400 mb-3" />
+              <div className="text-2xl font-bold text-prime-text dark:text-gray-100">{s.value}</div>
+              <div className="text-[10px] font-bold text-prime-gray-500 uppercase tracking-widest mt-1">{s.label}</div>
             </div>
           );
         })}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="bg-white dark:bg-gray-900 p-4 rounded-md border border-gray-200 dark:border-gray-800 shadow-xs min-h-[260px] flex flex-col transition-colors">
-          <h3 className=" text-xs uppercase tracking-wider mb-3 text-gray-600 dark:text-gray-400">SALES TREND</h3>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="prime-card border-prime-gray-200 p-6 flex flex-col">
+          <h3 className="text-xs font-bold uppercase tracking-widest text-prime-gray-500 mb-6">Sales Trend</h3>
           <div className="flex-1 w-full h-[200px]">
-            {isLoading ? (
-              <div className="w-full h-full bg-gray-50 dark:bg-gray-900 rounded animate-pulse flex items-center justify-center">
-                 <div className="w-[80%] h-[60%] border-b border-l border-gray-200 dark:border-gray-800 relative">
-                   <div className="absolute inset-0 bg-gradient-to-t from-gray-100/50 to-transparent dark:from-gray-800/50" />
-                 </div>
-              </div>
-            ) : (
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#000000" stopOpacity={0.1}/>
-                      <stop offset="95%" stopColor="#000000" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#888' }} />
-                  <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#888' }} tickFormatter={(val) => `₱${val}`} />
-                  <Tooltip 
-                    contentStyle={{ borderRadius: '4px', border: '1px solid #eaeaea', fontSize: '12px', fontWeight: 'bold' }}
-                    formatter={(value: number) => [`₱${value.toLocaleString()}`, 'Sales']}
-                  />
-                  <Area type="monotone" dataKey="sales" stroke="#000000" strokeWidth={2} fillOpacity={1} fill="url(#colorSales)" />
-                </AreaChart>
-              </ResponsiveContainer>
-            )}
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={chartData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#000000" stopOpacity={0.1}/>
+                    <stop offset="95%" stopColor="#000000" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#6b7280' }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#6b7280' }} tickFormatter={(val) => `₱${val}`} />
+                <Tooltip 
+                  contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', fontSize: '12px', fontWeight: 'bold' }}
+                  formatter={(value: number) => [`₱${value.toLocaleString()}`, 'Sales']}
+                />
+                <Area type="monotone" dataKey="sales" stroke="#000000" strokeWidth={2} fillOpacity={1} fill="url(#colorSales)" />
+              </AreaChart>
+            </ResponsiveContainer>
           </div>
         </div>
-        <div className="bg-white dark:bg-gray-900 p-4 rounded-md border border-gray-200 dark:border-gray-800 shadow-xs min-h-[260px] transition-colors">
-          <h3 className=" text-xs uppercase tracking-wider mb-3 text-gray-600 dark:text-gray-400">RECENT ACTIVITY</h3>
-          <div className="space-y-3">
+        <div className="prime-card border-prime-gray-200 p-6">
+          <h3 className="text-xs font-bold uppercase tracking-widest text-prime-gray-500 mb-6">Recent Activity</h3>
+          <div className="space-y-4">
             {isLoading ? (
               Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="flex gap-3 items-start border-b border-gray-100 dark:border-gray-800 pb-2.5 last:border-0 animate-pulse">
-                  <div className="w-7 h-7 rounded-full bg-gray-100 dark:bg-gray-800 shrink-0" />
-                  <div className="flex-1 space-y-2">
-                    <div className="h-3 bg-gray-100 dark:bg-gray-800 rounded w-3/4" />
-                    <div className="h-2 bg-gray-50 dark:bg-gray-900 rounded w-1/4" />
-                  </div>
-                </div>
+                <div key={i} className="h-10 bg-prime-gray-100 animate-pulse rounded-lg" />
               ))
             ) : orders.slice(0, 5).map((o, i) => (
-              <div key={o.id} className="flex gap-3 items-start border-b border-gray-100 dark:border-gray-800 pb-2.5 last:border-0">
-                <div className="w-7 h-7 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0 text-blue-600 dark:text-blue-400  text-xs">
+              <div key={o.id} className="flex gap-4 items-center p-3 rounded-lg bg-prime-gray-50 border border-prime-gray-100">
+                <div className="w-8 h-8 rounded-lg bg-prime-text text-white flex items-center justify-center font-bold text-xs">
                   {i + 1}
                 </div>
-                <div>
-                  <div className="text-xs ">New order {o.id} received</div>
-                  <div className="text-[10px] text-gray-500 dark:text-gray-400">{new Date(o.date).toLocaleString()}</div>
+                <div className="flex-1">
+                  <div className="text-xs font-bold text-prime-text">Order #{o.id.slice(-6)}</div>
+                  <div className="text-[10px] text-prime-gray-500">{new Date(o.date).toLocaleTimeString()}</div>
                 </div>
               </div>
             ))}
-            {orders.length === 0 && <div className="text-xs text-gray-500 dark:text-gray-400">No recent activity</div>}
           </div>
         </div>
       </div>
     </div>
   );
 }
+

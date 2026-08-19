@@ -13,30 +13,6 @@ import { OrdersPage } from './pages/OrdersPage';
 import { OrderDetailsPage } from './pages/OrderDetailsPage';
 import { useTelegramWebApp } from './hooks/useTelegramWebApp';
 
-function useTelegramEnvironment() {
-  const [available, setAvailable] = useState(false);
-  const [ready, setReady] = useState(false);
-
-  useEffect(() => {
-    // Check after a short delay to account for potential load timing
-    const checkTelegram = () => {
-        const telegram = (window as any).Telegram?.WebApp;
-        if (!telegram) {
-          setAvailable(false);
-          setReady(true);
-          return;
-        }
-        telegram.ready?.();
-        setAvailable(true);
-        setReady(true);
-    };
-
-    setTimeout(checkTelegram, 500); // 500ms delay to allow telegram object to initialize
-  }, []);
-
-  return { available, ready };
-}
-
 function TelegramGate() {
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950 flex items-center justify-center p-6 transition-colors">
@@ -98,8 +74,20 @@ function AppLayout() {
 }
 
 export default function App() {
-  console.log("App component rendered");
-  // Force bypass for testing
+  const webApp = useTelegramWebApp();
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    // Wait briefly to allow environment check
+    const timer = setTimeout(() => setIsReady(true), 500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (!isReady) return null; // Or a loading spinner
+
+  // Enforce Telegram-only gating
+  if (!webApp) return <TelegramGate />;
+
   return (
     <ThemeProvider>
       <BrowserRouter>
@@ -108,3 +96,4 @@ export default function App() {
     </ThemeProvider>
   );
 }
+

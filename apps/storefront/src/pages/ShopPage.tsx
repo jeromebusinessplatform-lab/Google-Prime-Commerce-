@@ -65,37 +65,32 @@ export function ShopPage() {
   };
 
   return (
-    <div className="p-2 w-full mx-auto pb-20">
+    <div className="p-4 w-full mx-auto pb-24 bg-white dark:bg-gray-950 transition-colors">
       {toast && (
-        <div className="fixed top-[100px] left-1/2 -translate-x-1/2 bg-black text-white px-4 py-2 rounded-full text-xs uppercase tracking-widest shadow-lg z-50 flex items-center gap-2">
-          <CheckCircle2 size={14} />
+        <div className="fixed top-20 left-1/2 -translate-x-1/2 bg-prime-text text-white px-6 py-3 rounded-full text-xs font-bold uppercase tracking-widest shadow-xl z-50 flex items-center gap-2">
+          <CheckCircle2 size={16} />
           {toast}
         </div>
       )}
-      <div className="sticky top-[env(safe-area-inset-top,0px)] bg-white dark:bg-gray-950 z-30 pb-2 pt-2 border-b border-gray-100 dark:border-gray-800 flex flex-col gap-2 transition-colors">
-        <div className="flex gap-2 relative" ref={searchRef}>
-          <div className="relative flex-1">
-            <Search className="absolute left-2 top-2 text-gray-400" size={14} />
-            <input
-              type="text"
-              value={search}
-              onFocus={() => setShowAutocomplete(true)}
-              onChange={(e) => {
-                setSearch(e.target.value);
-                setShowAutocomplete(true);
-              }}
-              placeholder="SEARCH PRODUCTS..."
-              className="w-full bg-gray-100 dark:bg-gray-800 border-none rounded-xl pl-8 pr-3 py-2 text-xs outline-none focus:ring-1 focus:ring-black dark:focus:ring-white transition-colors uppercase tracking-widest"
-            />
-          </div>
+      
+      <div className="sticky top-0 bg-white dark:bg-gray-950 z-30 pt-2 pb-4 border-b border-prime-gray-200">
+        <div className="relative mb-3">
+          <Search className="absolute left-3 top-2.5 text-prime-gray-500" size={18} />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="SEARCH PRODUCTS..."
+            className="w-full bg-prime-gray-100 dark:bg-gray-900 border-none rounded-lg pl-10 pr-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-prime-text transition-colors uppercase font-bold tracking-wider"
+          />
         </div>
-        <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
+        <div className="flex gap-2 overflow-x-auto no-scrollbar">
           {categories.map(cat => (
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className={`px-4 py-1.5 text-[10px] font-bold rounded-full whitespace-nowrap transition-colors uppercase tracking-widest ${
-                selectedCategory === cat ? 'bg-black dark:bg-white text-white dark:text-black' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
+              className={`px-5 py-2 text-[11px] font-bold rounded-lg whitespace-nowrap transition-all uppercase tracking-wider ${
+                selectedCategory === cat ? 'bg-prime-text text-white' : 'bg-prime-gray-100 dark:bg-gray-800 text-prime-gray-500 hover:bg-prime-gray-200'
               }`}
             >
               {cat}
@@ -104,44 +99,29 @@ export function ShopPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-2 mt-3">
+      <div className="grid grid-cols-2 gap-4 mt-4">
         {isLoading ? (
-          Array.from({ length: 10 }).map((_, i) => (
-            <div key={i} className="flex flex-col border border-gray-100 dark:border-gray-900 rounded-xl overflow-hidden bg-white dark:bg-gray-950 animate-pulse">
-              <div className="w-full aspect-square bg-gray-100 dark:bg-gray-900" />
-              <div className="p-2 space-y-1">
-                <div className="h-3 bg-gray-100 dark:bg-gray-900 rounded w-full" />
-                <div className="h-3 bg-gray-100 dark:bg-gray-900 rounded w-1/2" />
-              </div>
-            </div>
+          Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="prime-card h-64 animate-pulse" />
           ))
         ) : filteredProducts.map((p) => (
-          <div key={p.id} className="prime-card flex flex-col overflow-hidden bg-white dark:bg-gray-900 cursor-pointer relative shadow-sm group transition-colors">
-            <div className="w-full aspect-[4/5] bg-gray-100 dark:bg-gray-800 relative overflow-hidden">
+          <div key={p.id} className="prime-card flex flex-col bg-white dark:bg-gray-900 border-prime-gray-200 group transition-all hover:shadow-md">
+            <div className="w-full aspect-square bg-prime-gray-100 dark:bg-gray-800 rounded-lg relative overflow-hidden mb-3">
               <img src={p.media?.[0]?.url || p.image || 'https://placehold.co/400x500'} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
               {p.availability !== "in_stock" && (
-                <div className={`prime-badge absolute top-1 left-1 ${p.availability === "out_of_stock" ? 'badge-sale' : 'badge-low-stock'}`}>
-                  {p.availability === "out_of_stock" ? "OUT OF STOCK" : "LOW STOCK"}
+                <div className={`prime-badge absolute top-2 left-2 ${p.availability === "out_of_stock" ? 'badge-sale' : 'badge-low-stock'}`}>
+                  {p.availability === "out_of_stock" ? "OUT" : "LOW"}
                 </div>
               )}
             </div>
-            <div className="p-3 flex flex-col flex-1">
-              <div className="text-sm font-semibold leading-tight line-clamp-1 text-gray-900 dark:text-gray-100 uppercase tracking-tight">{p.name}</div>
-              {p.subname && <div className="text-xs text-prime-gray-500 dark:text-gray-400 uppercase line-clamp-1">{p.subname}</div>}
-              
-              <div className="mt-auto pt-3 flex items-center justify-between">
-                <div className="flex flex-col">
-                  <div className="text-lg font-bold">₱{p.price.toLocaleString()}</div>
-                  <div className={`text-[10px] font-semibold uppercase tracking-wider ${p.stockQuantity <= 5 ? 'text-prime-red' : 'text-prime-gray-500'}`}>
-                    STOCKS: {p.stockQuantity || 0}
-                  </div>
-                </div>
+            <div className="flex flex-col flex-1">
+              <h3 className="text-sm font-bold text-prime-text dark:text-gray-100 uppercase leading-tight">{p.name}</h3>
+              <p className="text-xs text-prime-gray-500 uppercase mt-0.5">{p.subname || 'Standard'}</p>
+              <div className="mt-auto pt-3 flex items-end justify-between">
+                <span className="text-lg font-bold">₱{p.price.toLocaleString()}</span>
                 <button 
-                  className="w-10 h-10 bg-prime-gray-100 dark:bg-gray-800 flex items-center justify-center rounded-lg text-lg font-bold text-gray-600 dark:text-gray-300 hover:bg-prime-text hover:text-white dark:hover:bg-white dark:hover:text-prime-text transition-colors"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleAddToCart(p);
-                  }}
+                  className="w-9 h-9 bg-prime-text text-white rounded-lg font-bold hover:bg-gray-800 transition-colors"
+                  onClick={() => handleAddToCart(p)}
                 >
                   +
                 </button>
