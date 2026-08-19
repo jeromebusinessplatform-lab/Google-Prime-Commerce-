@@ -42,6 +42,12 @@ export default {
     const [{ handleApiRequest }] = await Promise.all([import("./router.js")]);
 
     const url = new URL(request.url);
+
+    // FIX: Ensure all asset requests are routed to the root dist folder
+    if (url.pathname.startsWith("/assets/")) {
+      return await env.ASSETS.fetch(request);
+    }
+
     const isApi =
       url.pathname === "/api/health" ||
       url.pathname.startsWith("/api/") ||
@@ -51,7 +57,7 @@ export default {
       return handleApiRequest(request);
     }
 
-// Workers Static Assets serves the built storefront and admin bundles.
+    // Workers Static Assets serves the built storefront and admin bundles.
     const asset = await env.ASSETS.fetch(request);
     if (asset.status !== 404) {
       return asset;
@@ -64,5 +70,5 @@ export default {
       : "/apps/storefront/src/index.html";
 
     return await env.ASSETS.fetch(new Request(new URL(indexPath, request.url), request));
-  },
-};
+    },
+    };
