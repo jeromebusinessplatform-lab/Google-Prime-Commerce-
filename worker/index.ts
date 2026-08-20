@@ -70,7 +70,7 @@ export default {
     // 4. SPA Fallback Routing
     // Serve the bundled index.html file path.
     const isAdmin = path === "/admin" || path.startsWith("/admin/");
-    const indexPath = isAdmin ? "/admin/index.html" : "/index.html";
+    const indexPath = isAdmin ? "/apps/admin/src/index.html" : "/apps/storefront/src/index.html";
     
     const spaResponse = await env.ASSETS.fetch(new Request(new URL(indexPath, request.url)));
     
