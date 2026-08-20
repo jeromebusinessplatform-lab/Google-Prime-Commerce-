@@ -42,34 +42,51 @@ export default {
     const [{ handleApiRequest }] = await Promise.all([import("./router.js")]);
 
     const url = new URL(request.url);
+    const path = url.pathname;
 
-    // FIX: Ensure all asset requests (including those from nested paths) are routed to the root /assets/ folder
-    if (url.pathname.includes("/assets/")) {
-      const assetPath = "/assets/" + url.pathname.split("/assets/").pop();
-      return await env.ASSETS.fetch(new Request(new URL(assetPath, request.url), request));
-    }
-
+    // 1. Handle API requests
     const isApi =
-      url.pathname === "/api/health" ||
-      url.pathname.startsWith("/api/") ||
-      url.pathname.startsWith("/v1/");
+      path === "/api/health" ||
+      path.startsWith("/api/") ||
+      path.startsWith("/v1/");
 
     if (isApi) {
       return handleApiRequest(request);
     }
 
-    // Workers Static Assets serves the built storefront and admin bundles.
-    const asset = await env.ASSETS.fetch(request);
-    if (asset.status !== 404) {
-      return asset;
+    // 2. Handle Static Assets directly from root
+    // This ensures /assets/... is always found regardless of the current URL path.
+    if (path.includes("/assets/")) {
+      const assetPath = "/assets/" + path.split("/assets/").pop();
+      return await env.ASSETS.fetch(new Request(new URL(assetPath, request.url), request));
     }
 
-    // SPA routing: Serve appropriate index.html for unknown paths.
-    // Use the dist folder structure directly.
-    const indexPath = url.pathname.startsWith("/admin")
-      ? "/apps/admin/src/index.html"
-      : "/apps/storefront/src/index.html";
+    // 3. Try to serve exact file matches (favicon, images, etc.)
+    const directAsset = await env.ASSETS.fetch(request);
+    if (directAsset.status === 200) {
+      return directAsset;
+    }
 
-    return await env.ASSETS.fetch(new Request(new URL(indexPath, request.url), request));
-    },
-    };
+    // 4. SPA Fallback Routing
+    // Serve the bundled index.html file path.
+    const isAdmin = path === "/admin" || path.startsWith("/admin/");
+    const indexPath = isAdmin ? "/admin/index.html" : "/index.html";
+    
+    const spaResponse = await env.ASSETS.fetch(new Request(new URL(indexPath, request.url)));
+    
+    if (spaResponse.status === 200) {
+      // Return a fresh response with the same body but fixed headers to avoid any browser-side 
+      // confusion or redirects.
+      const headers = new Headers(spaResponse.headers);
+      headers.set("Content-Type", "text/html; charset=utf-8");
+      headers.set("Cache-Control", "no-cache");
+      
+      return new Response(spaResponse.body, {
+        status: 200,
+        headers
+      });
+    }
+
+    return spaResponse; // Fallback to whatever error Cloudflare gives (usually 404)
+  },
+};
