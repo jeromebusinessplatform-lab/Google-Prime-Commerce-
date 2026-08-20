@@ -176,7 +176,7 @@ export default function App() {
 
   return (
     <ThemeProvider>
-      <BrowserRouter basename="/admin">
+      <BrowserRouter>
         <div className="min-h-screen bg-gray-50 dark:bg-gray-950 dark:text-gray-100 flex flex-col transition-colors">
         <GlobalHeader />
         <QueueMonitor />
