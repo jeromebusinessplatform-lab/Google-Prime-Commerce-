@@ -68,8 +68,18 @@ export default {
     }
 
     // 4. SPA Fallback Routing
-    // Serve the bundled index.html file path.
+    // Force direct mapping to bundled output files in /dist/
     const isAdmin = path === "/admin" || path.startsWith("/admin/");
+    
+    // Gating: Only allow Storefront access if not /admin
+    if (!isAdmin) {
+      const initData = request.headers.get("x-telegram-init-data");
+      // If we are in production, enforce Telegram gating
+      if (env.NODE_ENV === "production" && !initData) {
+        return new Response("Access Denied: Must be accessed via Telegram", { status: 403 });
+      }
+    }
+
     const indexPath = isAdmin ? "/apps/admin/src/index.html" : "/apps/storefront/src/index.html";
     
     const spaResponse = await env.ASSETS.fetch(new Request(new URL(indexPath, request.url)));
